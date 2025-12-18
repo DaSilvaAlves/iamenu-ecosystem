@@ -1,0 +1,48 @@
+{
+  "name": "iamenu-ecosystem",
+  "version": "1.0.0",
+  "description": "iaMenu Ecosystem - Complete platform for Portuguese restaurants",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "frontend/apps/*",
+    "frontend/packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:community\" \"npm run dev:marketplace\" \"npm run dev:academy\"",
+    "dev:community": "npm run dev --workspace=@iamenu/community-api",
+    "dev:marketplace": "npm run dev --workspace=@iamenu/marketplace-api",
+    "dev:academy": "npm run dev --workspace=@iamenu/academy-api",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "prisma:generate": "npm run prisma:generate --workspaces",
+    "prisma:migrate": "npm run prisma:migrate --workspaces",
+    "prisma:seed": "npm run prisma:seed --workspaces",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "clean": "npm run clean --workspaces && rm -rf node_modules",
+    "setup": "npm install && npm run prisma:generate"
+  },
+  "keywords": [
+    "iamenu",
+    "restaurant",
+    "community",
+    "marketplace",
+    "academy",
+    "portugal"
+  ],
+  "author": "Eurico Alves <euricojsalves@gmail.com>",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DaSilvaAlves/iamenu-ecosystem.git"
+  }
+}

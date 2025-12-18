@@ -1,0 +1,148 @@
+// Prisma Schema - Community API
+// Schema: community (PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["community"]
+}
+
+// ===================================
+// Models
+// ===================================
+
+model Post {
+  id        String   @id @default(uuid())
+  authorId  String   @map("author_id")
+  groupId   String?  @map("group_id")
+  title     String   @db.VarChar(200)
+  body      String   @db.Text
+  category  String   @db.VarChar(50)
+  tags      String[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  views     Int      @default(0)
+  likes     Int      @default(0)
+  useful    Int      @default(0)
+  thanks    Int      @default(0)
+
+  // Relations
+  comments  Comment[]
+  reactions Reaction[]
+  group     Group?     @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+  @@index([authorId])
+  @@index([groupId])
+  @@index([createdAt(sort: Desc)])
+  @@map("posts")
+  @@schema("community")
+}
+
+model Comment {
+  id              String   @id @default(uuid())
+  postId          String   @map("post_id")
+  authorId        String   @map("author_id")
+  parentCommentId String?  @map("parent_comment_id")
+  body            String   @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  likes           Int      @default(0)
+
+  // Relations
+  post           Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parentComment  Comment?   @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies        Comment[]  @relation("CommentReplies")
+  reactions      Reaction[]
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([parentCommentId])
+  @@map("comments")
+  @@schema("community")
+}
+
+model Group {
+  id          String   @id @default(uuid())
+  name        String   @unique @db.VarChar(100)
+  description String?  @db.VarChar(500)
+  type        String   @default("public") @db.VarChar(20) // public | private
+  category    String?  @db.VarChar(50) // region | theme | type
+  createdBy   String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  coverImage  String?  @map("cover_image") @db.Text
+
+  // Relations
+  posts       Post[]
+  memberships GroupMembership[]
+
+  @@map("groups")
+  @@schema("community")
+}
+
+model GroupMembership {
+  groupId  String   @map("group_id")
+  userId   String   @map("user_id")
+  joinedAt DateTime @default(now()) @map("joined_at")
+  role     String   @default("member") @db.VarChar(20) // member | moderator | admin
+
+  // Relations
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, userId])
+  @@map("group_memberships")
+  @@schema("community")
+}
+
+model Profile {
+  userId           String   @id @map("user_id")
+  restaurantName   String?  @map("restaurant_name") @db.VarChar(200)
+  locationCity     String?  @map("location_city") @db.VarChar(100)
+  locationRegion   String?  @map("location_region") @db.VarChar(100)
+  restaurantType   String?  @map("restaurant_type") @db.VarChar(50)
+  bio              String?  @db.VarChar(200)
+  profilePhoto     String?  @map("profile_photo") @db.Text
+  coverPhoto       String?  @map("cover_photo") @db.Text
+  badges           String[]
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("profiles")
+  @@schema("community")
+}
+
+model Reaction {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  targetType   String   @map("target_type") @db.VarChar(20) // post | comment
+  targetId     String   @map("target_id")
+  reactionType String   @map("reaction_type") @db.VarChar(20) // like | useful | thanks
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations (optional, based on targetType)
+  post    Post?    @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  comment Comment? @relation(fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId, reactionType])
+  @@index([targetId])
+  @@map("reactions")
+  @@schema("community")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  type      String   @db.VarChar(50) // reply | mention | new_post | new_member
+  title     String   @db.VarChar(200)
+  body      String?  @db.Text
+  link      String?  @db.Text
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId, read])
+  @@map("notifications")
+  @@schema("community")
+}

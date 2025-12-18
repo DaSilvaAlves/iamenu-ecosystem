@@ -1,0 +1,203 @@
+# === Global .gitignore iaMenu Ecosystem ===
+
+# ===================================
+# Node.js & NPM
+# ===================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
+
+# ===================================
+# Java & Maven
+# ===================================
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# ===================================
+# Frontend & React
+# ===================================
+# Production
+/build
+/dist
+
+# Testing
+/coverage
+*.spec.ts.snap
+
+# Next.js (se usar)
+.next/
+out/
+
+# Vite
+.vite/
+
+# ===================================
+# Database
+# ===================================
+# Prisma
+prisma/.env
+prisma/dev.db
+prisma/dev.db-journal
+
+# PostgreSQL
+*.sql.bak
+*.dump
+
+# ===================================
+# Docker
+# ===================================
+# Docker volumes
+docker-volumes/
+*.log
+
+# ===================================
+# Operating System
+# ===================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ===================================
+# IDEs & Editors
+# ===================================
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains
+.idea/
+*.sw?
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ===================================
+# Logs & Temp Files
+# ===================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pids/
+*.pid
+*.seed
+*.pid.lock
+lib-cov/
+coverage/
+.nyc_output/
+.grunt/
+.lock-wscript
+typings/
+.npm/
+.eslintcache
+.node_repl_history
+*.tgz
+.yarn-integrity
+
+# ===================================
+# Sensitive Data
+# ===================================
+# Secrets
+secrets/
+*.pem
+*.key
+*.cert
+*.crt
+
+# Credentials
+credentials.json
+service-account.json
+
+# ===================================
+# Railway & Deployment
+# ===================================
+# Railway
+.railway/
+
+# Vercel (se usar)
+.vercel
+
+# ===================================
+# Backups
+# ===================================
+*.bak
+*.backup
+*.old
+*.tmp
+
+# ===================================
+# Custom iaMenu
+# ===================================
+# Upload directories (user content)
+uploads/
+public/uploads/
+
+# Generated certificates (Academia)
+certificates/generated/
+
+# Test data
+test-data/
+mock-data/
+
+# Scripts output
+scripts/output/
+
+# ===================================
+# Keep These Files
+# ===================================
+# Importante: NÃO ignorar
+!.gitkeep
+!.env.example
+!README.md

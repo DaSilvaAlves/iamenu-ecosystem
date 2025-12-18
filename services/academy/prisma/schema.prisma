@@ -1,0 +1,72 @@
+// Prisma Schema - Academy API
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["academy"]
+}
+
+model Course {
+  id String @id @default(uuid())
+  title String @db.VarChar(200)
+  slug String @unique
+  category String
+  level String
+  durationMinutes Int @map("duration_minutes")
+  price Decimal @default(0) @db.Decimal(10,2)
+  published Boolean @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  modules Module[]
+  enrollments Enrollment[]
+  
+  @@map("courses")
+  @@schema("academy")
+}
+
+model Module {
+  id String @id @default(uuid())
+  courseId String @map("course_id")
+  title String
+  order Int
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+  @@map("modules")
+  @@schema("academy")
+}
+
+model Lesson {
+  id String @id @default(uuid())
+  moduleId String @map("module_id")
+  title String
+  videoUrl String? @map("video_url") @db.Text
+  order Int
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  @@map("lessons")
+  @@schema("academy")
+}
+
+model Enrollment {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  courseId String @map("course_id")
+  enrolledAt DateTime @default(now()) @map("enrolled_at")
+  completedAt DateTime? @map("completed_at")
+  course Course @relation(fields: [courseId], references: [id])
+  @@unique([userId, courseId])
+  @@map("enrollments")
+  @@schema("academy")
+}
+
+model Certificate {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  courseId String @map("course_id")
+  issuedAt DateTime @default(now()) @map("issued_at")
+  verificationCode String @unique @db.VarChar(10)
+  @@map("certificates")
+  @@schema("academy")
+}

@@ -1,0 +1,132 @@
+// Prisma Schema - Marketplace API
+// Schema: marketplace (PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["marketplace"]
+}
+
+model Supplier {
+  id              String   @id @default(uuid())
+  userId          String   @unique @map("user_id")
+  companyName     String   @map("company_name") @db.VarChar(200)
+  logoUrl         String?  @map("logo_url") @db.Text
+  description     String?  @db.Text
+  categories      String[]
+  locationCity    String   @map("location_city") @db.VarChar(100)
+  locationRegion  String   @map("location_region") @db.VarChar(100)
+  nationalDelivery Boolean @default(false) @map("national_delivery")
+
+  contactPhone    String   @map("contact_phone") @db.VarChar(50)
+  contactEmail    String   @map("contact_email") @db.VarChar(100)
+  contactWebsite  String?  @map("contact_website") @db.Text
+
+  deliveryZones   String[] @map("delivery_zones")
+  deliveryCost    String?  @map("delivery_cost") @db.Text
+  minOrder        Decimal? @map("min_order") @db.Decimal(10, 2)
+  paymentTerms    String?  @map("payment_terms") @db.Text
+
+  certifications  String[]
+
+  ratingAvg       Decimal  @default(0) @map("rating_avg") @db.Decimal(3, 2)
+  reviewCount     Int      @default(0) @map("review_count")
+
+  verified        Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  reviews         Review[]
+  products        SupplierProduct[]
+
+  @@index([locationRegion])
+  @@map("suppliers")
+  @@schema("marketplace")
+}
+
+model Review {
+  id              String   @id @default(uuid())
+  supplierId      String   @map("supplier_id")
+  reviewerId      String   @map("reviewer_id")
+
+  ratingOverall   Int      @map("rating_overall")
+  ratingQuality   Int      @map("rating_quality")
+  ratingDelivery  Int      @map("rating_delivery")
+  ratingPrice     Int      @map("rating_price")
+  ratingService   Int      @map("rating_service")
+
+  comment         String?  @db.Text
+  recommend       Boolean
+  anonymous       Boolean  @default(false)
+
+  helpfulCount    Int      @default(0) @map("helpful_count")
+
+  supplierResponse String? @map("supplier_response") @db.Text
+
+  verifiedPurchase Boolean @default(false) @map("verified_purchase")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  supplier        Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@unique([supplierId, reviewerId])
+  @@index([supplierId])
+  @@map("reviews")
+  @@schema("marketplace")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(200)
+  category    String   @db.VarChar(100)
+  subcategory String?  @db.VarChar(100)
+  unit        String   @db.VarChar(50)
+  description String?  @db.Text
+  imageUrl    String?  @map("image_url") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  suppliers   SupplierProduct[]
+
+  @@index([category])
+  @@map("products")
+  @@schema("marketplace")
+}
+
+model SupplierProduct {
+  id              String   @id @default(uuid())
+  supplierId      String   @map("supplier_id")
+  productId       String   @map("product_id")
+  price           Decimal  @db.Decimal(10, 2)
+  unit            String   @db.VarChar(50)
+  minQuantity     Int?     @map("min_quantity")
+  deliveryIncluded Boolean @default(false) @map("delivery_included")
+  available       Boolean  @default(true)
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  supplier        Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([supplierId, productId])
+  @@map("supplier_products")
+  @@schema("marketplace")
+}
+
+model QuoteRequest {
+  id               String   @id @default(uuid())
+  restaurantId     String   @map("restaurant_id")
+  suppliers        String[]
+  items            Json
+  deliveryFrequency String? @map("delivery_frequency") @db.VarChar(50)
+  deliveryAddress  String?  @map("delivery_address") @db.Text
+  notes            String?  @db.Text
+  status           String   @default("pending") @db.VarChar(20)
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@map("quote_requests")
+  @@schema("marketplace")
+}
