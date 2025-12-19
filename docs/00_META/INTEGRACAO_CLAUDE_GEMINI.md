@@ -64,30 +64,40 @@ Tens dois sistemas de IA complementares trabalhando no projeto iaMenu:
 
 ---
 
-## 🤝 Divisão de Responsabilidades
+## 🤝 Especialidades e Autonomia (Ambos Podem Fazer Tudo!)
 
-### **Gemini LCI (Estratégia)**
-- 📋 Planeamento de alto nível
-- 🧠 Análise de requisitos e PRDs
-- 🎨 Decisões arquiteturais estratégicas
-- 📊 Análise de mercado e competição
-- 💡 Geração de ideias e features
-- 🔍 Research e validação de conceitos
+**⚠️ IMPORTANTE:** Esta divisão mostra **especialidades**, NÃO restrições. Ambos os agentes têm autonomia total para planear E executar!
 
-### **Claude Code (Execução)**
-- 💻 Implementação de código (TypeScript, Node.js, React, Java)
-- 🏗️ Setup de infraestrutura (Railway, PostgreSQL, Docker)
-- 🔧 Debugging e resolução de problemas técnicos
-- 📦 Deploy e CI/CD
-- 🧪 Testes e validação técnica
-- 📝 Documentação técnica (CHANGELOG, commits)
+### **Gemini LCI**
+**Especialidade:** Estratégia e planeamento
+**Pode fazer:**
+- ✅ Planeamento de alto nível e análise de requisitos
+- ✅ Decisões arquiteturais estratégicas e PRDs
+- ✅ Análise de mercado e validação de conceitos
+- ✅ **Implementação de código quando fizer sentido**
+- ✅ **Prototipagem rápida e testes**
+- ✅ **Executar features completas autonomamente**
+
+### **Claude Code**
+**Especialidade:** Execução e implementação
+**Pode fazer:**
+- ✅ Implementação de código (TypeScript, Node.js, React, Java)
+- ✅ Setup de infraestrutura (Railway, PostgreSQL, Docker)
+- ✅ Debugging e resolução de problemas técnicos
+- ✅ **Análise estratégica e decisões arquiteturais**
+- ✅ **Planeamento de features e PRDs**
+- ✅ **Research e validação técnica**
 
 ### **Eurico Alves (Product Owner)**
 - ✅ Aprovação de PRDs e decisões estratégicas
 - 🎯 Definição de prioridades
 - 📣 Feedback e validação de features
-- 🔄 Coordenação Claude ↔ Gemini
+- 🔄 Coordenação Claude ↔ Gemini (evitar duplicação)
 - 💼 Visão de negócio e produto
+
+---
+
+**🎯 Regra de Ouro:** Documentos servem para **coordenação**, NÃO para restringir. Ambos têm liberdade total!
 
 ---
 
