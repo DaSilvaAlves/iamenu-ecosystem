@@ -9,10 +9,11 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-// Import routes (criar depois)
-// import postsRouter from './routes/posts';
-// import groupsRouter from './routes/groups';
-// import profilesRouter from './routes/profiles';
+// Import routes
+import authRouter from './routes/auth';
+import postsRouter from './routes/posts';
+import groupsRouter from './routes/groups';
+// import profilesRouter from './routes/profiles'; // TODO: criar depois
 
 // Import middleware
 import { authenticateJWT } from './middleware/auth';
@@ -86,20 +87,18 @@ app.get('/api/v1/community/public/stats', (req: Request, res: Response) => {
   });
 });
 
-// Middleware auth para rotas protegidas
-// app.use('/api/v1/community', authenticateJWT);
+// Rotas da API
+app.use('/api/v1/community/auth', authRouter); // Auth endpoints (test-token, etc)
+app.use('/api/v1/community/posts', postsRouter);
+app.use('/api/v1/community/groups', groupsRouter);
+// app.use('/api/v1/community/profiles', profilesRouter); // TODO: Semana 1
 
-// Rotas protegidas (precisam JWT)
-// app.use('/api/v1/community/posts', postsRouter);
-// app.use('/api/v1/community/groups', groupsRouter);
-// app.use('/api/v1/community/profiles', profilesRouter);
-
-// Placeholder temporário (remover depois)
+// Placeholder para outras rotas (remover depois)
 app.get('/api/v1/community/*', authenticateJWT, (req: Request, res: Response) => {
   res.status(501).json({
     message: 'Endpoint em desenvolvimento',
     path: req.path,
-    hint: 'Rotas serão implementadas Semana 1'
+    hint: 'Outras rotas implementadas Semana 1-2'
   });
 });
 

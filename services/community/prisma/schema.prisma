@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
@@ -32,7 +33,6 @@ model Post {
 
   // Relations
   comments  Comment[]
-  reactions Reaction[]
   group     Group?     @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
   @@index([authorId])
@@ -56,7 +56,6 @@ model Comment {
   post           Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
   parentComment  Comment?   @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
   replies        Comment[]  @relation("CommentReplies")
-  reactions      Reaction[]
 
   @@index([postId])
   @@index([authorId])
@@ -122,9 +121,7 @@ model Reaction {
   reactionType String   @map("reaction_type") @db.VarChar(20) // like | useful | thanks
   createdAt    DateTime @default(now()) @map("created_at")
 
-  // Relations (optional, based on targetType)
-  post    Post?    @relation(fields: [targetId], references: [id], onDelete: Cascade)
-  comment Comment? @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  // Note: Polymorphic relations - no FK constraints needed
 
   @@unique([userId, targetType, targetId, reactionType])
   @@index([targetId])
