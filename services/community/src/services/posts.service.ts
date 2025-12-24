@@ -18,16 +18,45 @@ export interface CreatePostDto {
  */
 export class PostsService {
   /**
-   * Get all posts (with pagination and optional group filter)
+   * Get all posts (with pagination, filters, search, and sorting)
    */
-  async getAllPosts(limit = 20, offset = 0, groupId?: string) {
-    const where = groupId ? { groupId } : {};
+  async getAllPosts(
+    limit = 20,
+    offset = 0,
+    groupId?: string,
+    search?: string,
+    category?: string,
+    sortBy: 'recent' | 'popular' | 'commented' = 'recent'
+  ) {
+    // Build where clause
+    const where: any = {};
+    if (groupId) where.groupId = groupId;
+    if (category) where.category = category;
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { body: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+
+    // Build orderBy clause
+    let orderBy: any;
+    switch (sortBy) {
+      case 'popular':
+        orderBy = { likes: 'desc' };
+        break;
+      case 'commented':
+        orderBy = { comments: { _count: 'desc' } };
+        break;
+      default:
+        orderBy = { createdAt: 'desc' };
+    }
 
     const posts = await prisma.post.findMany({
       where,
       take: limit,
       skip: offset,
-      orderBy: { createdAt: 'desc' },
+      orderBy,
       include: {
         group: {
           select: {

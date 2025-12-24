@@ -16,8 +16,11 @@ export class PostsController {
       const limit = parseInt(req.query.limit as string) || 20;
       const offset = parseInt(req.query.offset as string) || 0;
       const groupId = req.query.groupId as string | undefined;
+      const search = req.query.search as string | undefined;
+      const category = req.query.category as string | undefined;
+      const sortBy = (req.query.sortBy as 'recent' | 'popular' | 'commented') || 'recent';
 
-      const result = await postsService.getAllPosts(limit, offset, groupId);
+      const result = await postsService.getAllPosts(limit, offset, groupId, search, category, sortBy);
 
       res.status(200).json({
         success: true,

@@ -12,10 +12,25 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
     const [comments, setComments] = useState({}); // { postId: [comments] }
     const [newComment, setNewComment] = useState({}); // { postId: 'content' }
 
-    // Load posts from backend
+    // Phase 8: Search and filters
+    const [searchInput, setSearchInput] = useState(''); // Local input state
+    const [searchQuery, setSearchQuery] = useState(''); // Actual search query
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [sortBy, setSortBy] = useState('recent');
+
+    // Debounce search input
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setSearchQuery(searchInput);
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchInput]);
+
+    // Load posts from backend (reload when filters change)
     useEffect(() => {
         loadPosts(selectedGroup?.id);
-    }, [selectedGroup]);
+    }, [selectedGroup, searchQuery, selectedCategory, sortBy]);
 
     // Ensure authentication on mount
     useEffect(() => {
@@ -37,11 +52,13 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
         try {
             setLoading(true);
             const params = { limit: 10 };
-            if (groupId) {
-                params.groupId = groupId;
-            }
+            if (groupId) params.groupId = groupId;
+            if (searchQuery) params.search = searchQuery;
+            if (selectedCategory) params.category = selectedCategory;
+            if (sortBy) params.sortBy = sortBy;
+
             const data = await CommunityAPI.getPosts(params);
-            setPosts(data.data || []);  // ✅ Fixed: posts are in data.data
+            setPosts(data.data || []);
             setError(null);
         } catch (err) {
             console.error('Error loading posts:', err);
@@ -218,27 +235,97 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                         </button>
                     )}
                 </div>
-                <div style={{ display: 'flex', gap: '16px' }}>
-                    <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: '8px 16px', borderRadius: '20px', fontSize: '0.875rem' }}>
-                        Popular ↓
-                    </div>
-                    <button
-                        onClick={() => setShowNewPostModal(true)}
-                        style={{
-                            backgroundColor: 'var(--primary)',
-                            color: 'white',
-                            padding: '8px 20px',
-                            borderRadius: '8px',
-                            fontWeight: 'bold',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            cursor: 'pointer',
-                            border: 'none'
+                <button
+                    onClick={() => setShowNewPostModal(true)}
+                    style={{
+                        backgroundColor: 'var(--primary)',
+                        color: 'white',
+                        padding: '8px 20px',
+                        borderRadius: '8px',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        cursor: 'pointer',
+                        border: 'none'
+                    }}
+                >
+                    <Plus size={18} /> New post
+                </button>
+            </div>
+
+            {/* Phase 8: Search and Filters */}
+            <div className="glass-panel" style={{ padding: '20px', marginTop: '16px' }}>
+                {/* Search Bar */}
+                <div style={{ marginBottom: '16px' }}>
+                    <input
+                        type="text"
+                        placeholder="Pesquisar posts..."
+                        value={searchInput}
+                        onChange={(e) => {
+                            console.log('Input changed:', e.target.value);
+                            setSearchInput(e.target.value);
                         }}
-                    >
-                        <Plus size={18} /> New post
-                    </button>
+                        style={{
+                            width: '100%',
+                            padding: '12px',
+                            backgroundColor: 'rgba(255,255,255,0.05)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '8px',
+                            color: 'white',
+                            fontSize: '0.9rem'
+                        }}
+                    />
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                        Debug: "{searchInput}"
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                    {/* Category Filters */}
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginRight: '8px' }}>Categoria:</span>
+                        {['', 'dica', 'duvida', 'showcase', 'evento'].map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                style={{
+                                    padding: '6px 14px',
+                                    backgroundColor: selectedCategory === cat ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                                    border: '1px solid var(--border)',
+                                    borderRadius: '16px',
+                                    color: selectedCategory === cat ? 'white' : 'var(--text-muted)',
+                                    fontSize: '0.8rem',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                {cat === '' ? 'Todas' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Sort Dropdown */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Ordenar:</span>
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            style={{
+                                padding: '8px 12px',
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '8px',
+                                color: 'white',
+                                fontSize: '0.85rem',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <option value="recent">Mais Recente</option>
+                            <option value="popular">Mais Popular</option>
+                            <option value="commented">Mais Comentado</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
