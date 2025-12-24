@@ -1,7 +1,7 @@
 ---
-última_atualização: 2025-12-24 02:00
+última_atualização: 2025-12-24 02:30
 agent: Claude Code + Eurico Alves
-versão: 1.2
+versão: 1.3
 status: Ativo
 ---
 
@@ -224,6 +224,62 @@ Tens dois sistemas de IA complementares trabalhando no projeto iaMenu:
 ---
 
 ## 🎯 Próximos Passos (Backlog)
+
+### **2025-12-24 (02:00 - 02:30) - Claude Code + Eurico**
+**Duração:** 30 minutos
+**Objetivo:** FASE 3 - Sistema Completo de Comentários
+
+**Resultados:**
+- ✅ **Backend Comments:** Service + Controller + Routes criados
+- ✅ **API Endpoints:** GET/POST /posts/:postId/comments, DELETE /comments/:id
+- ✅ **Frontend API Client:** getComments, createComment, deleteComment
+- ✅ **UI Expandível:** Click "Comentários" expande/colapsa seção
+- ✅ **Input Inline:** Campo com botão + Enter key support
+- ✅ **Real-time Updates:** Comentários aparecem instantaneamente
+- ✅ **Commit:** `444eec8` (+430 linhas, -2 linhas)
+
+**Ficheiros Criados:**
+- `services/community/src/services/comments.service.ts` (NEW, 78 linhas)
+- `services/community/src/controllers/comments.controller.ts` (NEW, 133 linhas)
+
+**Ficheiros Modificados:**
+- `services/community/src/routes/posts.ts` (+6 linhas) → Nested routes para comments
+- `prototype-vision/src/services/api.js` (+65 linhas) → getComments, createComment, deleteComment
+- `prototype-vision/src/views/CommunityView.jsx` (+148 linhas) → UI expandível + estado
+
+**Tecnologias:**
+- Prisma: Comment model com relações (Post, replies)
+- Express: Nested routes (/posts/:postId/comments)
+- React: Conditional rendering + inline editing
+- JWT: Authentication para criar/deletar comentários
+
+**Debugging:**
+- ❌ Erro 1: `Cannot find module '../config/database'` → Fixed: Import direto do PrismaClient
+- ❌ Erro 2: `Argument 'body' is missing` → Fixed: Mapeamento content → body (Prisma schema)
+- ✅ Backend reiniciado após correções
+- ✅ 2 comentários criados com sucesso
+
+**O que funciona agora:**
+- ✅ Click em "2 Comentários" expande thread
+- ✅ Lista de comentários com avatar + timestamp
+- ✅ Campo de input com placeholder "Escreve um comentário..."
+- ✅ Enter key ou botão "Comentar" submete
+- ✅ Comentário aparece instantaneamente ("agora", "há 1 min")
+- ✅ Persistência no SQLite database
+
+**Teste Realizado:**
+- Criados 2 comentários: "super" e "Finalmente funcionou! 🎉"
+- Timestamps funcionando ("agora", "há 1 min")
+- Contador atualizado (0 → 2 Comentários)
+- Expand/collapse funciona perfeitamente
+
+**Próxima Sessão:**
+- Implementar nested replies (comentar em comentário)
+- Implementar delete comment (apenas autor)
+- Implementar likes em comentários
+- Filtrar posts por grupo
+
+---
 
 ### **2025-12-24 (01:30 - 02:00) - Claude Code + Eurico**
 **Duração:** 30 minutos
