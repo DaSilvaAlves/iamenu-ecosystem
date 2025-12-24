@@ -1,7 +1,7 @@
 ---
-última_atualização: 2025-12-24 01:30
+última_atualização: 2025-12-24 02:00
 agent: Claude Code + Eurico Alves
-versão: 1.1
+versão: 1.2
 status: Ativo
 ---
 
@@ -224,6 +224,48 @@ Tens dois sistemas de IA complementares trabalhando no projeto iaMenu:
 ---
 
 ## 🎯 Próximos Passos (Backlog)
+
+### **2025-12-24 (01:30 - 02:00) - Claude Code + Eurico**
+**Duração:** 30 minutos
+**Objetivo:** FASE 2 - Tornar o Feed Interativo (Grupos + New Post)
+
+**Resultados:**
+- ✅ **Sidebar Dinâmico:** Carrega 15 grupos reais do backend (5 visíveis + "ver todos")
+- ✅ **Ícones Dinâmicos:** MapPin (regiões), Lightbulb (temáticos), Users (outros)
+- ✅ **New Post Modal:** Totalmente funcional (título, categoria, conteúdo, tags)
+- ✅ **Backend Fix:** Tags JSON.stringify para SQLite (consistency)
+- ✅ **UX Real-time:** Post aparece instantaneamente após criação
+- ✅ **Commit:** `020d4af` (+49 linhas, -2 linhas)
+
+**Ficheiros Modificados:**
+- `prototype-vision/src/components/Sidebar.jsx` (+49 linhas) → useEffect + CommunityAPI.getGroups()
+- `services/community/src/services/posts.service.ts` (1 linha) → JSON.stringify(tags)
+
+**Tecnologias:**
+- React Hooks (useState, useEffect) para estado de grupos
+- Dynamic rendering (map grupos com ícones condicionais)
+- Real-time UX (loadPosts após createPost)
+
+**O que funciona agora:**
+- ✅ Feed exibe 5 posts (3 seeded + 2 user-created)
+- ✅ Sidebar mostra grupos reais (Algarve, Açores, Lisboa + 12 mais)
+- ✅ Criar post funcional (modal → backend → refresh automático)
+- ✅ Tags funcionando (#teste #fase2 #sucesso)
+- ✅ Timestamps dinâmicos ("agora", "há 3 min")
+
+**Teste Realizado:**
+- Criado post "Teste Fase 2 - Novo Post ao Vivo" com sucesso
+- Post apareceu instantaneamente no topo do feed
+- Tags renderizadas corretamente
+- Sidebar carregou 15 grupos do SQLite
+
+**Próxima Sessão:**
+- Implementar filtro de posts por grupo (click em grupo → ver posts desse grupo)
+- Implementar comentários (GET/POST /posts/:id/comments)
+- Membership grupos (POST /groups/:id/join)
+- Dashboard BI (fix tela preta)
+
+---
 
 ### **2025-12-24 (01:00 - 01:30) - Claude Code + Eurico**
 **Duração:** 30 minutos
