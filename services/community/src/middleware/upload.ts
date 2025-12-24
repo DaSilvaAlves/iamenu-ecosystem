@@ -5,7 +5,7 @@ import { Request } from 'express';
 // Configure storage
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, path.join(process.cwd(), 'uploads'));
   },
   filename: (_req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

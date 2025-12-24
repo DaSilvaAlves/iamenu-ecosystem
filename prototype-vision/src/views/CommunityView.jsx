@@ -151,7 +151,8 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
         if (!tags) return [];
         if (Array.isArray(tags)) return tags;
         try {
-            return JSON.parse(tags);
+            const parsed = JSON.parse(tags);
+            return Array.isArray(parsed) ? parsed : [];
         } catch {
             return [];
         }
@@ -636,9 +637,11 @@ const NewPostModal = ({ onClose, onSubmit }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 1000
+            zIndex: 1000,
+            overflowY: 'auto',
+            padding: '20px 0'
         }} onClick={onClose}>
-            <div className="glass-panel" style={{ padding: '32px', maxWidth: '600px', width: '90%' }} onClick={(e) => e.stopPropagation()}>
+            <div className="glass-panel" style={{ padding: '32px', maxWidth: '600px', width: '90%', maxHeight: '90vh', overflowY: 'auto', margin: 'auto' }} onClick={(e) => e.stopPropagation()}>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '24px' }}>Criar Novo Post</h2>
                 <form onSubmit={handleSubmit}>
                     <div style={{ marginBottom: '16px' }}>

@@ -27,8 +27,10 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 // ===================================
 
-// Security
-app.use(helmet());
+// Security (with relaxed cross-origin policy for uploads)
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 // CORS
 app.use(cors({
