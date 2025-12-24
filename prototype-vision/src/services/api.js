@@ -192,6 +192,71 @@ export const CommunityAPI = {
     return handleResponse(response);
   },
 
+  // ===== NOTIFICATIONS =====
+
+  /**
+   * Get user notifications (requires authentication)
+   * @param {Object} params - Query parameters
+   * @param {number} params.limit - Items per page (default: 20)
+   * @param {number} params.offset - Offset for pagination (default: 0)
+   * @returns {Promise<Object>} Notifications data with pagination
+   */
+  getNotifications: async ({ limit = 20, offset = 0 } = {}) => {
+    const token = getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await fetch(
+      `${API_BASE}/notifications?limit=${limit}&offset=${offset}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+    return handleResponse(response);
+  },
+
+  /**
+   * Mark notification as read (requires authentication)
+   * @param {string} id - Notification ID
+   * @returns {Promise<Object>} Updated notification
+   */
+  markNotificationAsRead: async (id) => {
+    const token = getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await fetch(`${API_BASE}/notifications/${id}/read`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return handleResponse(response);
+  },
+
+  /**
+   * Mark all notifications as read (requires authentication)
+   * @returns {Promise<Object>} Result with count
+   */
+  markAllNotificationsAsRead: async () => {
+    const token = getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await fetch(`${API_BASE}/notifications/read-all`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return handleResponse(response);
+  },
+
   // ===== GROUPS =====
 
   /**

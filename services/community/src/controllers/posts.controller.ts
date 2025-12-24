@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { postsService } from '../services/posts.service';
+import { notificationsService } from '../services/notifications.service';
 
 /**
  * Posts Controller
@@ -224,6 +225,25 @@ export class PostsController {
       }
 
       const result = await postsService.toggleReaction(userId, id, reactionType);
+
+      // Create notification for post author (if adding reaction and not own post)
+      if (result.action === 'added') {
+        try {
+          const post = await postsService.getPostById(id);
+          if (post && post.authorId !== userId) {
+            await notificationsService.createNotification({
+              userId: post.authorId,
+              type: 'reaction',
+              title: `Alguém reagiu ao teu post`,
+              body: `Recebeste uma reação de ${reactionType}`,
+              link: `/posts/${id}`,
+            });
+          }
+        } catch (notifError) {
+          console.error('Failed to create notification:', notifError);
+          // Don't fail the request if notification fails
+        }
+      }
 
       res.status(200).json({
         success: true,

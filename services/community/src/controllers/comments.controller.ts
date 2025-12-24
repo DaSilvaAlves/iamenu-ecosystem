@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { commentsService } from '../services/comments.service';
+import { notificationsService } from '../services/notifications.service';
+import { postsService } from '../services/posts.service';
 
 /**
  * Comments Controller
@@ -69,6 +71,23 @@ export class CommentsController {
         authorId,
         body: content.trim(), // Map 'content' from API to 'body' for Prisma
       });
+
+      // Create notification for post author (if not commenting on own post)
+      try {
+        const post = await postsService.getPostById(postId);
+        if (post && post.authorId !== authorId) {
+          await notificationsService.createNotification({
+            userId: post.authorId,
+            type: 'comment',
+            title: 'Novo comentário no teu post',
+            body: content.trim().substring(0, 100),
+            link: `/posts/${postId}`,
+          });
+        }
+      } catch (notifError) {
+        console.error('Failed to create notification:', notifError);
+        // Don't fail the request if notification fails
+      }
 
       res.status(201).json({
         success: true,

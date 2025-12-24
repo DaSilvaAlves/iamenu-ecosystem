@@ -1,7 +1,76 @@
-import React from 'react';
-import { Search, Bell, MessageSquare, Bookmark, User } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Bell, MessageSquare, Bookmark, User, X } from 'lucide-react';
+import { CommunityAPI } from '../services/api';
 
 const TopBar = () => {
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        loadNotifications();
+        // Poll for new notifications every 30 seconds
+        const interval = setInterval(loadNotifications, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowNotifications(false);
+            }
+        };
+
+        if (showNotifications) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showNotifications]);
+
+    const loadNotifications = async () => {
+        try {
+            const data = await CommunityAPI.getNotifications({ limit: 10 });
+            setNotifications(data.data || []);
+            setUnreadCount(data.unreadCount || 0);
+        } catch (err) {
+            console.error('Error loading notifications:', err);
+        }
+    };
+
+    const handleMarkAsRead = async (id) => {
+        try {
+            await CommunityAPI.markNotificationAsRead(id);
+            loadNotifications(); // Reload to update counts
+        } catch (err) {
+            console.error('Error marking notification as read:', err);
+        }
+    };
+
+    const handleMarkAllAsRead = async () => {
+        try {
+            await CommunityAPI.markAllNotificationsAsRead();
+            loadNotifications();
+        } catch (err) {
+            console.error('Error marking all as read:', err);
+        }
+    };
+
+    const formatTimeAgo = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const seconds = Math.floor((now - date) / 1000);
+
+        if (seconds < 60) return 'agora';
+        if (seconds < 3600) return `há ${Math.floor(seconds / 60)} min`;
+        if (seconds < 86400) return `há ${Math.floor(seconds / 3600)}h`;
+        return `há ${Math.floor(seconds / 86400)} dias`;
+    };
+
     return (
         <div style={{
             height: '64px',
@@ -68,10 +137,134 @@ const TopBar = () => {
                 </div>
 
                 <div style={{ display: 'flex', gap: '16px', color: 'var(--text-muted)' }}>
-                    <div style={{ position: 'relative', cursor: 'pointer' }} className="hover:text-white">
-                        <Bell size={20} />
-                        <div style={{ position: 'absolute', top: '-4px', right: '-4px', width: '8px', height: '8px', backgroundColor: 'var(--primary)', borderRadius: '50%', border: '2px solid var(--bg-sidebar)' }}></div>
+                    {/* Notifications */}
+                    <div ref={dropdownRef} style={{ position: 'relative' }}>
+                        <div
+                            onClick={() => setShowNotifications(!showNotifications)}
+                            style={{ position: 'relative', cursor: 'pointer' }}
+                            className="hover:text-white"
+                        >
+                            <Bell size={20} />
+                            {unreadCount > 0 && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-4px',
+                                    right: '-4px',
+                                    minWidth: '18px',
+                                    height: '18px',
+                                    backgroundColor: 'var(--primary)',
+                                    borderRadius: '10px',
+                                    border: '2px solid var(--bg-sidebar)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.65rem',
+                                    fontWeight: 'bold',
+                                    padding: '0 4px'
+                                }}>{unreadCount}</div>
+                            )}
+                        </div>
+
+                        {/* Notifications Dropdown */}
+                        {showNotifications && (
+                            <div style={{
+                                position: 'absolute',
+                                top: 'calc(100% + 12px)',
+                                right: 0,
+                                width: '400px',
+                                maxHeight: '500px',
+                                backgroundColor: 'var(--bg-sidebar)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '12px',
+                                boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                                overflow: 'hidden',
+                                zIndex: 1000
+                            }}>
+                                {/* Header */}
+                                <div style={{
+                                    padding: '16px',
+                                    borderBottom: '1px solid var(--border)',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <h3 style={{ fontWeight: '600', fontSize: '1rem' }}>Notificações</h3>
+                                    {unreadCount > 0 && (
+                                        <button
+                                            onClick={handleMarkAllAsRead}
+                                            style={{
+                                                fontSize: '0.75rem',
+                                                color: 'var(--primary)',
+                                                cursor: 'pointer',
+                                                background: 'none',
+                                                border: 'none'
+                                            }}
+                                        >
+                                            Marcar todas como lidas
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Notifications List */}
+                                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                    {notifications.length === 0 ? (
+                                        <div style={{
+                                            padding: '40px 20px',
+                                            textAlign: 'center',
+                                            color: 'var(--text-muted)',
+                                            fontSize: '0.9rem'
+                                        }}>
+                                            Sem notificações
+                                        </div>
+                                    ) : (
+                                        notifications.map(notif => (
+                                            <div
+                                                key={notif.id}
+                                                onClick={() => !notif.read && handleMarkAsRead(notif.id)}
+                                                style={{
+                                                    padding: '12px 16px',
+                                                    borderBottom: '1px solid var(--border)',
+                                                    cursor: 'pointer',
+                                                    backgroundColor: notif.read ? 'transparent' : 'rgba(255,255,255,0.03)',
+                                                    transition: 'background-color 0.2s'
+                                                }}
+                                                className="hover:bg-white/5"
+                                            >
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '4px' }}>
+                                                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: notif.read ? 'var(--text-muted)' : 'white' }}>
+                                                        {notif.title}
+                                                    </span>
+                                                    {!notif.read && (
+                                                        <div style={{
+                                                            width: '8px',
+                                                            height: '8px',
+                                                            backgroundColor: 'var(--primary)',
+                                                            borderRadius: '50%',
+                                                            marginTop: '4px'
+                                                        }}></div>
+                                                    )}
+                                                </div>
+                                                {notif.body && (
+                                                    <p style={{
+                                                        fontSize: '0.8rem',
+                                                        color: 'var(--text-muted)',
+                                                        marginBottom: '6px',
+                                                        lineHeight: '1.4'
+                                                    }}>
+                                                        {notif.body}
+                                                    </p>
+                                                )}
+                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                                    {formatTimeAgo(notif.createdAt)}
+                                                </span>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
+
                     <MessageSquare size={20} className="cursor-pointer hover:text-white" />
                     <Bookmark size={20} className="cursor-pointer hover:text-white" />
                     <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }}>

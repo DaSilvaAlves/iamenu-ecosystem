@@ -13,6 +13,7 @@ dotenv.config();
 import authRouter from './routes/auth';
 import postsRouter from './routes/posts';
 import groupsRouter from './routes/groups';
+import notificationsRouter from './routes/notifications';
 // import profilesRouter from './routes/profiles'; // TODO: criar depois
 
 // Import middleware
@@ -91,6 +92,7 @@ app.get('/api/v1/community/public/stats', (req: Request, res: Response) => {
 app.use('/api/v1/community/auth', authRouter); // Auth endpoints (test-token, etc)
 app.use('/api/v1/community/posts', postsRouter);
 app.use('/api/v1/community/groups', groupsRouter);
+app.use('/api/v1/community/notifications', notificationsRouter);
 // app.use('/api/v1/community/profiles', profilesRouter); // TODO: Semana 1
 
 // Placeholder para outras rotas (remover depois)
