@@ -100,13 +100,31 @@ export const CommunityAPI = {
       throw new Error('Authentication required. Please login first.');
     }
 
+    // If image is provided, use FormData, otherwise use JSON
+    let body;
+    let headers = {
+      'Authorization': `Bearer ${token}`
+    };
+
+    if (postData.image) {
+      const formData = new FormData();
+      formData.append('title', postData.title);
+      formData.append('body', postData.body);
+      formData.append('category', postData.category);
+      if (postData.groupId) formData.append('groupId', postData.groupId);
+      if (postData.tags) formData.append('tags', JSON.stringify(postData.tags));
+      formData.append('image', postData.image);
+      body = formData;
+      // Don't set Content-Type for FormData - browser will set it with boundary
+    } else {
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(postData);
+    }
+
     const response = await fetch(`${API_BASE}/posts`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(postData)
+      headers,
+      body
     });
     return handleResponse(response);
   },

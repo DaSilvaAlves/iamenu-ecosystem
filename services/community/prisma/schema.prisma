@@ -11,12 +11,13 @@ datasource db {
 
 model Post {
   id        String   @id @default(uuid())
-  authorId  String   
-  groupId   String?  
+  authorId  String
+  groupId   String?
   title     String
   body      String
   category  String
-  tags      String   
+  tags      String
+  imageUrl  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   views     Int      @default(0)
@@ -24,25 +25,25 @@ model Post {
   useful    Int      @default(0)
   thanks    Int      @default(0)
 
-  comments  Comment[]
-  group     Group?     @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  comments Comment[]
+  group    Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
   @@map("posts")
 }
 
 model Comment {
   id              String   @id @default(uuid())
-  postId          String   
-  authorId        String   
-  parentCommentId String?  
+  postId          String
+  authorId        String
+  parentCommentId String?
   body            String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   likes           Int      @default(0)
 
-  post           Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
-  parentComment  Comment?   @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
-  replies        Comment[]  @relation("CommentReplies")
+  post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parentComment Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies       Comment[] @relation("CommentReplies")
 
   @@map("comments")
 }
@@ -53,9 +54,9 @@ model Group {
   description String?
   type        String   @default("public")
   category    String?
-  createdBy   String   
+  createdBy   String
   createdAt   DateTime @default(now())
-  coverImage  String?  
+  coverImage  String?
 
   posts       Post[]
   memberships GroupMembership[]
@@ -64,8 +65,8 @@ model Group {
 }
 
 model GroupMembership {
-  groupId  String   
-  userId   String   
+  groupId  String
+  userId   String
   joinedAt DateTime @default(now())
   role     String   @default("member")
 
@@ -76,27 +77,27 @@ model GroupMembership {
 }
 
 model Profile {
-  userId           String   @id
-  restaurantName   String?  
-  locationCity     String?  
-  locationRegion   String?  
-  restaurantType   String?  
-  bio              String?
-  profilePhoto     String?  
-  coverPhoto       String?  
-  badges           String?  
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  userId         String   @id
+  restaurantName String?
+  locationCity   String?
+  locationRegion String?
+  restaurantType String?
+  bio            String?
+  profilePhoto   String?
+  coverPhoto     String?
+  badges         String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@map("profiles")
 }
 
 model Reaction {
   id           String   @id @default(uuid())
-  userId       String   
-  targetType   String   
-  targetId     String   
-  reactionType String   
+  userId       String
+  targetType   String
+  targetId     String
+  reactionType String
   createdAt    DateTime @default(now())
 
   @@unique([userId, targetType, targetId, reactionType])
@@ -105,7 +106,7 @@ model Reaction {
 
 model Notification {
   id        String   @id @default(uuid())
-  userId    String   
+  userId    String
   type      String
   title     String
   body      String?

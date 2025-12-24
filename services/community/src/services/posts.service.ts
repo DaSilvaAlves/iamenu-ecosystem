@@ -9,6 +9,7 @@ export interface CreatePostDto {
   body: string;
   category: string;
   tags?: string[];
+  imageUrl?: string;
 }
 
 /**
@@ -108,6 +109,7 @@ export class PostsService {
         body: data.body,
         category: data.category,
         tags: data.tags ? JSON.stringify(data.tags) : '[]', // SQLite stores arrays as JSON strings
+        imageUrl: data.imageUrl,
       },
       include: {
         group: {

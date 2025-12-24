@@ -327,6 +327,23 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                                     {post.body}
                                 </p>
 
+                                {/* Post Image */}
+                                {post.imageUrl && (
+                                    <div style={{ marginBottom: '20px' }}>
+                                        <img
+                                            src={`http://localhost:3001${post.imageUrl}`}
+                                            alt={post.title}
+                                            style={{
+                                                width: '100%',
+                                                maxHeight: '500px',
+                                                objectFit: 'cover',
+                                                borderRadius: '12px',
+                                                border: '1px solid var(--border)'
+                                            }}
+                                        />
+                                    </div>
+                                )}
+
                                 {/* Tags */}
                                 {parseTags(post.tags).length > 0 && (
                                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
@@ -548,6 +565,8 @@ const NewPostModal = ({ onClose, onSubmit }) => {
     const [tags, setTags] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [groups, setGroups] = useState([]);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
 
     useEffect(() => {
         // Load groups for dropdown
@@ -555,6 +574,34 @@ const NewPostModal = ({ onClose, onSubmit }) => {
             setGroups(data.data || []);
         });
     }, []);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor seleciona apenas imagens');
+                return;
+            }
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('A imagem deve ter no máximo 5MB');
+                return;
+            }
+            setSelectedImage(file);
+            // Create preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveImage = () => {
+        setSelectedImage(null);
+        setImagePreview(null);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -570,7 +617,8 @@ const NewPostModal = ({ onClose, onSubmit }) => {
                 body: body.trim(),
                 category,
                 groupId: groupId || undefined,
-                tags: tags.split(',').map(t => t.trim()).filter(Boolean)
+                tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+                image: selectedImage
             });
         } finally {
             setSubmitting(false);
@@ -672,7 +720,7 @@ const NewPostModal = ({ onClose, onSubmit }) => {
                         />
                     </div>
 
-                    <div style={{ marginBottom: '24px' }}>
+                    <div style={{ marginBottom: '16px' }}>
                         <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Tags (separadas por vírgula)</label>
                         <input
                             type="text"
@@ -688,6 +736,57 @@ const NewPostModal = ({ onClose, onSubmit }) => {
                             }}
                             placeholder="Ex: marketing, vendas, turismo"
                         />
+                    </div>
+
+                    <div style={{ marginBottom: '24px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Imagem (opcional)</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '8px',
+                                color: 'white',
+                                cursor: 'pointer'
+                            }}
+                        />
+                        {imagePreview && (
+                            <div style={{ marginTop: '12px', position: 'relative' }}>
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    style={{
+                                        width: '100%',
+                                        maxHeight: '300px',
+                                        objectFit: 'cover',
+                                        borderRadius: '8px',
+                                        border: '1px solid var(--border)'
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleRemoveImage}
+                                    style={{
+                                        position: 'absolute',
+                                        top: '8px',
+                                        right: '8px',
+                                        padding: '8px',
+                                        backgroundColor: 'rgba(0,0,0,0.7)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        cursor: 'pointer',
+                                        fontSize: '0.8rem'
+                                    }}
+                                >
+                                    Remover
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>

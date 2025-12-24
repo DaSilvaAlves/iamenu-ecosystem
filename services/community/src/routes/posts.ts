@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { postsController } from '../controllers/posts.controller';
 import { commentsController } from '../controllers/comments.controller';
 import { authenticateJWT } from '../middleware/auth';
+import { upload } from '../middleware/upload';
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.get('/', postsController.getAllPosts.bind(postsController));
 router.get('/:id', postsController.getPostById.bind(postsController));
 
 // Protected routes (auth required)
-router.post('/', authenticateJWT, postsController.createPost.bind(postsController));
+router.post('/', authenticateJWT, upload.single('image'), postsController.createPost.bind(postsController));
 router.patch('/:id', authenticateJWT, postsController.updatePost.bind(postsController));
 router.delete('/:id', authenticateJWT, postsController.deletePost.bind(postsController));
 

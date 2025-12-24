@@ -94,6 +94,9 @@ export class PostsController {
         });
       }
 
+      // Get uploaded image URL if exists
+      const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
+
       const post = await postsService.createPost({
         authorId,
         title,
@@ -101,6 +104,7 @@ export class PostsController {
         category,
         groupId,
         tags,
+        imageUrl,
       });
 
       res.status(201).json({
