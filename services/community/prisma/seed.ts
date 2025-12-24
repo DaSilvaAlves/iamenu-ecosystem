@@ -20,7 +20,7 @@ Apliquei a mesma táctica a outros fornecimentos e agora poupo **€400/mês tot
 
 Dica: Sempre pedir 3 orçamentos antes de decidir!`,
       category: 'Gestão',
-      tags: ['fornecedores', 'poupança', 'negociação'],
+      tags: JSON.stringify(['fornecedores', 'poupança', 'negociação']),
       views: 234,
       likes: 45,
       useful: 32,
@@ -41,7 +41,7 @@ Resultado: Servimos mesmas 5 mesas mas com 30% menos stress!
 
 Alguém tem outras dicas?`,
       category: 'Operações',
-      tags: ['turismo', 'eficiência', 'algarve'],
+      tags: JSON.stringify(['turismo', 'eficiência', 'algarve']),
       views: 189,
       likes: 28,
       useful: 41,
@@ -64,7 +64,7 @@ Alguém tem outras dicas?`,
 
 Próximo: TikTok? Alguém já testou?`,
       category: 'Marketing',
-      tags: ['instagram', 'social-media', 'crescimento'],
+      tags: JSON.stringify(['instagram', 'social-media', 'crescimento']),
       views: 156,
       likes: 22,
       useful: 18,

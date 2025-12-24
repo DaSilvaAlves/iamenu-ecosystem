@@ -1,0 +1,493 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { MessageSquare, Award, MoreHorizontal, Plus, Loader } from 'lucide-react';
+import { CommunityAPI, Auth } from '../services/api';
+
+const CommunityView = () => {
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [showNewPostModal, setShowNewPostModal] = useState(false);
+
+    // Load posts from backend
+    useEffect(() => {
+        loadPosts();
+        ensureAuthentication();
+    }, []);
+
+    const ensureAuthentication = async () => {
+        if (!Auth.isAuthenticated()) {
+            try {
+                await Auth.getTestToken();
+                console.log('✅ Authenticated with test token');
+            } catch (err) {
+                console.error('❌ Authentication failed:', err);
+            }
+        }
+    };
+
+    const loadPosts = async () => {
+        try {
+            setLoading(true);
+            const data = await CommunityAPI.getPosts({ limit: 10 });
+            setPosts(data.data || []);  // ✅ Fixed: posts are in data.data
+            setError(null);
+        } catch (err) {
+            console.error('Error loading posts:', err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCreatePost = async (postData) => {
+        try {
+            await CommunityAPI.createPost(postData);
+            setShowNewPostModal(false);
+            loadPosts(); // Reload posts
+        } catch (err) {
+            alert('Erro ao criar post: ' + err.message);
+        }
+    };
+
+    const formatTimeAgo = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const seconds = Math.floor((now - date) / 1000);
+
+        if (seconds < 60) return 'agora';
+        if (seconds < 3600) return `há ${Math.floor(seconds / 60)} min`;
+        if (seconds < 86400) return `há ${Math.floor(seconds / 3600)}h`;
+        return `há ${Math.floor(seconds / 86400)} dias`;
+    };
+
+    const getCategoryLabel = (category) => {
+        const labels = {
+            dica: 'Dica',
+            duvida: 'Dúvida',
+            showcase: 'Showcase',
+            evento: 'Evento'
+        };
+        return labels[category] || category;
+    };
+
+    
+    const parseTags = (tags) => {
+        if (!tags) return [];
+        if (Array.isArray(tags)) return tags;
+        try {
+            return JSON.parse(tags);
+        } catch {
+            return [];
+        }
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+        >
+            {/* Hero Banner */}
+            <div style={{
+                width: '100%',
+                height: '340px',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                position: 'relative',
+                backgroundImage: 'url("https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=2070")',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                border: '1px solid var(--border)'
+            }}>
+                <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                    padding: '0 40px'
+                }}>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '12px' }}>iaMenu Ecosystem</h2>
+                    <p style={{ fontSize: '1.25rem', color: 'rgba(255,255,255,0.8)', maxWidth: '600px' }}>
+                        Juntos estamos a revolucionar a restauração em Portugal. Bem-vindos ao futuro!
+                    </p>
+                </div>
+            </div>
+
+            {/* Feed Header */}
+            <div className="flex items-center justify-between" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 8px' }}>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Feed</h3>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                    <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: '8px 16px', borderRadius: '20px', fontSize: '0.875rem' }}>
+                        Popular ↓
+                    </div>
+                    <button
+                        onClick={() => setShowNewPostModal(true)}
+                        style={{
+                            backgroundColor: 'var(--primary)',
+                            color: 'white',
+                            padding: '8px 20px',
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                            border: 'none'
+                        }}
+                    >
+                        <Plus size={18} /> New post
+                    </button>
+                </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '24px' }}>
+                {/* Main Feed */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    {/* New Post Input */}
+                    <div className="glass-panel" style={{ padding: '24px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--border)' }}></div>
+                            <span style={{ fontSize: '0.9rem' }}>Vais partilhar algo hoje, Eurico?</span>
+                        </div>
+                    </div>
+
+                    {/* Loading State */}
+                    {loading && (
+                        <div className="glass-panel" style={{ padding: '40px', textAlign: 'center' }}>
+                            <Loader size={32} className="animate-spin" style={{ margin: '0 auto', color: 'var(--primary)' }} />
+                            <p style={{ marginTop: '16px', color: 'var(--text-muted)' }}>A carregar posts...</p>
+                        </div>
+                    )}
+
+                    {/* Error State */}
+                    {error && (
+                        <div className="glass-panel" style={{ padding: '24px', backgroundColor: 'rgba(255,0,0,0.1)', border: '1px solid rgba(255,0,0,0.3)' }}>
+                            <p style={{ color: '#ff6b6b' }}>❌ Erro: {error}</p>
+                            <button
+                                onClick={loadPosts}
+                                style={{ marginTop: '12px', padding: '8px 16px', backgroundColor: 'var(--primary)', color: 'white', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
+                            >
+                                Tentar novamente
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Posts List */}
+                    {!loading && posts.length === 0 && (
+                        <div className="glass-panel" style={{ padding: '40px', textAlign: 'center' }}>
+                            <p style={{ color: 'var(--text-muted)' }}>Ainda não há posts. Seja o primeiro a partilhar!</p>
+                        </div>
+                    )}
+
+                    {!loading && posts.map(post => (
+                        <div key={post.id} className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
+                            <div style={{ padding: '24px' }}>
+                                {/* Post Header */}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                                    <div style={{ display: 'flex', gap: '12px' }}>
+                                        <div style={{
+                                            width: '44px',
+                                            height: '44px',
+                                            borderRadius: '50%',
+                                            backgroundColor: 'var(--border)',
+                                            fontSize: '1.2rem',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}>
+                                            👤
+                                        </div>
+                                        <div>
+                                            <h4 style={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                                                {post.authorName || 'Restaurador'}
+                                            </h4>
+                                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                                {formatTimeAgo(post.createdAt)} • <span style={{ color: 'var(--primary)', fontWeight: '600' }}>
+                                                    {getCategoryLabel(post.category)}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <MoreHorizontal size={20} color="var(--text-muted)" style={{ cursor: 'pointer' }} />
+                                </div>
+
+                                {/* Post Title */}
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '12px' }}>
+                                    {post.title}
+                                </h3>
+
+                                {/* Post Body */}
+                                <p style={{
+                                    color: 'rgba(255,255,255,0.8)',
+                                    lineHeight: '1.6',
+                                    marginBottom: '20px',
+                                    whiteSpace: 'pre-line'
+                                }}>
+                                    {post.body}
+                                </p>
+
+                                {/* Tags */}
+                                {parseTags(post.tags).length > 0 && (
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                                        {parseTags(post.tags).map(tag => (
+                                            <span key={tag} style={{
+                                                fontSize: '0.75rem',
+                                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                                padding: '4px 10px',
+                                                borderRadius: '12px',
+                                                color: 'var(--text-muted)'
+                                            }}>
+                                                #{tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Post Footer */}
+                            <div style={{
+                                padding: '12px 24px',
+                                borderTop: '1px solid var(--border)',
+                                display: 'flex',
+                                gap: '24px',
+                                fontSize: '0.85rem',
+                                color: 'var(--text-muted)'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                    <MessageSquare size={16} /> {post._count?.comments || 0} Comentários
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                    <Award size={16} /> {post.likes || 0} Likes
+                                </div>
+                                <div style={{ fontSize: '0.75rem', marginLeft: 'auto' }}>
+                                    👁️ {post.views || 0} visualizações
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Sidebar */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    {/* Eventos */}
+                    <div className="glass-panel" style={{ padding: '24px' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '16px' }}>Eventos Próximos</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            {[
+                                { date: '28 JAN', title: 'Webinar: IA na Gestão de Stocks', time: '15:00 WET' },
+                                { date: '12 FEV', title: 'Networking Algarve: Restauradores 4.0', time: '11:00 WET' }
+                            ].map(event => (
+                                <div key={event.title} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                    <div style={{
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        padding: '8px',
+                                        borderRadius: '6px',
+                                        textAlign: 'center',
+                                        minWidth: '60px'
+                                    }}>
+                                        <p style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{event.date.split(' ')[0]}</p>
+                                        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{event.date.split(' ')[1]}</p>
+                                    </div>
+                                    <div>
+                                        <h4 style={{ fontSize: '0.85rem', fontWeight: '600' }}>{event.title}</h4>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{event.time}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Tendências */}
+                    <div className="glass-panel" style={{ padding: '24px' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '16px' }}>Tendências</h3>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                            {['#DigitalGastro', '#EcoEfficiency', '#StaffRetention', '#MarketAI'].map(tag => (
+                                <span key={tag} style={{
+                                    fontSize: '0.75rem',
+                                    backgroundColor: 'rgba(255,255,255,0.05)',
+                                    padding: '4px 10px',
+                                    borderRadius: '12px',
+                                    color: 'var(--text-muted)',
+                                    cursor: 'pointer'
+                                }}>{tag}</span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* New Post Modal (Simple version - can be enhanced later) */}
+            {showNewPostModal && (
+                <NewPostModal
+                    onClose={() => setShowNewPostModal(false)}
+                    onSubmit={handleCreatePost}
+                />
+            )}
+        </motion.div>
+    );
+};
+
+// Simple New Post Modal Component
+const NewPostModal = ({ onClose, onSubmit }) => {
+    const [title, setTitle] = useState('');
+    const [body, setBody] = useState('');
+    const [category, setCategory] = useState('dica');
+    const [tags, setTags] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!title.trim() || !body.trim()) {
+            alert('Título e conteúdo são obrigatórios');
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            await onSubmit({
+                title: title.trim(),
+                body: body.trim(),
+                category,
+                tags: tags.split(',').map(t => t.trim()).filter(Boolean)
+            });
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+        }} onClick={onClose}>
+            <div className="glass-panel" style={{ padding: '32px', maxWidth: '600px', width: '90%' }} onClick={(e) => e.stopPropagation()}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '24px' }}>Criar Novo Post</h2>
+                <form onSubmit={handleSubmit}>
+                    <div style={{ marginBottom: '16px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Título *</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '8px',
+                                color: 'white'
+                            }}
+                            placeholder="Ex: Como aumentei vendas em 20%"
+                        />
+                    </div>
+
+                    <div style={{ marginBottom: '16px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Categoria *</label>
+                        <select
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '8px',
+                                color: 'white'
+                            }}
+                        >
+                            <option value="dica">Dica</option>
+                            <option value="duvida">Dúvida</option>
+                            <option value="showcase">Showcase</option>
+                            <option value="evento">Evento</option>
+                        </select>
+                    </div>
+
+                    <div style={{ marginBottom: '16px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Conteúdo *</label>
+                        <textarea
+                            value={body}
+                            onChange={(e) => setBody(e.target.value)}
+                            rows={6}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '8px',
+                                color: 'white',
+                                resize: 'vertical'
+                            }}
+                            placeholder="Partilha a tua experiência..."
+                        />
+                    </div>
+
+                    <div style={{ marginBottom: '24px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Tags (separadas por vírgula)</label>
+                        <input
+                            type="text"
+                            value={tags}
+                            onChange={(e) => setTags(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '8px',
+                                color: 'white'
+                            }}
+                            placeholder="Ex: marketing, vendas, turismo"
+                        />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            style={{
+                                padding: '10px 20px',
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '8px',
+                                color: 'white',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={submitting}
+                            style={{
+                                padding: '10px 20px',
+                                backgroundColor: 'var(--primary)',
+                                border: 'none',
+                                borderRadius: '8px',
+                                color: 'white',
+                                fontWeight: 'bold',
+                                cursor: submitting ? 'not-allowed' : 'pointer',
+                                opacity: submitting ? 0.6 : 1
+                            }}
+                        >
+                            {submitting ? 'A publicar...' : 'Publicar'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+export default CommunityView;
