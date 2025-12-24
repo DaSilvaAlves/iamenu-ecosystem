@@ -215,6 +215,72 @@ export const CommunityAPI = {
       body: JSON.stringify(groupData)
     });
     return handleResponse(response);
+  },
+
+  // ===== COMMENTS =====
+
+  /**
+   * Get comments for a post
+   * @param {string} postId - Post ID
+   * @param {Object} params - Query parameters
+   * @param {number} params.limit - Items per page (default: 20)
+   * @param {number} params.offset - Offset for pagination (default: 0)
+   * @returns {Promise<Object>} Comments data with pagination
+   */
+  getComments: async (postId, { limit = 20, offset = 0 } = {}) => {
+    const response = await fetch(
+      `${API_BASE}/posts/${postId}/comments?limit=${limit}&offset=${offset}`
+    );
+    return handleResponse(response);
+  },
+
+  /**
+   * Create new comment (requires authentication)
+   * @param {string} postId - Post ID
+   * @param {Object} commentData
+   * @param {string} commentData.content - Comment content
+   * @returns {Promise<Object>} Created comment
+   */
+  createComment: async (postId, commentData) => {
+    const token = getToken();
+    if (!token) {
+      throw new Error('Authentication required. Please login first.');
+    }
+
+    const response = await fetch(`${API_BASE}/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(commentData)
+    });
+    return handleResponse(response);
+  },
+
+  /**
+   * Delete comment (requires authentication, only author)
+   * @param {string} postId - Post ID
+   * @param {string} commentId - Comment ID
+   * @returns {Promise<void>}
+   */
+  deleteComment: async (postId, commentId) => {
+    const token = getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await fetch(`${API_BASE}/posts/${postId}/comments/${commentId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Delete failed' }));
+      throw new Error(error.message);
+    }
   }
 };
 

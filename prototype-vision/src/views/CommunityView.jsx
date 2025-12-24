@@ -8,6 +8,9 @@ const CommunityView = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showNewPostModal, setShowNewPostModal] = useState(false);
+    const [expandedComments, setExpandedComments] = useState({}); // { postId: true/false }
+    const [comments, setComments] = useState({}); // { postId: [comments] }
+    const [newComment, setNewComment] = useState({}); // { postId: 'content' }
 
     // Load posts from backend
     useEffect(() => {
@@ -47,6 +50,45 @@ const CommunityView = () => {
             loadPosts(); // Reload posts
         } catch (err) {
             alert('Erro ao criar post: ' + err.message);
+        }
+    };
+
+    const toggleComments = async (postId) => {
+        const isExpanded = expandedComments[postId];
+
+        if (!isExpanded) {
+            // Load comments if not already loaded
+            if (!comments[postId]) {
+                try {
+                    const data = await CommunityAPI.getComments(postId);
+                    setComments(prev => ({ ...prev, [postId]: data.data || [] }));
+                } catch (err) {
+                    console.error('Error loading comments:', err);
+                }
+            }
+        }
+
+        setExpandedComments(prev => ({ ...prev, [postId]: !isExpanded }));
+    };
+
+    const handleCreateComment = async (postId) => {
+        const content = newComment[postId];
+        if (!content || !content.trim()) {
+            alert('Comentário não pode estar vazio');
+            return;
+        }
+
+        try {
+            await CommunityAPI.createComment(postId, { content: content.trim() });
+
+            // Reload comments
+            const data = await CommunityAPI.getComments(postId);
+            setComments(prev => ({ ...prev, [postId]: data.data || [] }));
+
+            // Clear input
+            setNewComment(prev => ({ ...prev, [postId]: '' }));
+        } catch (err) {
+            alert('Erro ao criar comentário: ' + err.message);
         }
     };
 
@@ -258,8 +300,11 @@ const CommunityView = () => {
                                 fontSize: '0.85rem',
                                 color: 'var(--text-muted)'
                             }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                    <MessageSquare size={16} /> {post._count?.comments || 0} Comentários
+                                <div
+                                    onClick={() => toggleComments(post.id)}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                                >
+                                    <MessageSquare size={16} /> {comments[post.id]?.length || post._count?.comments || 0} Comentários
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                                     <Award size={16} /> {post.likes || 0} Likes
@@ -268,6 +313,94 @@ const CommunityView = () => {
                                     👁️ {post.views || 0} visualizações
                                 </div>
                             </div>
+
+                            {/* Comments Section */}
+                            {expandedComments[post.id] && (
+                                <div style={{
+                                    padding: '24px',
+                                    backgroundColor: 'rgba(0,0,0,0.2)',
+                                    borderTop: '1px solid var(--border)'
+                                }}>
+                                    {/* Comments List */}
+                                    <div style={{ marginBottom: '16px' }}>
+                                        {comments[post.id]?.length > 0 ? (
+                                            comments[post.id].map((comment) => (
+                                                <div key={comment.id} style={{
+                                                    marginBottom: '12px',
+                                                    padding: '12px',
+                                                    backgroundColor: 'rgba(255,255,255,0.03)',
+                                                    borderRadius: '8px'
+                                                }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                                        <div style={{
+                                                            width: '24px',
+                                                            height: '24px',
+                                                            borderRadius: '50%',
+                                                            backgroundColor: 'rgba(255,255,255,0.1)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            fontSize: '0.7rem'
+                                                        }}>
+                                                            👤
+                                                        </div>
+                                                        <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>Restaurador</span>
+                                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                                            {formatTimeAgo(comment.createdAt)}
+                                                        </span>
+                                                    </div>
+                                                    <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.9)' }}>
+                                                        {comment.body || comment.content}
+                                                    </p>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center', padding: '16px' }}>
+                                                Nenhum comentário ainda. Seja o primeiro!
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* New Comment Input */}
+                                    <div style={{ display: 'flex', gap: '12px' }}>
+                                        <input
+                                            type="text"
+                                            value={newComment[post.id] || ''}
+                                            onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    handleCreateComment(post.id);
+                                                }
+                                            }}
+                                            placeholder="Escreve um comentário..."
+                                            style={{
+                                                flex: 1,
+                                                padding: '10px 16px',
+                                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                                border: '1px solid var(--border)',
+                                                borderRadius: '20px',
+                                                color: 'white',
+                                                fontSize: '0.9rem'
+                                            }}
+                                        />
+                                        <button
+                                            onClick={() => handleCreateComment(post.id)}
+                                            style={{
+                                                padding: '10px 20px',
+                                                backgroundColor: 'var(--primary)',
+                                                border: 'none',
+                                                borderRadius: '20px',
+                                                color: 'white',
+                                                fontWeight: 'bold',
+                                                cursor: 'pointer',
+                                                fontSize: '0.85rem'
+                                            }}
+                                        >
+                                            Comentar
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

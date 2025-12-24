@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { postsController } from '../controllers/posts.controller';
+import { commentsController } from '../controllers/comments.controller';
 import { authenticateJWT } from '../middleware/auth';
 
 const router = Router();
@@ -17,5 +18,17 @@ router.get('/:id', postsController.getPostById.bind(postsController));
 router.post('/', authenticateJWT, postsController.createPost.bind(postsController));
 router.patch('/:id', authenticateJWT, postsController.updatePost.bind(postsController));
 router.delete('/:id', authenticateJWT, postsController.deletePost.bind(postsController));
+
+/**
+ * Comments Routes (nested under posts)
+ * Base path: /api/v1/community/posts/:postId/comments
+ */
+
+// Public route - get comments for a post
+router.get('/:postId/comments', commentsController.getCommentsByPostId.bind(commentsController));
+
+// Protected routes - create/delete comments (auth required)
+router.post('/:postId/comments', authenticateJWT, commentsController.createComment.bind(commentsController));
+router.delete('/:postId/comments/:id', authenticateJWT, commentsController.deleteComment.bind(commentsController));
 
 export default router;
