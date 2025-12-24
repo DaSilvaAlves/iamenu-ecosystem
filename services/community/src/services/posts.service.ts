@@ -88,7 +88,7 @@ export class PostsService {
         title: data.title,
         body: data.body,
         category: data.category,
-        tags: data.tags || [],
+        tags: data.tags ? JSON.stringify(data.tags) : '[]', // SQLite stores arrays as JSON strings
       },
       include: {
         group: {

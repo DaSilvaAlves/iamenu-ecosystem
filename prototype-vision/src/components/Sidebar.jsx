@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     MessageSquare,
     ChevronDown,
@@ -20,6 +20,7 @@ import {
     Camera,
     ChefHat
 } from 'lucide-react';
+import { CommunityAPI } from '../services/api';
 
 const NavItem = ({ icon: Icon, label, active, onClick, badge }) => (
     <div
@@ -70,6 +71,30 @@ const SidebarSection = ({ title, children, hasChevron = true }) => (
 );
 
 const Sidebar = ({ currentView, setView }) => {
+    const [groups, setGroups] = useState([]);
+    const [loadingGroups, setLoadingGroups] = useState(true);
+
+    useEffect(() => {
+        loadGroups();
+    }, []);
+
+    const loadGroups = async () => {
+        try {
+            const data = await CommunityAPI.getGroups({ limit: 10 });
+            setGroups(data.data || []);
+        } catch (err) {
+            console.error('Error loading groups:', err);
+        } finally {
+            setLoadingGroups(false);
+        }
+    };
+
+    const getGroupIcon = (category) => {
+        if (category === 'region') return MapPin;
+        if (category === 'theme') return Lightbulb;
+        return Users;
+    };
+
     return (
         <div style={{
             width: '260px',
@@ -115,6 +140,28 @@ const Sidebar = ({ currentView, setView }) => {
                 <NavItem label="Dashboard Business Intel" icon={LayoutDashboard} active={currentView === 'dashboard'} onClick={() => setView('dashboard')} />
                 <NavItem label="Escalas de Staff AI" icon={Users} active={currentView === 'equipas'} onClick={() => setView('equipas')} />
                 <NavItem label="Aulas ao VIVO" icon={Video} active={currentView === 'aulas'} onClick={() => setView('aulas')} />
+            </SidebarSection>
+
+            <SidebarSection title="Grupos da Comunidade">
+                {loadingGroups ? (
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', padding: '0 12px' }}>A carregar...</p>
+                ) : (
+                    groups.slice(0, 5).map((group) => (
+                        <NavItem
+                            key={group.id}
+                            label={group.name}
+                            icon={getGroupIcon(group.category)}
+                            badge={group.memberCount > 0 ? group.memberCount.toString() : null}
+                        />
+                    ))
+                )}
+                {groups.length > 5 && (
+                    <div style={{ padding: '8px 12px' }}>
+                        <a href="#" style={{ fontSize: '0.75rem', color: 'var(--primary)', textDecoration: 'none' }}>
+                            Ver todos os {groups.length} grupos →
+                        </a>
+                    </div>
+                )}
             </SidebarSection>
 
             <SidebarSection title="Hub de Negócios">
