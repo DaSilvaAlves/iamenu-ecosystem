@@ -1,7 +1,7 @@
 ---
-última_atualização: 2025-12-23 18:00
+última_atualização: 2025-12-24 01:30
 agent: Claude Code + Eurico Alves
-versão: 1.0
+versão: 1.1
 status: Ativo
 ---
 
@@ -225,6 +225,46 @@ Tens dois sistemas de IA complementares trabalhando no projeto iaMenu:
 
 ## 🎯 Próximos Passos (Backlog)
 
+### **2025-12-24 (01:00 - 01:30) - Claude Code + Eurico**
+**Duração:** 30 minutos
+**Objetivo:** FASE 1 - Conectar Community Feed ao backend SQLite real
+
+**Resultados:**
+- ✅ **Migração Database:** Railway PostgreSQL → SQLite local (`dev.db` 86KB)
+- ✅ **Backend Funcionando:** Community API (localhost:3001) + SQLite
+- ✅ **Frontend Conectado:** Feed carrega 3 posts reais do database
+- ✅ **CORS Corrigido:** PORT 3000 → 5173 (match Vite dev server)
+- ✅ **Bug Fix:** `data.posts → data.data` (posts não apareciam)
+- ✅ **Commit:** `53d6f54` (+877 linhas, -380 linhas)
+
+**Ficheiros Criados/Modificados:**
+- `prototype-vision/src/services/api.js` (NEW, 231 linhas) → HTTP client para Community API
+- `prototype-vision/src/views/CommunityView.jsx` (NEW, 493 linhas) → Componente Feed extraído
+- `services/community/prisma/dev.db` (NEW, 86KB) → SQLite database local
+- `services/community/prisma/schema.prisma` → PostgreSQL → SQLite (multiSchema removed)
+- `services/community/prisma/seed.ts` → Arrays JSON.stringify para SQLite
+- `prototype-vision/src/App.jsx` → Import CommunityView separado
+
+**Tecnologias:**
+- SQLite 3 (local development)
+- Prisma ORM (schema migration)
+- Fetch API (HTTP client)
+- React Hooks (useState, useEffect)
+
+**O que funciona agora:**
+- ✅ Feed exibe 3 posts reais (backend SQLite)
+- ✅ Tags funcionando (#fornecedores, #turismo, #instagram)
+- ✅ Autenticação JWT (test token)
+- ✅ CORS configurado corretamente
+- ✅ Prisma Studio aberto (localhost:5555) para debug
+
+**Próxima Sessão:**
+- Implementar comentários (GET/POST /posts/:id/comments)
+- Conectar Sidebar aos 15 grupos do backend (atualmente hardcoded)
+- Implementar "New Post" modal functionality
+- Membership grupos (POST /groups/:id/join)
+
+---
 
 ### **2025-12-23 (17:00 - 18:00) - Claude Code + Eurico**
 **Duração:** 1 hora
