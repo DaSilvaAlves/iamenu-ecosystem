@@ -42,10 +42,21 @@ export class PostsService {
       },
     });
 
+    // Add reaction counts to each post
+    const postsWithReactions = await Promise.all(
+      posts.map(async (post) => {
+        const reactions = await this.getPostReactions(post.id);
+        return {
+          ...post,
+          reactions,
+        };
+      })
+    );
+
     const total = await prisma.post.count({ where });
 
     return {
-      posts,
+      posts: postsWithReactions,
       total,
       limit,
       offset,
@@ -156,6 +167,82 @@ export class PostsService {
     });
 
     return true;
+  }
+
+  /**
+   * Toggle reaction on a post (add if not exists, remove if exists)
+   */
+  async toggleReaction(userId: string, postId: string, reactionType: string) {
+    // Check if reaction already exists
+    const existing = await prisma.reaction.findUnique({
+      where: {
+        userId_targetType_targetId_reactionType: {
+          userId,
+          targetType: 'post',
+          targetId: postId,
+          reactionType,
+        },
+      },
+    });
+
+    if (existing) {
+      // Remove reaction
+      await prisma.reaction.delete({
+        where: { id: existing.id },
+      });
+      return { action: 'removed', reactionType };
+    } else {
+      // Add reaction
+      await prisma.reaction.create({
+        data: {
+          userId,
+          targetType: 'post',
+          targetId: postId,
+          reactionType,
+        },
+      });
+      return { action: 'added', reactionType };
+    }
+  }
+
+  /**
+   * Get reaction counts for a post
+   */
+  async getPostReactions(postId: string) {
+    const reactions = await prisma.reaction.groupBy({
+      by: ['reactionType'],
+      where: {
+        targetType: 'post',
+        targetId: postId,
+      },
+      _count: {
+        reactionType: true,
+      },
+    });
+
+    // Convert to object { like: 5, useful: 2, thanks: 1 }
+    return reactions.reduce((acc, r) => {
+      acc[r.reactionType] = r._count.reactionType;
+      return acc;
+    }, {} as Record<string, number>);
+  }
+
+  /**
+   * Check if user has reacted to a post
+   */
+  async getUserReaction(userId: string, postId: string, reactionType: string) {
+    const reaction = await prisma.reaction.findUnique({
+      where: {
+        userId_targetType_targetId_reactionType: {
+          userId,
+          targetType: 'post',
+          targetId: postId,
+          reactionType,
+        },
+      },
+    });
+
+    return reaction !== null;
   }
 }
 

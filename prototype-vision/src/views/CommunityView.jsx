@@ -100,6 +100,31 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
         }
     };
 
+    const handleReaction = async (postId, reactionType) => {
+        try {
+            const result = await CommunityAPI.toggleReaction(postId, reactionType);
+
+            // Update post reactions in state
+            setPosts(prevPosts =>
+                prevPosts.map(post => {
+                    if (post.id === postId) {
+                        const reactions = { ...post.reactions };
+                        if (result.data.action === 'added') {
+                            reactions[reactionType] = (reactions[reactionType] || 0) + 1;
+                        } else {
+                            reactions[reactionType] = Math.max(0, (reactions[reactionType] || 0) - 1);
+                        }
+                        return { ...post, reactions };
+                    }
+                    return post;
+                })
+            );
+        } catch (err) {
+            console.error('Error toggling reaction:', err);
+            alert('Erro ao reagir: ' + err.message);
+        }
+    };
+
     const formatTimeAgo = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -331,12 +356,32 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                             }}>
                                 <div
                                     onClick={() => toggleComments(post.id)}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', transition: 'color 0.2s' }}
+                                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
                                 >
                                     <MessageSquare size={16} /> {comments[post.id]?.length || post._count?.comments || 0} Comentários
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                    <Award size={16} /> {post.likes || 0} Likes
+                                <div
+                                    onClick={() => handleReaction(post.id, 'like')}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        color: (post.reactions?.like > 0) ? 'var(--primary)' : 'var(--text-muted)'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'scale(1.1)';
+                                        e.currentTarget.style.color = 'var(--primary)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'scale(1)';
+                                        e.currentTarget.style.color = (post.reactions?.like > 0) ? 'var(--primary)' : 'var(--text-muted)';
+                                    }}
+                                >
+                                    <Award size={16} /> {post.reactions?.like || 0} Likes
                                 </div>
                                 <div style={{ fontSize: '0.75rem', marginLeft: 'auto' }}>
                                     👁️ {post.views || 0} visualizações

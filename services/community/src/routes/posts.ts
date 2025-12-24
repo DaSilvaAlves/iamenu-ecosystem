@@ -20,6 +20,17 @@ router.patch('/:id', authenticateJWT, postsController.updatePost.bind(postsContr
 router.delete('/:id', authenticateJWT, postsController.deletePost.bind(postsController));
 
 /**
+ * Reactions Routes (nested under posts)
+ * Base path: /api/v1/community/posts/:id/react
+ */
+
+// Public route - get reaction counts for a post
+router.get('/:id/reactions', postsController.getPostReactions.bind(postsController));
+
+// Protected route - toggle reaction (add or remove)
+router.post('/:id/react', authenticateJWT, postsController.toggleReaction.bind(postsController));
+
+/**
  * Comments Routes (nested under posts)
  * Base path: /api/v1/community/posts/:postId/comments
  */

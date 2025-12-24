@@ -198,6 +198,69 @@ export class PostsController {
       });
     }
   }
+
+  /**
+   * POST /api/v1/community/posts/:id/react
+   * Toggle reaction on a post (add or remove)
+   */
+  async toggleReaction(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { reactionType } = req.body;
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+      }
+
+      if (!reactionType) {
+        return res.status(400).json({
+          success: false,
+          error: 'reactionType is required',
+        });
+      }
+
+      const result = await postsService.toggleReaction(userId, id, reactionType);
+
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: `Reaction ${result.action}`,
+      });
+    } catch (error) {
+      console.error('Error toggling reaction:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to toggle reaction',
+      });
+    }
+  }
+
+  /**
+   * GET /api/v1/community/posts/:id/reactions
+   * Get reaction counts for a post
+   */
+  async getPostReactions(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const reactions = await postsService.getPostReactions(id);
+
+      res.status(200).json({
+        success: true,
+        data: reactions,
+      });
+    } catch (error) {
+      console.error('Error fetching reactions:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch reactions',
+      });
+    }
+  }
 }
 
 export const postsController = new PostsController();
