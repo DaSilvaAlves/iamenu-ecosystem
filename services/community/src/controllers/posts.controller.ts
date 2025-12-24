@@ -14,8 +14,9 @@ export class PostsController {
     try {
       const limit = parseInt(req.query.limit as string) || 20;
       const offset = parseInt(req.query.offset as string) || 0;
+      const groupId = req.query.groupId as string | undefined;
 
-      const result = await postsService.getAllPosts(limit, offset);
+      const result = await postsService.getAllPosts(limit, offset, groupId);
 
       res.status(200).json({
         success: true,

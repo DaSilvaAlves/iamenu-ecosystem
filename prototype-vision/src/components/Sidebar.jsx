@@ -26,12 +26,12 @@ const NavItem = ({ icon: Icon, label, active, onClick, badge }) => (
     <div
         onClick={onClick}
         className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 group ${active
-            ? 'bg-white/5 text-white'
-            : 'text-text-muted hover:text-white hover:bg-white/5'
+            ? 'bg-white/10 text-white'
+            : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
     >
         <div className="flex items-center gap-3">
-            {Icon && <Icon size={18} className={active ? 'text-primary' : 'text-text-muted group-hover:text-white'} />}
+            {Icon && <Icon size={18} className={active ? 'text-primary' : 'text-white/50 group-hover:text-primary'} />}
             <span style={{ fontSize: '0.875rem' }}>{label}</span>
         </div>
         {badge && (
@@ -70,7 +70,7 @@ const SidebarSection = ({ title, children, hasChevron = true }) => (
     </div>
 );
 
-const Sidebar = ({ currentView, setView }) => {
+const Sidebar = ({ currentView, setView, selectedGroup, setSelectedGroup }) => {
     const [groups, setGroups] = useState([]);
     const [loadingGroups, setLoadingGroups] = useState(true);
 
@@ -152,6 +152,11 @@ const Sidebar = ({ currentView, setView }) => {
                             label={group.name}
                             icon={getGroupIcon(group.category)}
                             badge={group.memberCount > 0 ? group.memberCount.toString() : null}
+                            active={selectedGroup?.id === group.id}
+                            onClick={() => {
+                                setSelectedGroup(group);
+                                setView('comunidade');
+                            }}
                         />
                     ))
                 )}

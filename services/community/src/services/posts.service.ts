@@ -17,10 +17,13 @@ export interface CreatePostDto {
  */
 export class PostsService {
   /**
-   * Get all posts (with pagination)
+   * Get all posts (with pagination and optional group filter)
    */
-  async getAllPosts(limit = 20, offset = 0) {
+  async getAllPosts(limit = 20, offset = 0, groupId?: string) {
+    const where = groupId ? { groupId } : {};
+
     const posts = await prisma.post.findMany({
+      where,
       take: limit,
       skip: offset,
       orderBy: { createdAt: 'desc' },
@@ -31,10 +34,15 @@ export class PostsService {
             name: true,
           },
         },
+        _count: {
+          select: {
+            comments: true,
+          },
+        },
       },
     });
 
-    const total = await prisma.post.count();
+    const total = await prisma.post.count({ where });
 
     return {
       posts,

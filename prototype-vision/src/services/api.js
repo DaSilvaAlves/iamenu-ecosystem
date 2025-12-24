@@ -63,12 +63,15 @@ export const CommunityAPI = {
    * @param {Object} params - Query parameters
    * @param {number} params.limit - Items per page (default: 20)
    * @param {number} params.offset - Offset for pagination (default: 0)
+   * @param {string} params.groupId - Optional group filter
    * @returns {Promise<Object>} Posts data with pagination
    */
-  getPosts: async ({ limit = 20, offset = 0 } = {}) => {
-    const response = await fetch(
-      `${API_BASE}/posts?limit=${limit}&offset=${offset}`
-    );
+  getPosts: async ({ limit = 20, offset = 0, groupId } = {}) => {
+    let url = `${API_BASE}/posts?limit=${limit}&offset=${offset}`;
+    if (groupId) {
+      url += `&groupId=${groupId}`;
+    }
+    const response = await fetch(url);
     return handleResponse(response);
   },
 

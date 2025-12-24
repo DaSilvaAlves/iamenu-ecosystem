@@ -33,10 +33,11 @@ const StandardPlaceholder = ({ title, icon: Icon }) => (
 
 const App = () => {
     const [currentView, setView] = useState('comunidade');
+    const [selectedGroup, setSelectedGroup] = useState(null);
 
     const renderContent = () => {
         switch (currentView) {
-            case 'comunidade': return <CommunityView />;
+            case 'comunidade': return <CommunityView selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />;
             case 'dashboard': return <DashboardBI />;
             case 'foodcost': return <FoodCostView />;
             case 'marketing': return <MarketingPlanner />;
@@ -50,7 +51,7 @@ const App = () => {
             case 'marketplace': return <StandardPlaceholder title="Marketplace" />;
             case 'hubs': return <StandardPlaceholder title="Hubs Regionais" />;
             case 'lab': return <StandardPlaceholder title="Laboratório" />;
-            default: return <CommunityView />;
+            default: return <CommunityView selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />;
         }
     };
 
@@ -58,7 +59,7 @@ const App = () => {
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--bg-dark)' }}>
             <TopBar />
             <div style={{ display: 'flex', flex: 1 }}>
-                <Sidebar currentView={currentView} setView={setView} />
+                <Sidebar currentView={currentView} setView={setView} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
                 <main style={{ flex: 1, padding: '32px', overflowY: 'auto', backgroundColor: '#0c0c0c' }}>
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                         <AnimatePresence mode="wait">

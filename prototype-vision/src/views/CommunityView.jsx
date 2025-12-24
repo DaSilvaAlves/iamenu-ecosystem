@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { MessageSquare, Award, MoreHorizontal, Plus, Loader } from 'lucide-react';
 import { CommunityAPI, Auth } from '../services/api';
 
-const CommunityView = () => {
+const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -14,7 +14,11 @@ const CommunityView = () => {
 
     // Load posts from backend
     useEffect(() => {
-        loadPosts();
+        loadPosts(selectedGroup?.id);
+    }, [selectedGroup]);
+
+    // Ensure authentication on mount
+    useEffect(() => {
         ensureAuthentication();
     }, []);
 
@@ -29,10 +33,14 @@ const CommunityView = () => {
         }
     };
 
-    const loadPosts = async () => {
+    const loadPosts = async (groupId = null) => {
         try {
             setLoading(true);
-            const data = await CommunityAPI.getPosts({ limit: 10 });
+            const params = { limit: 10 };
+            if (groupId) {
+                params.groupId = groupId;
+            }
+            const data = await CommunityAPI.getPosts(params);
             setPosts(data.data || []);  // ✅ Fixed: posts are in data.data
             setError(null);
         } catch (err) {
@@ -162,7 +170,28 @@ const CommunityView = () => {
 
             {/* Feed Header */}
             <div className="flex items-center justify-between" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 8px' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Feed</h3>
+                <div>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+                        {selectedGroup ? `Feed - ${selectedGroup.name}` : 'Feed'}
+                    </h3>
+                    {selectedGroup && (
+                        <button
+                            onClick={() => setSelectedGroup(null)}
+                            style={{
+                                marginTop: '8px',
+                                padding: '4px 12px',
+                                backgroundColor: 'rgba(255,255,255,0.1)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '12px',
+                                color: 'var(--text-muted)',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            ← Todos os posts
+                        </button>
+                    )}
+                </div>
                 <div style={{ display: 'flex', gap: '16px' }}>
                     <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: '8px 16px', borderRadius: '20px', fontSize: '0.875rem' }}>
                         Popular ↓
@@ -470,8 +499,17 @@ const NewPostModal = ({ onClose, onSubmit }) => {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [category, setCategory] = useState('dica');
+    const [groupId, setGroupId] = useState('');
     const [tags, setTags] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [groups, setGroups] = useState([]);
+
+    useEffect(() => {
+        // Load groups for dropdown
+        CommunityAPI.getGroups({ limit: 20 }).then(data => {
+            setGroups(data.data || []);
+        });
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -486,6 +524,7 @@ const NewPostModal = ({ onClose, onSubmit }) => {
                 title: title.trim(),
                 body: body.trim(),
                 category,
+                groupId: groupId || undefined,
                 tags: tags.split(',').map(t => t.trim()).filter(Boolean)
             });
         } finally {
@@ -545,6 +584,27 @@ const NewPostModal = ({ onClose, onSubmit }) => {
                             <option value="duvida">Dúvida</option>
                             <option value="showcase">Showcase</option>
                             <option value="evento">Evento</option>
+                        </select>
+                    </div>
+
+                    <div style={{ marginBottom: '16px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Grupo (opcional)</label>
+                        <select
+                            value={groupId}
+                            onChange={(e) => setGroupId(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '8px',
+                                color: 'white'
+                            }}
+                        >
+                            <option value="">Sem grupo (geral)</option>
+                            {groups.map(group => (
+                                <option key={group.id} value={group.id}>{group.name}</option>
+                            ))}
                         </select>
                     </div>
 
