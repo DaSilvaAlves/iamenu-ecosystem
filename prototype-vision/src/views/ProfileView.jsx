@@ -162,6 +162,70 @@ const ProfileView = ({ userId }) => {
                 </div>
             </div>
 
+            {/* Level & XP */}
+            <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <div>
+                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Nível {stats?.level || 1}</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginLeft: '12px' }}>
+                            {stats?.totalXP || 0} XP
+                        </span>
+                    </div>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                        {stats?.xpProgress || 0} / {stats?.xpNeeded || 100} XP para nível {(stats?.level || 1) + 1}
+                    </span>
+                </div>
+                {/* XP Progress Bar */}
+                <div style={{
+                    height: '12px',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    borderRadius: '6px',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{
+                        height: '100%',
+                        width: `${Math.min(100, ((stats?.xpProgress || 0) / (stats?.xpNeeded || 100)) * 100)}%`,
+                        background: 'linear-gradient(90deg, var(--primary) 0%, #f59e0b 100%)',
+                        transition: 'width 0.5s ease'
+                    }} />
+                </div>
+            </div>
+
+            {/* Badges */}
+            {stats?.unlockedBadges && stats.unlockedBadges.length > 0 && (
+                <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px' }}>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '16px' }}>
+                        Badges Desbloqueados ({stats.unlockedBadges.length})
+                    </h3>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                        {stats.unlockedBadges.map(badge => (
+                            <div
+                                key={badge.id}
+                                className="glass-panel"
+                                style={{
+                                    padding: '12px 16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    borderRadius: '12px',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    cursor: 'help'
+                                }}
+                                title={badge.description}
+                            >
+                                <span style={{ fontSize: '1.5rem' }}>{badge.icon}</span>
+                                <div>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '600' }}>{badge.name}</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                        +{badge.xpReward} XP
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Stats */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
                 <div className="glass-panel" style={{ padding: '24px', textAlign: 'center' }}>

@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { gamificationService } from './gamification.service';
 
 const prisma = new PrismaClient();
 
@@ -80,10 +81,20 @@ export class ProfilesService {
       }),
     ]);
 
+    // Get gamification data (level, XP, badges)
+    const gamificationData = await gamificationService.getGamificationData(userId);
+
     return {
       postsCount,
       commentsCount,
       reactionsReceived,
+      // Gamification data
+      level: gamificationData.level,
+      totalXP: gamificationData.totalXP,
+      xpProgress: gamificationData.xpProgress,
+      xpNeeded: gamificationData.xpNeeded,
+      xpForNextLevel: gamificationData.xpForNextLevel,
+      unlockedBadges: gamificationData.unlockedBadges,
     };
   }
 
