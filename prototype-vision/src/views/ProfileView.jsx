@@ -12,8 +12,8 @@ const ProfileView = ({ userId }) => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [isOwnProfile, setIsOwnProfile] = useState(false);
 
-    // Use test user ID if not provided
-    const currentUserId = userId || 'test-user-123';
+    // Use test user ID if not provided (must match the JWT token userId)
+    const currentUserId = userId || 'test-user-001';
 
     useEffect(() => {
         loadProfile();
@@ -120,7 +120,9 @@ const ProfileView = ({ userId }) => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '3rem',
-                            flexShrink: 0
+                            flexShrink: 0,
+                            position: 'relative',
+                            zIndex: 10
                         }}>
                             {!profile?.profilePhoto && '👤'}
                         </div>
