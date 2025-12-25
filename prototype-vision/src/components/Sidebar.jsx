@@ -100,7 +100,7 @@ const Sidebar = ({ currentView, setView, selectedGroup, setSelectedGroup }) => {
 
     return (
         <div style={{
-            width: '260px',
+            width: '280px',
             height: '100vh',
             backgroundColor: 'var(--bg-sidebar)',
             borderRight: '1px solid var(--border)',

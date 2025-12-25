@@ -41,16 +41,18 @@ const NotificationBadge = ({ onClick, className = '' }) => {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors ${className}`}
+      className={`flex items-center justify-between w-full px-3 py-2 rounded-lg hover:bg-white/5 transition-colors ${className}`}
       aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ''}`}
     >
-      <Bell size={18} className="text-white/60" />
-      <span className="text-sm text-white/60">
-        Notificações
-      </span>
+      <div className="flex items-center gap-2">
+        <Bell size={18} className="text-white/60" />
+        <span className="text-sm text-white/60">
+          Notificações
+        </span>
+      </div>
       {!loading && unreadCount > 0 && (
-        <span className="text-xs font-bold text-red-500 ml-auto">
-          {unreadCount}
+        <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-xs font-bold">
+          {unreadCount > 99 ? '99+' : unreadCount}
         </span>
       )}
     </button>
