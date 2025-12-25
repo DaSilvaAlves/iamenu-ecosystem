@@ -1,0 +1,127 @@
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export interface UpdateProfileDto {
+  restaurantName?: string;
+  locationCity?: string;
+  locationRegion?: string;
+  restaurantType?: string;
+  bio?: string;
+  profilePhoto?: string;
+  coverPhoto?: string;
+  badges?: string;
+}
+
+/**
+ * Profiles Service
+ * Handles all database operations for user profiles
+ */
+export class ProfilesService {
+  /**
+   * Get profile by userId
+   */
+  async getProfile(userId: string) {
+    let profile = await prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    // Create profile if doesn't exist
+    if (!profile) {
+      profile = await prisma.profile.create({
+        data: { userId },
+      });
+    }
+
+    return profile;
+  }
+
+  /**
+   * Update profile
+   */
+  async updateProfile(userId: string, data: UpdateProfileDto) {
+    // Upsert (create or update)
+    const profile = await prisma.profile.upsert({
+      where: { userId },
+      update: data,
+      create: {
+        userId,
+        ...data,
+      },
+    });
+
+    return profile;
+  }
+
+  /**
+   * Get user statistics (posts, comments, reactions received)
+   */
+  async getUserStats(userId: string) {
+    const [postsCount, commentsCount, reactionsReceived] = await Promise.all([
+      // Count posts by user
+      prisma.post.count({
+        where: { authorId: userId },
+      }),
+      // Count comments by user
+      prisma.comment.count({
+        where: { authorId: userId },
+      }),
+      // Count reactions on user's posts
+      prisma.reaction.count({
+        where: {
+          targetType: 'post',
+          targetId: {
+            in: await prisma.post.findMany({
+              where: { authorId: userId },
+              select: { id: true },
+            }).then(posts => posts.map(p => p.id)),
+          },
+        },
+      }),
+    ]);
+
+    return {
+      postsCount,
+      commentsCount,
+      reactionsReceived,
+    };
+  }
+
+  /**
+   * Get user's posts
+   */
+  async getUserPosts(userId: string, limit = 10, offset = 0) {
+    const posts = await prisma.post.findMany({
+      where: { authorId: userId },
+      take: limit,
+      skip: offset,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        group: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+          },
+        },
+      },
+    });
+
+    const total = await prisma.post.count({
+      where: { authorId: userId },
+    });
+
+    return {
+      posts,
+      total,
+      limit,
+      offset,
+    };
+  }
+}
+
+export const profilesService = new ProfilesService();

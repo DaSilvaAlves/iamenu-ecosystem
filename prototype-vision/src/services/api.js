@@ -401,6 +401,72 @@ export const CommunityAPI = {
       const error = await response.json().catch(() => ({ message: 'Delete failed' }));
       throw new Error(error.message);
     }
+  },
+
+  // ===== PROFILES =====
+
+  /**
+   * Get user profile
+   * @param {string} userId - User ID
+   * @returns {Promise<Object>} Profile data
+   */
+  getProfile: async (userId) => {
+    const response = await fetch(`${API_BASE}/profiles/${userId}`);
+    return handleResponse(response);
+  },
+
+  /**
+   * Update profile (requires authentication)
+   * @param {string} userId - User ID
+   * @param {Object} profileData - Profile data (can include files)
+   * @returns {Promise<Object>} Updated profile
+   */
+  updateProfile: async (userId, profileData) => {
+    const token = getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const formData = new FormData();
+    Object.keys(profileData).forEach(key => {
+      if (profileData[key] !== undefined && profileData[key] !== null) {
+        formData.append(key, profileData[key]);
+      }
+    });
+
+    const response = await fetch(`${API_BASE}/profiles/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+    return handleResponse(response);
+  },
+
+  /**
+   * Get user statistics
+   * @param {string} userId - User ID
+   * @returns {Promise<Object>} User stats
+   */
+  getUserStats: async (userId) => {
+    const response = await fetch(`${API_BASE}/profiles/${userId}/stats`);
+    return handleResponse(response);
+  },
+
+  /**
+   * Get user's posts
+   * @param {string} userId - User ID
+   * @param {Object} params - Query params (limit, offset)
+   * @returns {Promise<Object>} User posts
+   */
+  getUserPosts: async (userId, params = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.limit) queryParams.append('limit', params.limit);
+    if (params.offset) queryParams.append('offset', params.offset);
+
+    const response = await fetch(`${API_BASE}/profiles/${userId}/posts?${queryParams}`);
+    return handleResponse(response);
   }
 };
 
