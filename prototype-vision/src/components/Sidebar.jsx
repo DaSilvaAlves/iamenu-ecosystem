@@ -112,10 +112,9 @@ const Sidebar = ({ currentView, setView, selectedGroup, setSelectedGroup }) => {
             overflowY: 'auto'
         }}>
             {/* Notifications */}
-            <div style={{ marginBottom: '16px', position: 'relative' }}>
+            <div style={{ marginBottom: '16px' }}>
                 <NotificationBadge
                     onClick={() => setShowNotifications(!showNotifications)}
-                    className="w-full justify-start"
                 />
                 <NotificationsPanel
                     isOpen={showNotifications}
