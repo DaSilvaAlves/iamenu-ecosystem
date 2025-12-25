@@ -88,8 +88,14 @@ export class GroupsService {
         type: data.type || 'public',
         category: data.category,
         createdBy: data.createdBy,
-        coverImage: data.coverImage
-      }
+        coverImage: data.coverImage,
+        memberships: {
+          create: {
+            userId: data.createdBy,
+            role: 'owner',
+          },
+        },
+      },
     });
 
     return group;

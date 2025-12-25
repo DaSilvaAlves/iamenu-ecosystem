@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { groupsService } from '../services/groups.service';
+import { groupMembersService } from '../services/group-members.service';
 
 /**
  * Groups Controller
@@ -229,6 +230,243 @@ export class GroupsController {
       res.status(500).json({
         success: false,
         error: 'Failed to fetch groups by category',
+      });
+    }
+  }
+
+  // ===================================
+  // MEMBERSHIP ENDPOINTS
+  // ===================================
+
+  /**
+   * POST /api/v1/community/groups/:id/join
+   * Join a group
+   */
+  async joinGroup(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+      }
+
+      const membership = await groupMembersService.joinGroup(id, userId);
+
+      res.status(201).json({
+        success: true,
+        data: membership,
+        message: 'Successfully joined the group',
+      });
+    } catch (error: any) {
+      console.error('Error joining group:', error);
+
+      if (error.message === 'Group not found') {
+        return res.status(404).json({
+          success: false,
+          error: 'Group not found',
+        });
+      }
+
+      if (error.message === 'Already a member of this group') {
+        return res.status(409).json({
+          success: false,
+          error: 'Already a member of this group',
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        error: 'Failed to join group',
+      });
+    }
+  }
+
+  /**
+   * POST /api/v1/community/groups/:id/leave
+   * Leave a group
+   */
+  async leaveGroup(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+      }
+
+      await groupMembersService.leaveGroup(id, userId);
+
+      res.status(200).json({
+        success: true,
+        message: 'Successfully left the group',
+      });
+    } catch (error: any) {
+      console.error('Error leaving group:', error);
+
+      if (error.message.includes('creator cannot leave')) {
+        return res.status(403).json({
+          success: false,
+          error: 'Group creator cannot leave. Delete the group instead.',
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        error: 'Failed to leave group',
+      });
+    }
+  }
+
+  /**
+   * GET /api/v1/community/groups/:id/members
+   * Get all members of a group
+   */
+  async getGroupMembers(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const members = await groupMembersService.getGroupMembers(id);
+
+      res.status(200).json({
+        success: true,
+        data: members,
+        count: members.length,
+      });
+    } catch (error) {
+      console.error('Error fetching group members:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch group members',
+      });
+    }
+  }
+
+  /**
+   * GET /api/v1/community/groups/user/:userId
+   * Get all groups a user is member of
+   */
+  async getUserGroups(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+
+      const groups = await groupMembersService.getUserGroups(userId);
+
+      res.status(200).json({
+        success: true,
+        data: groups,
+        count: groups.length,
+      });
+    } catch (error) {
+      console.error('Error fetching user groups:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch user groups',
+      });
+    }
+  }
+
+  /**
+   * PATCH /api/v1/community/groups/:id/members/:userId/role
+   * Update member role (admin operation)
+   */
+  async updateMemberRole(req: Request, res: Response) {
+    try {
+      const { id, userId: targetUserId } = req.params;
+      const { role } = req.body;
+      const requestingUserId = req.user?.userId;
+
+      if (!requestingUserId) {
+        return res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+      }
+
+      if (!role) {
+        return res.status(400).json({
+          success: false,
+          error: 'Missing required field: role',
+        });
+      }
+
+      const updated = await groupMembersService.updateMemberRole(
+        id,
+        targetUserId,
+        role,
+        requestingUserId
+      );
+
+      res.status(200).json({
+        success: true,
+        data: updated,
+        message: 'Member role updated successfully',
+      });
+    } catch (error: any) {
+      console.error('Error updating member role:', error);
+
+      if (error.message.includes('Only group owner or admins')) {
+        return res.status(403).json({
+          success: false,
+          error: 'Only group owner or admins can update member roles',
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        error: 'Failed to update member role',
+      });
+    }
+  }
+
+  /**
+   * DELETE /api/v1/community/groups/:id/members/:userId
+   * Remove member from group (admin operation)
+   */
+  async removeMember(req: Request, res: Response) {
+    try {
+      const { id, userId: targetUserId } = req.params;
+      const requestingUserId = req.user?.userId;
+
+      if (!requestingUserId) {
+        return res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+      }
+
+      await groupMembersService.removeMember(id, targetUserId, requestingUserId);
+
+      res.status(200).json({
+        success: true,
+        message: 'Member removed successfully',
+      });
+    } catch (error: any) {
+      console.error('Error removing member:', error);
+
+      if (error.message.includes('Only group owner or admins')) {
+        return res.status(403).json({
+          success: false,
+          error: 'Only group owner or admins can remove members',
+        });
+      }
+
+      if (error.message.includes('Cannot remove group creator')) {
+        return res.status(403).json({
+          success: false,
+          error: 'Cannot remove group creator',
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        error: 'Failed to remove member',
       });
     }
   }

@@ -9,6 +9,8 @@ import FoodCostView from './views/FoodCostView';
 import GastroLens from './views/GastroLens';
 import CommunityView from './views/CommunityView';
 import ProfileView from './views/ProfileView';
+import GroupsView from './views/GroupsView';
+import GroupDetailView from './views/GroupDetailView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -35,10 +37,18 @@ const StandardPlaceholder = ({ title, icon: Icon }) => (
 const App = () => {
     const [currentView, setView] = useState('comunidade');
     const [selectedGroup, setSelectedGroup] = useState(null);
+    const [selectedGroupId, setSelectedGroupId] = useState(null);
+
+    const navigateToGroupDetail = (groupId) => {
+        setSelectedGroupId(groupId);
+        setView('grupo-detalhe');
+    };
 
     const renderContent = () => {
         switch (currentView) {
             case 'comunidade': return <CommunityView selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />;
+            case 'grupos': return <GroupsView onViewGroup={navigateToGroupDetail} />;
+            case 'grupo-detalhe': return <GroupDetailView groupId={selectedGroupId} onBack={() => setView('grupos')} />;
             case 'perfil': return <ProfileView />;
             case 'dashboard': return <DashboardBI />;
             case 'foodcost': return <FoodCostView />;

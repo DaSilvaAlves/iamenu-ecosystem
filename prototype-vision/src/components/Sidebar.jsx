@@ -160,13 +160,23 @@ const Sidebar = ({ currentView, setView, selectedGroup, setSelectedGroup }) => {
                         />
                     ))
                 )}
-                {groups.length > 5 && (
-                    <div style={{ padding: '8px 12px' }}>
-                        <a href="#" style={{ fontSize: '0.75rem', color: 'var(--primary)', textDecoration: 'none' }}>
-                            Ver todos os {groups.length} grupos →
-                        </a>
-                    </div>
-                )}
+                <div style={{ padding: '8px 12px', marginTop: '8px' }}>
+                    <button
+                        onClick={() => setView('grupos')}
+                        style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--primary)',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0,
+                            textDecoration: 'none',
+                            fontWeight: '600',
+                        }}
+                    >
+                        Ver todos os {groups.length} grupos →
+                    </button>
+                </div>
             </SidebarSection>
 
             <SidebarSection title="Hub de Negócios">
