@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { notificationsService } from './notifications.service';
 
 const prisma = new PrismaClient();
 
@@ -39,6 +40,17 @@ export class GroupMembersService {
         role: 'member',
       },
     });
+
+    // Notify group owner about new member
+    if (group.createdBy !== userId) {
+      await notificationsService.createNotification({
+        userId: group.createdBy,
+        type: 'group_join',
+        title: 'Novo membro no teu grupo',
+        body: `Alguém juntou-se ao grupo "${group.name}"`,
+        link: `/groups/${groupId}`,
+      });
+    }
 
     return membership;
   }

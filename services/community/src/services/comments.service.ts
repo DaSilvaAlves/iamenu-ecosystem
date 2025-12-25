@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { notificationsService } from './notifications.service';
 
 const prisma = new PrismaClient();
 
@@ -49,6 +50,22 @@ export class CommentsService {
         body: data.body,
       },
     });
+
+    // Create notification for post author (if not self-comment)
+    const post = await prisma.post.findUnique({
+      where: { id: data.postId },
+      select: { authorId: true, title: true },
+    });
+
+    if (post && post.authorId !== data.authorId) {
+      await notificationsService.createNotification({
+        userId: post.authorId,
+        type: 'comment',
+        title: 'Novo comentário no teu post',
+        body: `Alguém comentou no teu post "${post.title}"`,
+        link: `/posts/${data.postId}`,
+      });
+    }
 
     return comment;
   }

@@ -21,6 +21,8 @@ import {
     ChefHat
 } from 'lucide-react';
 import { CommunityAPI } from '../services/api';
+import NotificationBadge from './NotificationBadge';
+import NotificationsPanel from './NotificationsPanel';
 
 const NavItem = ({ icon: Icon, label, active, onClick, badge }) => (
     <div
@@ -73,6 +75,7 @@ const SidebarSection = ({ title, children, hasChevron = true }) => (
 const Sidebar = ({ currentView, setView, selectedGroup, setSelectedGroup }) => {
     const [groups, setGroups] = useState([]);
     const [loadingGroups, setLoadingGroups] = useState(true);
+    const [showNotifications, setShowNotifications] = useState(false);
 
     useEffect(() => {
         loadGroups();
@@ -108,6 +111,18 @@ const Sidebar = ({ currentView, setView, selectedGroup, setSelectedGroup }) => {
             flexDirection: 'column',
             overflowY: 'auto'
         }}>
+            {/* Notifications */}
+            <div style={{ marginBottom: '16px', position: 'relative' }}>
+                <NotificationBadge
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className="w-full justify-start"
+                />
+                <NotificationsPanel
+                    isOpen={showNotifications}
+                    onClose={() => setShowNotifications(false)}
+                />
+            </div>
+
             <div style={{ marginBottom: '24px' }}>
                 <div
                     onClick={() => setView('comunidade')}

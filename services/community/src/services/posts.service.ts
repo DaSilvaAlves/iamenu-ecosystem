@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { notificationsService } from './notifications.service';
 
 const prisma = new PrismaClient();
 
@@ -232,6 +233,27 @@ export class PostsService {
           reactionType,
         },
       });
+
+      // Create notification for post author (if not self-reaction)
+      const post = await prisma.post.findUnique({
+        where: { id: postId },
+        select: { authorId: true, title: true },
+      });
+
+      if (post && post.authorId !== userId) {
+        const reactionEmoji = reactionType === 'like' ? '👍' :
+                              reactionType === 'useful' ? '💡' :
+                              reactionType === 'thanks' ? '🙏' : '❤️';
+
+        await notificationsService.createNotification({
+          userId: post.authorId,
+          type: 'reaction',
+          title: `Nova reação no teu post`,
+          body: `Alguém reagiu ${reactionEmoji} no teu post "${post.title}"`,
+          link: `/posts/${postId}`,
+        });
+      }
+
       return { action: 'added', reactionType };
     }
   }
