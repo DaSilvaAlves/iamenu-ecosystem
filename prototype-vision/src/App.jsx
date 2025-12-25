@@ -8,6 +8,7 @@ import PaymentsAutomationView from './views/PaymentsAutomationView';
 import FoodCostView from './views/FoodCostView';
 import GastroLens from './views/GastroLens';
 import CommunityView from './views/CommunityView';
+import ProfileView from './views/ProfileView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -38,6 +39,7 @@ const App = () => {
     const renderContent = () => {
         switch (currentView) {
             case 'comunidade': return <CommunityView selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />;
+            case 'perfil': return <ProfileView />;
             case 'dashboard': return <DashboardBI />;
             case 'foodcost': return <FoodCostView />;
             case 'marketing': return <MarketingPlanner />;
@@ -57,7 +59,7 @@ const App = () => {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--bg-dark)' }}>
-            <TopBar />
+            <TopBar setView={setView} />
             <div style={{ display: 'flex', flex: 1 }}>
                 <Sidebar currentView={currentView} setView={setView} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
                 <main style={{ flex: 1, padding: '32px', overflowY: 'auto', backgroundColor: '#0c0c0c' }}>

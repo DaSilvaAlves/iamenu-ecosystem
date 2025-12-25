@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, Bell, MessageSquare, Bookmark, User, X } from 'lucide-react';
 import { CommunityAPI } from '../services/api';
 
-const TopBar = () => {
+const TopBar = ({ setView }) => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -267,7 +267,11 @@ const TopBar = () => {
 
                     <MessageSquare size={20} className="cursor-pointer hover:text-white" />
                     <Bookmark size={20} className="cursor-pointer hover:text-white" />
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }}>
+                    <div
+                        onClick={() => setView && setView('perfil')}
+                        style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }}
+                        className="hover:bg-primary"
+                    >
                         <User size={20} />
                     </div>
                 </div>
