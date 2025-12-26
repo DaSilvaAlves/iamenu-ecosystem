@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { commentsService } from '../services/comments.service';
 import { notificationsService } from '../services/notifications.service';
 import { postsService } from '../services/posts.service';
+import { reactionsService } from '../services/reactions.service';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Comments Controller
@@ -146,6 +148,104 @@ export class CommentsController {
       res.status(500).json({
         success: false,
         error: 'Failed to delete comment',
+      });
+    }
+  }
+
+  /**
+   * POST /api/v1/community/comments/:id/react
+   * Toggle reaction on a comment
+   */
+  async toggleReaction(req: Request, res: Response) {
+    try {
+      const { id } = req.params; // comment ID
+      const { reactionType } = req.body;
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+      }
+
+      if (!reactionType || !['like', 'useful', 'thanks'].includes(reactionType)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid reactionType. Must be: like, useful, or thanks',
+        });
+      }
+
+      // Toggle the reaction
+      const result = await reactionsService.toggleReaction(
+        userId,
+        'comment',
+        id,
+        reactionType
+      );
+
+      // Create notification if reaction was added
+      if (result.action === 'added') {
+        try {
+          const prisma = new PrismaClient();
+          // Get the comment to find the author
+          const comment = await prisma.comment.findUnique({
+            where: { id },
+            select: { authorId: true, body: true, postId: true },
+          });
+
+          // Only notify if reactor is not the comment author
+          if (comment && comment.authorId !== userId) {
+            const emoji = reactionType === 'like' ? '👍' : reactionType === 'useful' ? '💡' : '🙏';
+
+            await notificationsService.createNotification({
+              userId: comment.authorId,
+              type: 'reaction',
+              title: 'Nova reação no teu comentário',
+              body: `Alguém reagiu ${emoji} ao teu comentário: "${comment.body.substring(0, 50)}..."`,
+              link: `/posts/${comment.postId}`, // Link to the post containing the comment
+            });
+          }
+          await prisma.$disconnect();
+        } catch (notifError) {
+          console.error('Failed to create notification:', notifError);
+          // Don't fail the request if notification fails
+        }
+      }
+
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: `Reaction ${result.action}`,
+      });
+    } catch (error) {
+      console.error('Error toggling reaction:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to toggle reaction',
+      });
+    }
+  }
+
+  /**
+   * GET /api/v1/community/comments/:id/reactions
+   * Get reaction counts for a comment
+   */
+  async getCommentReactions(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const reactions = await reactionsService.getReactionCounts('comment', id);
+
+      res.status(200).json({
+        success: true,
+        data: reactions,
+      });
+    } catch (error) {
+      console.error('Error fetching reactions:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch reactions',
       });
     }
   }

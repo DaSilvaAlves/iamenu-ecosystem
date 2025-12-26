@@ -43,4 +43,15 @@ router.get('/:postId/comments', commentsController.getCommentsByPostId.bind(comm
 router.post('/:postId/comments', authenticateJWT, commentsController.createComment.bind(commentsController));
 router.delete('/:postId/comments/:id', authenticateJWT, commentsController.deleteComment.bind(commentsController));
 
+/**
+ * Comment Reactions Routes
+ * Base path: /api/v1/community/posts/:postId/comments/:id/react
+ */
+
+// Public route - get reaction counts for a comment
+router.get('/:postId/comments/:id/reactions', commentsController.getCommentReactions.bind(commentsController));
+
+// Protected route - toggle reaction on comment (add or remove)
+router.post('/:postId/comments/:id/react', authenticateJWT, commentsController.toggleReaction.bind(commentsController));
+
 export default router;

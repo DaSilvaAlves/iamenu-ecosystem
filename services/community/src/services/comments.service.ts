@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { notificationsService } from './notifications.service';
+import { reactionsService } from './reactions.service';
 
 const prisma = new PrismaClient();
 
@@ -30,8 +31,19 @@ export class CommentsService {
       }),
     ]);
 
+    // Add reaction counts to each comment
+    const commentsWithReactions = await Promise.all(
+      comments.map(async (comment) => {
+        const reactions = await reactionsService.getReactionCounts('comment', comment.id);
+        return {
+          ...comment,
+          reactions,
+        };
+      })
+    );
+
     return {
-      comments,
+      comments: commentsWithReactions,
       total,
       limit,
       offset,
