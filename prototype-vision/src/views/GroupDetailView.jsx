@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
     ArrowLeft, Users, MapPin, Crown, Shield, UserPlus, UserMinus,
-    Heart, MessageCircle, Eye, Send, X, Plus
+    Heart, MessageCircle, Eye, Send, X, Plus, MoreVertical, Edit2, Trash2
 } from 'lucide-react';
 import CommunityAPI from '../services/api';
 
@@ -28,7 +28,21 @@ const GroupDetailView = ({ groupId, onBack }) => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
 
+    // Edit/Delete post
+    const [openMenuPostId, setOpenMenuPostId] = useState(null);
+    const [editingPost, setEditingPost] = useState(null);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editTitle, setEditTitle] = useState('');
+    const [editBody, setEditBody] = useState('');
+    const [editCategory, setEditCategory] = useState('discussion');
+    const [submittingEdit, setSubmittingEdit] = useState(false);
+
     const currentUserId = 'test-user-001';
+
+    // Check if current user owns the post
+    const isOwnPost = (post) => {
+        return post.authorId === currentUserId;
+    };
 
     useEffect(() => {
         if (groupId) {
@@ -110,6 +124,20 @@ const GroupDetailView = ({ groupId, onBack }) => {
             fetchPosts();
         }
     }, [groupId]);
+
+    // Close dropdown menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => {
+            if (openMenuPostId) {
+                setOpenMenuPostId(null);
+            }
+        };
+
+        if (openMenuPostId) {
+            document.addEventListener('click', handleClickOutside);
+            return () => document.removeEventListener('click', handleClickOutside);
+        }
+    }, [openMenuPostId]);
 
     const joinGroup = async () => {
         try {
@@ -274,6 +302,72 @@ const GroupDetailView = ({ groupId, onBack }) => {
             alert('Erro ao criar post: ' + err.message);
         } finally {
             setSubmittingPost(false);
+        }
+    };
+
+    const handleEditPost = (post) => {
+        setEditingPost(post);
+        setEditTitle(post.title);
+        setEditBody(post.body);
+        setEditCategory(post.category);
+        setShowEditModal(true);
+        setOpenMenuPostId(null); // Close dropdown
+    };
+
+    const handleSaveEdit = async (e) => {
+        e.preventDefault();
+
+        if (!editTitle.trim() || !editBody.trim()) {
+            alert('Título e conteúdo são obrigatórios');
+            return;
+        }
+
+        setSubmittingEdit(true);
+        try {
+            await CommunityAPI.updatePost(editingPost.id, {
+                title: editTitle.trim(),
+                body: editBody.trim(),
+                category: editCategory
+            });
+
+            // Reset and close
+            setShowEditModal(false);
+            setEditingPost(null);
+            setEditTitle('');
+            setEditBody('');
+            setEditCategory('discussion');
+
+            // Refresh posts
+            fetchPosts();
+
+            alert('Post atualizado com sucesso!');
+        } catch (err) {
+            console.error('Error updating post:', err);
+            alert('Erro ao atualizar post: ' + err.message);
+        } finally {
+            setSubmittingEdit(false);
+        }
+    };
+
+    const handleDeletePost = async (postId) => {
+        if (!confirm('Tens a certeza que queres eliminar este post?')) {
+            return;
+        }
+
+        try {
+            await CommunityAPI.deletePost(postId);
+
+            // Close dropdown
+            setOpenMenuPostId(null);
+
+            // Refresh posts and group details to update counter
+            fetchPosts();
+            fetchGroupDetails();
+
+            alert('Post eliminado com sucesso!');
+        } catch (err) {
+            console.error('Error deleting post:', err);
+            alert('Erro ao eliminar post: ' + err.message);
         }
     };
 
@@ -574,6 +668,94 @@ const GroupDetailView = ({ groupId, onBack }) => {
                                         }}>
                                             {post.category}
                                         </span>
+
+                                        {/* Three dots menu (only for own posts) */}
+                                        {isOwnPost(post) && (
+                                            <div style={{ position: 'relative' }}>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setOpenMenuPostId(
+                                                            openMenuPostId === post.id ? null : post.id
+                                                        );
+                                                    }}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        color: 'var(--text-muted)',
+                                                        cursor: 'pointer',
+                                                        padding: '4px',
+                                                        display: 'flex',
+                                                        alignItems: 'center'
+                                                    }}
+                                                >
+                                                    <MoreVertical size={18} />
+                                                </button>
+
+                                                {/* Dropdown menu */}
+                                                {openMenuPostId === post.id && (
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        top: '100%',
+                                                        right: 0,
+                                                        backgroundColor: 'rgba(30,30,30,0.98)',
+                                                        border: '1px solid var(--border)',
+                                                        borderRadius: '8px',
+                                                        padding: '8px 0',
+                                                        minWidth: '150px',
+                                                        zIndex: 100,
+                                                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                                                    }}>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleEditPost(post);
+                                                            }}
+                                                            style={{
+                                                                width: '100%',
+                                                                padding: '10px 16px',
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                color: 'white',
+                                                                cursor: 'pointer',
+                                                                textAlign: 'left',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '8px',
+                                                                fontSize: '0.9rem'
+                                                            }}
+                                                            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+                                                            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                                                        >
+                                                            <Edit2 size={16} /> Editar
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeletePost(post.id);
+                                                            }}
+                                                            style={{
+                                                                width: '100%',
+                                                                padding: '10px 16px',
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                color: '#ff4444',
+                                                                cursor: 'pointer',
+                                                                textAlign: 'left',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '8px',
+                                                                fontSize: '0.9rem'
+                                                            }}
+                                                            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,68,68,0.1)'}
+                                                            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                                                        >
+                                                            <Trash2 size={16} /> Eliminar
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Post Content */}
@@ -1045,6 +1227,178 @@ const GroupDetailView = ({ groupId, onBack }) => {
                                     }}
                                 >
                                     {submittingPost ? 'A publicar...' : 'Publicar'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Post Modal */}
+            {showEditModal && editingPost && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000,
+                        padding: '20px'
+                    }}
+                    onClick={() => {
+                        setShowEditModal(false);
+                        setEditingPost(null);
+                        setEditTitle('');
+                        setEditBody('');
+                        setEditCategory('discussion');
+                    }}
+                >
+                    <div
+                        className="glass-panel"
+                        style={{
+                            padding: '32px',
+                            maxWidth: '600px',
+                            width: '100%',
+                            borderRadius: '20px',
+                            maxHeight: '90vh',
+                            overflowY: 'auto'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Editar Post</h2>
+                            <button
+                                onClick={() => {
+                                    setShowEditModal(false);
+                                    setEditingPost(null);
+                                    setEditTitle('');
+                                    setEditBody('');
+                                    setEditCategory('discussion');
+                                }}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: 'var(--text-muted)',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSaveEdit}>
+                            {/* Title */}
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                    Título *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editTitle}
+                                    onChange={(e) => setEditTitle(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'white'
+                                    }}
+                                    placeholder="Título do post..."
+                                    disabled={submittingEdit}
+                                />
+                            </div>
+
+                            {/* Category */}
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                    Categoria
+                                </label>
+                                <select
+                                    value={editCategory}
+                                    onChange={(e) => setEditCategory(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'white'
+                                    }}
+                                    disabled={submittingEdit}
+                                >
+                                    <option value="discussion">💬 Discussão</option>
+                                    <option value="tip">💡 Dica</option>
+                                    <option value="question">❓ Dúvida</option>
+                                    <option value="showcase">🎨 Showcase</option>
+                                    <option value="event">📅 Evento</option>
+                                </select>
+                            </div>
+
+                            {/* Body */}
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                    Conteúdo *
+                                </label>
+                                <textarea
+                                    value={editBody}
+                                    onChange={(e) => setEditBody(e.target.value)}
+                                    rows={6}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        resize: 'vertical'
+                                    }}
+                                    placeholder="Escreve o teu post..."
+                                    disabled={submittingEdit}
+                                />
+                            </div>
+
+                            {/* Buttons */}
+                            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowEditModal(false);
+                                        setEditingPost(null);
+                                    }}
+                                    disabled={submittingEdit}
+                                    style={{
+                                        padding: '10px 20px',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        cursor: submittingEdit ? 'not-allowed' : 'pointer',
+                                        opacity: submittingEdit ? 0.6 : 1
+                                    }}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submittingEdit}
+                                    style={{
+                                        padding: '10px 20px',
+                                        backgroundColor: 'var(--primary)',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        fontWeight: 'bold',
+                                        cursor: submittingEdit ? 'not-allowed' : 'pointer',
+                                        opacity: submittingEdit ? 0.6 : 1
+                                    }}
+                                >
+                                    {submittingEdit ? 'A guardar...' : 'Guardar'}
                                 </button>
                             </div>
                         </form>
