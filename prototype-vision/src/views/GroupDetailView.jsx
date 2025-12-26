@@ -237,6 +237,19 @@ const GroupDetailView = ({ groupId, onBack }) => {
         }
     };
 
+    const handleCommentReaction = async (postId, commentId, reactionType) => {
+        try {
+            await CommunityAPI.toggleCommentReaction(postId, commentId, reactionType);
+
+            // Refresh comments for this post to get updated counts
+            const data = await CommunityAPI.getComments(postId);
+            setComments(prev => ({ ...prev, [postId]: data.data || [] }));
+        } catch (err) {
+            console.error('Error toggling comment reaction:', err);
+            alert('Erro ao reagir ao comentário');
+        }
+    };
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -925,6 +938,34 @@ const GroupDetailView = ({ groupId, onBack }) => {
                                                         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                                                             {comment.content}
                                                         </p>
+
+                                                        {/* Reaction buttons for comments */}
+                                                        <div style={{
+                                                            display: 'flex',
+                                                            gap: '12px',
+                                                            marginTop: '8px',
+                                                            paddingTop: '8px',
+                                                            borderTop: '1px solid rgba(255,255,255,0.05)'
+                                                        }}>
+                                                            <button onClick={() => handleCommentReaction(post.id, comment.id, 'like')} style={{
+                                                                background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer',
+                                                                display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', padding: '4px 8px', borderRadius: '4px'
+                                                            }} onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>
+                                                                👍 {comment.reactions?.like || 0}
+                                                            </button>
+                                                            <button onClick={() => handleCommentReaction(post.id, comment.id, 'useful')} style={{
+                                                                background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer',
+                                                                display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', padding: '4px 8px', borderRadius: '4px'
+                                                            }} onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>
+                                                                💡 {comment.reactions?.useful || 0}
+                                                            </button>
+                                                            <button onClick={() => handleCommentReaction(post.id, comment.id, 'thanks')} style={{
+                                                                background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer',
+                                                                display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', padding: '4px 8px', borderRadius: '4px'
+                                                            }} onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>
+                                                                🙏 {comment.reactions?.thanks || 0}
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 ))}
                                                 {(!comments[post.id] || comments[post.id].length === 0) && (

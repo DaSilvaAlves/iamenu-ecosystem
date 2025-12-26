@@ -403,6 +403,42 @@ export const CommunityAPI = {
     }
   },
 
+  /**
+   * Toggle reaction on a comment (requires authentication)
+   * @param {string} postId - Post ID
+   * @param {string} commentId - Comment ID
+   * @param {string} reactionType - Type of reaction (like, useful, thanks)
+   * @returns {Promise<Object>} Result with action (added/removed)
+   */
+  toggleCommentReaction: async (postId, commentId, reactionType) => {
+    const token = getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await fetch(`${API_BASE}/posts/${postId}/comments/${commentId}/react`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ reactionType })
+    });
+
+    return handleResponse(response);
+  },
+
+  /**
+   * Get reaction counts for a comment
+   * @param {string} postId - Post ID
+   * @param {string} commentId - Comment ID
+   * @returns {Promise<Object>} Reaction counts { like: 5, useful: 2, ... }
+   */
+  getCommentReactions: async (postId, commentId) => {
+    const response = await fetch(`${API_BASE}/posts/${postId}/comments/${commentId}/reactions`);
+    return handleResponse(response);
+  },
+
   // ===== PROFILES =====
 
   /**
