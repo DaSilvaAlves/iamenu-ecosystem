@@ -248,61 +248,27 @@ const GroupDetailView = ({ groupId, onBack }) => {
 
         setSubmittingPost(true);
         try {
-            let response;
-            const token = localStorage.getItem('authToken') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LXVzZXItMDAxIiwiZW1haWwiOiJldXJpY29AaWFtZW51LnB0Iiwicm9sZSI6InJlc3RhdXJhZG9yIiwiaWF0IjoxNzY2NjM2MzU1LCJleHAiOjE3NjY3MjI3NTV9.7PG9LRK7y8UkhU1zpc7vHe1Zsf748NMp0cLFS2-vFLU';
+            await CommunityAPI.createPost({
+                title: newPostTitle.trim(),
+                body: newPostBody.trim(),
+                category: newPostCategory,
+                groupId: groupId,
+                image: selectedImage || undefined
+            });
 
-            if (selectedImage) {
-                // Send with FormData
-                const formData = new FormData();
-                formData.append('title', newPostTitle.trim());
-                formData.append('body', newPostBody.trim());
-                formData.append('category', newPostCategory);
-                formData.append('groupId', groupId);
-                formData.append('image', selectedImage);
+            // Reset form and close modal
+            setNewPostTitle('');
+            setNewPostBody('');
+            setNewPostCategory('discussion');
+            setSelectedImage(null);
+            setImagePreview(null);
+            setShowNewPostModal(false);
 
-                response = await fetch('http://localhost:3001/api/v1/community/posts', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: formData
-                });
-            } else {
-                // Send as JSON
-                response = await fetch('http://localhost:3001/api/v1/community/posts', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        title: newPostTitle.trim(),
-                        body: newPostBody.trim(),
-                        category: newPostCategory,
-                        groupId: groupId
-                    })
-                });
-            }
+            // Refresh posts and group details to update counters
+            fetchPosts();
+            fetchGroupDetails();
 
-            const data = await response.json();
-
-            if (data.success) {
-                // Reset form and close modal
-                setNewPostTitle('');
-                setNewPostBody('');
-                setNewPostCategory('discussion');
-                setSelectedImage(null);
-                setImagePreview(null);
-                setShowNewPostModal(false);
-
-                // Refresh posts and group details to update counters
-                fetchPosts();
-                fetchGroupDetails();
-
-                alert('Post criado com sucesso!');
-            } else {
-                throw new Error(data.error || 'Erro ao criar post');
-            }
+            alert('Post criado com sucesso!');
         } catch (err) {
             console.error('Error creating post:', err);
             alert('Erro ao criar post: ' + err.message);
