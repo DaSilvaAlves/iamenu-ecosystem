@@ -230,8 +230,9 @@ const GroupDetailView = ({ groupId, onBack }) => {
             setNewPostCategory('discussion');
             setShowNewPostModal(false);
 
-            // Refresh posts
+            // Refresh posts and group details to update counters
             fetchPosts();
+            fetchGroupDetails();
 
             alert('Post criado com sucesso!');
         } catch (err) {
