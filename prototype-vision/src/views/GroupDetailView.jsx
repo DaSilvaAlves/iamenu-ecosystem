@@ -25,6 +25,8 @@ const GroupDetailView = ({ groupId, onBack }) => {
     const [newPostBody, setNewPostBody] = useState('');
     const [newPostCategory, setNewPostCategory] = useState('discussion');
     const [submittingPost, setSubmittingPost] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
 
     const currentUserId = 'test-user-001';
 
@@ -207,6 +209,35 @@ const GroupDetailView = ({ groupId, onBack }) => {
         }
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor seleciona apenas imagens');
+                return;
+            }
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('A imagem deve ter no máximo 5MB');
+                return;
+            }
+            setSelectedImage(file);
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveImage = () => {
+        setSelectedImage(null);
+        setImagePreview(null);
+    };
+
     const handleCreatePost = async (e) => {
         e.preventDefault();
 
@@ -217,24 +248,61 @@ const GroupDetailView = ({ groupId, onBack }) => {
 
         setSubmittingPost(true);
         try {
-            await CommunityAPI.createPost({
-                title: newPostTitle.trim(),
-                body: newPostBody.trim(),
-                category: newPostCategory,
-                groupId: groupId
-            });
+            let response;
+            const token = localStorage.getItem('authToken') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LXVzZXItMDAxIiwiZW1haWwiOiJldXJpY29AaWFtZW51LnB0Iiwicm9sZSI6InJlc3RhdXJhZG9yIiwiaWF0IjoxNzY2NjM2MzU1LCJleHAiOjE3NjY3MjI3NTV9.7PG9LRK7y8UkhU1zpc7vHe1Zsf748NMp0cLFS2-vFLU';
 
-            // Reset form and close modal
-            setNewPostTitle('');
-            setNewPostBody('');
-            setNewPostCategory('discussion');
-            setShowNewPostModal(false);
+            if (selectedImage) {
+                // Send with FormData
+                const formData = new FormData();
+                formData.append('title', newPostTitle.trim());
+                formData.append('body', newPostBody.trim());
+                formData.append('category', newPostCategory);
+                formData.append('groupId', groupId);
+                formData.append('image', selectedImage);
 
-            // Refresh posts and group details to update counters
-            fetchPosts();
-            fetchGroupDetails();
+                response = await fetch('http://localhost:3001/api/v1/community/posts', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+            } else {
+                // Send as JSON
+                response = await fetch('http://localhost:3001/api/v1/community/posts', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: newPostTitle.trim(),
+                        body: newPostBody.trim(),
+                        category: newPostCategory,
+                        groupId: groupId
+                    })
+                });
+            }
 
-            alert('Post criado com sucesso!');
+            const data = await response.json();
+
+            if (data.success) {
+                // Reset form and close modal
+                setNewPostTitle('');
+                setNewPostBody('');
+                setNewPostCategory('discussion');
+                setSelectedImage(null);
+                setImagePreview(null);
+                setShowNewPostModal(false);
+
+                // Refresh posts and group details to update counters
+                fetchPosts();
+                fetchGroupDetails();
+
+                alert('Post criado com sucesso!');
+            } else {
+                throw new Error(data.error || 'Erro ao criar post');
+            }
         } catch (err) {
             console.error('Error creating post:', err);
             alert('Erro ao criar post: ' + err.message);
@@ -802,7 +870,14 @@ const GroupDetailView = ({ groupId, onBack }) => {
                         zIndex: 1000,
                         padding: '20px'
                     }}
-                    onClick={() => setShowNewPostModal(false)}
+                    onClick={() => {
+                        setShowNewPostModal(false);
+                        setNewPostTitle('');
+                        setNewPostBody('');
+                        setNewPostCategory('discussion');
+                        setSelectedImage(null);
+                        setImagePreview(null);
+                    }}
                 >
                     <div
                         className="glass-panel"
@@ -817,7 +892,14 @@ const GroupDetailView = ({ groupId, onBack }) => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                             <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Novo Post</h2>
                             <button
-                                onClick={() => setShowNewPostModal(false)}
+                                onClick={() => {
+                                    setShowNewPostModal(false);
+                                    setNewPostTitle('');
+                                    setNewPostBody('');
+                                    setNewPostCategory('discussion');
+                                    setSelectedImage(null);
+                                    setImagePreview(null);
+                                }}
                                 style={{
                                     background: 'none',
                                     border: 'none',
@@ -900,6 +982,67 @@ const GroupDetailView = ({ groupId, onBack }) => {
                                     disabled={submittingPost}
                                 />
                             </div>
+
+                            {/* Image Upload */}
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                    Imagem (opcional)
+                                </label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        cursor: 'pointer'
+                                    }}
+                                    disabled={submittingPost}
+                                />
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                    Formatos aceitos: JPEG, PNG, GIF, WebP (máx. 5MB)
+                                </p>
+                            </div>
+
+                            {/* Image Preview */}
+                            {imagePreview && (
+                                <div style={{ marginBottom: '24px', position: 'relative' }}>
+                                    <img
+                                        src={imagePreview}
+                                        alt="Preview"
+                                        style={{
+                                            width: '100%',
+                                            maxHeight: '300px',
+                                            objectFit: 'cover',
+                                            borderRadius: '8px',
+                                            border: '1px solid var(--border)'
+                                        }}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleRemoveImage}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '8px',
+                                            right: '8px',
+                                            padding: '8px 16px',
+                                            backgroundColor: 'rgba(255,0,0,0.8)',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.85rem',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        Remover
+                                    </button>
+                                </div>
+                            )}
 
                             {/* Buttons */}
                             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
