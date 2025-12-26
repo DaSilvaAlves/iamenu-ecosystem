@@ -851,7 +851,9 @@ const GroupDetailView = ({ groupId, onBack }) => {
                             padding: '32px',
                             maxWidth: '600px',
                             width: '100%',
-                            borderRadius: '20px'
+                            borderRadius: '20px',
+                            maxHeight: '90vh',
+                            overflowY: 'auto'
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
