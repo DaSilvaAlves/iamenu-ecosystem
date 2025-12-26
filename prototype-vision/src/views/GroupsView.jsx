@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import CommunityAPI from '../services/api';
 
 const GroupsView = ({ onViewGroup }) => {
     const [groups, setGroups] = useState([]);
@@ -6,6 +7,12 @@ const GroupsView = ({ onViewGroup }) => {
     const [loading, setLoading] = useState(true);
     const [filterCategory, setFilterCategory] = useState('all'); // 'all', 'region', 'theme'
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [groupName, setGroupName] = useState('');
+    const [groupDescription, setGroupDescription] = useState('');
+    const [groupCategory, setGroupCategory] = useState('region');
+    const [groupType, setGroupType] = useState('public');
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState('');
     const currentUserId = 'test-user-001';
 
     useEffect(() => {
@@ -37,6 +44,68 @@ const GroupsView = ({ onViewGroup }) => {
         } catch (error) {
             console.error('Erro ao carregar grupos do utilizador:', error);
         }
+    };
+
+    const handleCreateGroup = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        // Validation
+        if (!groupName.trim()) {
+            setError('O nome do grupo é obrigatório');
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const groupData = {
+                name: groupName.trim(),
+                description: groupDescription.trim() || undefined,
+                category: groupCategory,
+                type: groupType
+            };
+
+            const result = await CommunityAPI.createGroup(groupData);
+
+            if (result.success) {
+                // Reset form
+                setGroupName('');
+                setGroupDescription('');
+                setGroupCategory('region');
+                setGroupType('public');
+                setShowCreateModal(false);
+
+                // Success feedback
+                alert('Grupo criado com sucesso!');
+
+                // Refresh lists
+                fetchGroups();
+                fetchUserGroups();
+            }
+        } catch (error) {
+            console.error('Erro ao criar grupo:', error);
+
+            // Handle specific errors
+            if (error.message.includes('duplicate') || error.message.includes('already exists')) {
+                setError('Já existe um grupo com este nome. Escolhe outro nome.');
+            } else if (error.message.includes('Authentication') || error.message.includes('401')) {
+                setError('Precisas de estar autenticado para criar um grupo.');
+            } else {
+                setError(error.message || 'Erro ao criar grupo. Tenta novamente.');
+            }
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleCloseModal = () => {
+        if (submitting) return;
+        setShowCreateModal(false);
+        setGroupName('');
+        setGroupDescription('');
+        setGroupCategory('region');
+        setGroupType('public');
+        setError('');
     };
 
     const joinGroup = async (groupId) => {
@@ -352,7 +421,7 @@ const GroupsView = ({ onViewGroup }) => {
                 </div>
             )}
 
-            {/* Create Group Modal (placeholder) */}
+            {/* Create Group Modal */}
             {showCreateModal && (
                 <div
                     style={{
@@ -361,42 +430,180 @@ const GroupsView = ({ onViewGroup }) => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'rgba(0,0,0,0.7)',
+                        backgroundColor: 'rgba(0,0,0,0.8)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         zIndex: 1000,
+                        overflowY: 'auto',
+                        padding: '20px 0'
                     }}
-                    onClick={() => setShowCreateModal(false)}
+                    onClick={handleCloseModal}
                 >
                     <div
                         className="glass-panel"
                         style={{
                             padding: '32px',
-                            borderRadius: '20px',
-                            maxWidth: '500px',
+                            maxWidth: '600px',
                             width: '90%',
+                            borderRadius: '20px'
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h2 style={{ marginBottom: '16px' }}>Criar Nova Comunidade</h2>
-                        <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
-                            Modal de criação em desenvolvimento...
-                        </p>
-                        <button
-                            onClick={() => setShowCreateModal(false)}
-                            style={{
-                                padding: '12px 24px',
-                                background: 'var(--primary)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '12px',
-                                fontWeight: 'bold',
-                                cursor: 'pointer',
-                            }}
-                        >
-                            Fechar
-                        </button>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '24px' }}>
+                            Criar Nova Comunidade
+                        </h2>
+
+                        {/* Error Alert */}
+                        {error && (
+                            <div style={{
+                                padding: '12px 16px',
+                                backgroundColor: 'rgba(255,0,0,0.1)',
+                                border: '1px solid rgba(255,0,0,0.3)',
+                                borderRadius: '8px',
+                                color: '#ff4444',
+                                marginBottom: '20px',
+                                fontSize: '0.9rem'
+                            }}>
+                                {error}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleCreateGroup}>
+                            {/* Name Field */}
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                    Nome da Comunidade *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={groupName}
+                                    onChange={(e) => setGroupName(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        fontSize: '1rem'
+                                    }}
+                                    placeholder="Ex: Restauradores de Lisboa"
+                                    disabled={submitting}
+                                />
+                            </div>
+
+                            {/* Description Field */}
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                    Descrição
+                                </label>
+                                <textarea
+                                    value={groupDescription}
+                                    onChange={(e) => setGroupDescription(e.target.value)}
+                                    rows={4}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        resize: 'vertical',
+                                        fontSize: '1rem'
+                                    }}
+                                    placeholder="Descreve a comunidade..."
+                                    disabled={submitting}
+                                />
+                            </div>
+
+                            {/* Category Field */}
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                    Categoria
+                                </label>
+                                <select
+                                    value={groupCategory}
+                                    onChange={(e) => setGroupCategory(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        fontSize: '1rem'
+                                    }}
+                                    disabled={submitting}
+                                >
+                                    <option value="region">📍 Região</option>
+                                    <option value="theme">💡 Tema</option>
+                                    <option value="type">🏘️ Tipo</option>
+                                </select>
+                            </div>
+
+                            {/* Type Field */}
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                    Tipo de Grupo
+                                </label>
+                                <select
+                                    value={groupType}
+                                    onChange={(e) => setGroupType(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        fontSize: '1rem'
+                                    }}
+                                    disabled={submitting}
+                                >
+                                    <option value="public">Público (todos podem ver e juntar-se)</option>
+                                    <option value="private">Privado (apenas por convite)</option>
+                                </select>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                                <button
+                                    type="button"
+                                    onClick={handleCloseModal}
+                                    disabled={submitting}
+                                    style={{
+                                        padding: '10px 20px',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        cursor: submitting ? 'not-allowed' : 'pointer',
+                                        fontSize: '1rem',
+                                        opacity: submitting ? 0.6 : 1
+                                    }}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submitting}
+                                    style={{
+                                        padding: '10px 20px',
+                                        backgroundColor: 'var(--primary)',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        fontWeight: 'bold',
+                                        cursor: submitting ? 'not-allowed' : 'pointer',
+                                        fontSize: '1rem',
+                                        opacity: submitting ? 0.6 : 1
+                                    }}
+                                >
+                                    {submitting ? 'A criar...' : 'Criar Comunidade'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
