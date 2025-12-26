@@ -9,15 +9,18 @@ import { groupMembersService } from '../services/group-members.service';
 export class GroupsController {
   /**
    * GET /api/v1/community/groups
-   * List all groups (with optional category filter)
+   * List all groups (with optional filters, search, and sorting)
    */
   async getAllGroups(req: Request, res: Response) {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
       const category = req.query.category as string | undefined;
+      const search = req.query.search as string | undefined;
+      const type = req.query.type as string | undefined;
+      const sortBy = (req.query.sortBy as 'name' | 'members' | 'posts' | 'recent') || 'name';
 
-      const result = await groupsService.getAllGroups(limit, offset, category);
+      const result = await groupsService.getAllGroups(limit, offset, category, search, type, sortBy);
 
       res.status(200).json({
         success: true,

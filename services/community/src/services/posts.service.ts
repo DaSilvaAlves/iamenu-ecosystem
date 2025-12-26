@@ -35,8 +35,8 @@ export class PostsService {
     if (category) where.category = category;
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { body: { contains: search, mode: 'insensitive' } }
+        { title: { contains: search } },
+        { body: { contains: search } }
       ];
     }
 

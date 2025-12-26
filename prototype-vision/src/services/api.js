@@ -59,18 +59,23 @@ export const CommunityAPI = {
   // ===== POSTS =====
 
   /**
-   * Get all posts (paginated)
+   * Get all posts (paginated with search and filters)
    * @param {Object} params - Query parameters
    * @param {number} params.limit - Items per page (default: 20)
    * @param {number} params.offset - Offset for pagination (default: 0)
    * @param {string} params.groupId - Optional group filter
+   * @param {string} params.search - Search query
+   * @param {string} params.category - Category filter
+   * @param {string} params.sortBy - Sort by (recent, popular, commented)
    * @returns {Promise<Object>} Posts data with pagination
    */
-  getPosts: async ({ limit = 20, offset = 0, groupId } = {}) => {
+  getPosts: async ({ limit = 20, offset = 0, groupId, search, category, sortBy } = {}) => {
     let url = `${API_BASE}/posts?limit=${limit}&offset=${offset}`;
-    if (groupId) {
-      url += `&groupId=${groupId}`;
-    }
+    if (groupId) url += `&groupId=${groupId}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (category) url += `&category=${encodeURIComponent(category)}`;
+    if (sortBy) url += `&sortBy=${sortBy}`;
+
     const response = await fetch(url);
     return handleResponse(response);
   },
@@ -278,16 +283,24 @@ export const CommunityAPI = {
   // ===== GROUPS =====
 
   /**
-   * Get all groups (paginated)
+   * Get all groups (paginated with search and filters)
    * @param {Object} params - Query parameters
    * @param {number} params.limit - Items per page (default: 50)
    * @param {number} params.offset - Offset for pagination (default: 0)
+   * @param {string} params.search - Search query
+   * @param {string} params.category - Category filter (region/theme)
+   * @param {string} params.type - Type filter (public/private)
+   * @param {string} params.sortBy - Sort by (name, members, posts, recent)
    * @returns {Promise<Object>} Groups data with pagination
    */
-  getGroups: async ({ limit = 50, offset = 0 } = {}) => {
-    const response = await fetch(
-      `${API_BASE}/groups?limit=${limit}&offset=${offset}`
-    );
+  getGroups: async ({ limit = 50, offset = 0, search, category, type, sortBy } = {}) => {
+    let url = `${API_BASE}/groups?limit=${limit}&offset=${offset}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (category) url += `&category=${encodeURIComponent(category)}`;
+    if (type) url += `&type=${type}`;
+    if (sortBy) url += `&sortBy=${sortBy}`;
+
+    const response = await fetch(url);
     return handleResponse(response);
   },
 

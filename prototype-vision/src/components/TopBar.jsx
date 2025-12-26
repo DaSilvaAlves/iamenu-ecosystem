@@ -118,20 +118,26 @@ const TopBar = ({ setView }) => {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    backgroundColor: 'rgba(255,255,255,0.03)',
-                    padding: '6px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border)',
-                    width: '240px'
-                }}>
+                <div
+                    onClick={() => setView && setView('pesquisa')}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        backgroundColor: 'rgba(255,255,255,0.03)',
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border)',
+                        width: '240px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                    }}
+                    className="hover:bg-white/5"
+                >
                     <Search size={16} color="var(--text-muted)" />
                     <input
                         placeholder="Pesquisar..."
-                        style={{ backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', outline: 'none', width: '100%' }}
+                        style={{ backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', outline: 'none', width: '100%', cursor: 'pointer' }}
                         readOnly
                     />
                 </div>

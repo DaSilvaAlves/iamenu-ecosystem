@@ -11,6 +11,7 @@ import CommunityView from './views/CommunityView';
 import ProfileView from './views/ProfileView';
 import GroupsView from './views/GroupsView';
 import GroupDetailView from './views/GroupDetailView';
+import SearchView from './views/SearchView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -49,6 +50,7 @@ const App = () => {
             case 'comunidade': return <CommunityView selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />;
             case 'grupos': return <GroupsView onViewGroup={navigateToGroupDetail} />;
             case 'grupo-detalhe': return <GroupDetailView groupId={selectedGroupId} onBack={() => setView('grupos')} />;
+            case 'pesquisa': return <SearchView onNavigateToGroup={navigateToGroupDetail} />;
             case 'perfil': return <ProfileView />;
             case 'dashboard': return <DashboardBI />;
             case 'foodcost': return <FoodCostView />;

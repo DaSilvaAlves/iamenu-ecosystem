@@ -17,19 +17,51 @@ interface CreateGroupDto {
  */
 export class GroupsService {
   /**
-   * Get all groups with pagination
+   * Get all groups with pagination, search, and filters
    */
-  async getAllGroups(limit = 50, offset = 0, category?: string) {
-    const where = category ? { category } : {};
+  async getAllGroups(
+    limit = 50,
+    offset = 0,
+    category?: string,
+    search?: string,
+    type?: string,
+    sortBy: 'name' | 'members' | 'posts' | 'recent' = 'name'
+  ) {
+    // Build where clause
+    const where: any = {};
+    if (category) where.category = category;
+    if (type) where.type = type;
+    if (search) {
+      where.OR = [
+        { name: { contains: search } },
+        { description: { contains: search } }
+      ];
+    }
+
+    // Build orderBy clause
+    let orderBy: any;
+    switch (sortBy) {
+      case 'members':
+        orderBy = { memberships: { _count: 'desc' } };
+        break;
+      case 'posts':
+        orderBy = { posts: { _count: 'desc' } };
+        break;
+      case 'recent':
+        orderBy = { createdAt: 'desc' };
+        break;
+      default:
+        orderBy = [
+          { category: 'asc' }, // Region first, then theme
+          { name: 'asc' }      // Alphabetical within category
+        ];
+    }
 
     const groups = await prisma.group.findMany({
       where,
       take: limit,
       skip: offset,
-      orderBy: [
-        { category: 'asc' }, // Region first, then theme
-        { name: 'asc' }      // Alphabetical within category
-      ],
+      orderBy,
       include: {
         _count: {
           select: {
