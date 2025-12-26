@@ -318,6 +318,7 @@ export const CommunityAPI = {
    * @param {string} groupData.description - Group description
    * @param {string} groupData.category - Category (region, theme, type)
    * @param {string} groupData.type - Type (public, private)
+   * @param {File} groupData.coverImage - Optional cover image
    * @returns {Promise<Object>} Created group
    */
   createGroup: async (groupData) => {
@@ -326,13 +327,30 @@ export const CommunityAPI = {
       throw new Error('Authentication required');
     }
 
+    // If cover image is provided, use FormData, otherwise use JSON
+    let body;
+    let headers = {
+      'Authorization': `Bearer ${token}`
+    };
+
+    if (groupData.coverImage) {
+      const formData = new FormData();
+      formData.append('name', groupData.name);
+      if (groupData.description) formData.append('description', groupData.description);
+      formData.append('category', groupData.category);
+      formData.append('type', groupData.type);
+      formData.append('coverImage', groupData.coverImage);
+      body = formData;
+      // Don't set Content-Type for FormData - browser will set it with boundary
+    } else {
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(groupData);
+    }
+
     const response = await fetch(`${API_BASE}/groups`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(groupData)
+      headers,
+      body
     });
     return handleResponse(response);
   },

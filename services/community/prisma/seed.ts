@@ -79,7 +79,7 @@ Próximo: TikTok? Alguém já testou?`,
   // Create 15 groups (5 regional + 10 thematic)
   console.log('\n🌱 Seeding groups...');
 
-  // Regional Groups (5)
+  // Regional Groups (5) - Focused on Continental Portugal
   const regionalGroups = [
     {
       name: 'Algarve',
@@ -89,29 +89,29 @@ Próximo: TikTok? Alguém já testou?`,
       createdBy: 'admin-001'
     },
     {
-      name: 'Lisboa',
-      description: 'Restauração em Lisboa - Capital, turismo urbano e diversidade',
+      name: 'Lisboa & Vale do Tejo',
+      description: 'Restauração em Lisboa e Vale do Tejo - Capital, turismo urbano, diversidade e tradição ribatejana',
       category: 'region',
       type: 'public',
       createdBy: 'admin-001'
     },
     {
-      name: 'Porto',
-      description: 'Restauradores do Porto - Tradição, inovação e vinhos',
+      name: 'Norte',
+      description: 'Restauradores do Norte - Porto, Minho, Trás-os-Montes, Douro - Tradição, inovação, vinhos e gastronomia nortenha',
       category: 'region',
       type: 'public',
       createdBy: 'admin-001'
     },
     {
-      name: 'Açores',
-      description: 'Restauração nos Açores - Insularidade, produtos locais e sustentabilidade',
+      name: 'Centro',
+      description: 'Restauração no Centro - Coimbra, Beira Interior, Beira Litoral - Tradições académicas, produtos da serra',
       category: 'region',
       type: 'public',
       createdBy: 'admin-001'
     },
     {
-      name: 'Madeira',
-      description: 'Restauradores da Madeira - Turismo, espetada e hospitalidade',
+      name: 'Alentejo',
+      description: 'Restauradores do Alentejo - Turismo rural, produtos locais, vinhos e gastronomia alentejana',
       category: 'region',
       type: 'public',
       createdBy: 'admin-001'
@@ -200,7 +200,7 @@ Próximo: TikTok? Alguém já testou?`,
   }
 
   console.log(`✅ Created 15 groups`);
-  console.log(`   - Regional: 5 (Algarve, Lisboa, Porto, Açores, Madeira)`);
+  console.log(`   - Regional: 5 (Algarve, Lisboa & Vale do Tejo, Norte, Centro, Alentejo)`);
   console.log(`   - Thematic: 10 (Turismo, Fast Food, Fine Dining, Cafés, Vegano, Gestão, Marketing, RH, Sustentabilidade, Tech)`);
 
   console.log('\n🎉 Seed completed!');

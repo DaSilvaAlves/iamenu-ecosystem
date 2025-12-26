@@ -74,7 +74,7 @@ export class GroupsController {
    */
   async createGroup(req: Request, res: Response) {
     try {
-      const { name, description, type, category, coverImage } = req.body;
+      const { name, description, type, category } = req.body;
 
       // Validation
       if (!name) {
@@ -93,6 +93,9 @@ export class GroupsController {
           error: 'User not authenticated',
         });
       }
+
+      // Get uploaded cover image URL if exists
+      const coverImage = req.file ? `/uploads/${req.file.filename}` : undefined;
 
       const group = await groupsService.createGroup({
         name,

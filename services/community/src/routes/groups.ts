@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { groupsController } from '../controllers/groups.controller';
 import { authenticateJWT } from '../middleware/auth';
+import { upload } from '../middleware/upload';
 
 const router = Router();
 
@@ -33,7 +34,7 @@ router.get('/:id/members', groupsController.getGroupMembers.bind(groupsControlle
 // ===================================
 
 // Create group
-router.post('/', authenticateJWT, groupsController.createGroup.bind(groupsController));
+router.post('/', authenticateJWT, upload.single('coverImage'), groupsController.createGroup.bind(groupsController));
 
 // Update group
 router.patch('/:id', authenticateJWT, groupsController.updateGroup.bind(groupsController));

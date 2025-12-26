@@ -77,9 +77,14 @@ export class PostsService {
     const postsWithReactions = await Promise.all(
       posts.map(async (post) => {
         const reactions = await this.getPostReactions(post.id);
+        const totalReactions = Object.values(reactions).reduce((sum, count) => sum + count, 0);
         return {
           ...post,
           reactions,
+          _count: {
+            ...post._count,
+            reactions: totalReactions,
+          },
         };
       })
     );
@@ -117,12 +122,6 @@ export class PostsService {
     if (!post) {
       return null;
     }
-
-    // Increment views
-    await prisma.post.update({
-      where: { id },
-      data: { views: { increment: 1 } },
-    });
 
     return post;
   }

@@ -13,6 +13,8 @@ const GroupsView = ({ onViewGroup }) => {
     const [groupType, setGroupType] = useState('public');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
     const currentUserId = 'test-user-001';
 
     useEffect(() => {
@@ -46,6 +48,36 @@ const GroupsView = ({ onViewGroup }) => {
         }
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                setError('Por favor seleciona apenas imagens');
+                return;
+            }
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                setError('A imagem deve ter no máximo 5MB');
+                return;
+            }
+            setSelectedImage(file);
+            setError('');
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveImage = () => {
+        setSelectedImage(null);
+        setImagePreview(null);
+    };
+
     const handleCreateGroup = async (e) => {
         e.preventDefault();
         setError('');
@@ -62,7 +94,8 @@ const GroupsView = ({ onViewGroup }) => {
                 name: groupName.trim(),
                 description: groupDescription.trim() || undefined,
                 category: groupCategory,
-                type: groupType
+                type: groupType,
+                coverImage: selectedImage || undefined
             };
 
             const result = await CommunityAPI.createGroup(groupData);
@@ -73,6 +106,8 @@ const GroupsView = ({ onViewGroup }) => {
                 setGroupDescription('');
                 setGroupCategory('region');
                 setGroupType('public');
+                setSelectedImage(null);
+                setImagePreview(null);
                 setShowCreateModal(false);
 
                 // Success feedback
@@ -105,6 +140,8 @@ const GroupsView = ({ onViewGroup }) => {
         setGroupDescription('');
         setGroupCategory('region');
         setGroupType('public');
+        setSelectedImage(null);
+        setImagePreview(null);
         setError('');
     };
 
@@ -543,7 +580,7 @@ const GroupsView = ({ onViewGroup }) => {
                             </div>
 
                             {/* Type Field */}
-                            <div style={{ marginBottom: '24px' }}>
+                            <div style={{ marginBottom: '16px' }}>
                                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
                                     Tipo de Grupo
                                 </label>
@@ -564,6 +601,68 @@ const GroupsView = ({ onViewGroup }) => {
                                     <option value="public">Público (todos podem ver e juntar-se)</option>
                                     <option value="private">Privado (apenas por convite)</option>
                                 </select>
+                            </div>
+
+                            {/* Cover Image Upload */}
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                    Imagem de Capa (opcional)
+                                </label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        cursor: 'pointer',
+                                        fontSize: '0.9rem'
+                                    }}
+                                    disabled={submitting}
+                                />
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                    Formatos aceitos: JPEG, PNG, GIF, WebP (máx. 5MB)
+                                </p>
+
+                                {/* Image Preview */}
+                                {imagePreview && (
+                                    <div style={{ marginTop: '12px', position: 'relative' }}>
+                                        <img
+                                            src={imagePreview}
+                                            alt="Preview"
+                                            style={{
+                                                width: '100%',
+                                                maxHeight: '200px',
+                                                objectFit: 'cover',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--border)'
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveImage}
+                                            style={{
+                                                position: 'absolute',
+                                                top: '8px',
+                                                right: '8px',
+                                                padding: '6px 12px',
+                                                backgroundColor: 'rgba(255,0,0,0.8)',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                                fontSize: '0.85rem',
+                                                fontWeight: 'bold'
+                                            }}
+                                        >
+                                            Remover
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Action Buttons */}

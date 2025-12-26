@@ -7,9 +7,11 @@ const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
     cb(null, path.join(process.cwd(), 'uploads'));
   },
-  filename: (_req, file, cb) => {
+  filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `post-${uniqueSuffix}${path.extname(file.originalname)}`);
+    // Determine prefix based on field name
+    const prefix = file.fieldname === 'coverImage' ? 'group' : 'post';
+    cb(null, `${prefix}-${uniqueSuffix}${path.extname(file.originalname)}`);
   }
 });
 

@@ -463,7 +463,7 @@ const GroupDetailView = ({ groupId, onBack }) => {
                     borderRadius: '20px',
                     marginBottom: '24px',
                     background: group.coverImage
-                        ? `url(${group.coverImage}) center/cover`
+                        ? `url(http://localhost:3001${group.coverImage}) center/cover`
                         : 'linear-gradient(135deg, rgba(0,122,255,0.3) 0%, rgba(0,122,255,0.05) 100%)',
                     display: 'flex',
                     alignItems: 'flex-end',
@@ -936,7 +936,7 @@ const GroupDetailView = ({ groupId, onBack }) => {
                                                             </span>
                                                         </div>
                                                         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                            {comment.content}
+                                                            {comment.body}
                                                         </p>
 
                                                         {/* Reaction buttons for comments */}
