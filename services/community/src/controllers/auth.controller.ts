@@ -36,7 +36,7 @@ export class AuthController {
       const testUser = {
         userId: 'test-user-001',
         email: 'eurico@iamenu.pt',
-        role: 'restaurador'
+        role: 'admin'
       };
 
       // Generate JWT token (expires in 24 hours)
