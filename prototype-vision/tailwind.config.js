@@ -12,6 +12,8 @@ export default {
                 "bg-dark": "#0a0a0a",
                 "bg-card": "#141414",
                 "bg-sidebar": "#0f0f0f",
+                "background-light": "#1a1a1a",
+                "surface-light": "#141414",
             },
         },
     },

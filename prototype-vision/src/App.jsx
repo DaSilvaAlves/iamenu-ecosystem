@@ -12,6 +12,7 @@ import ProfileView from './views/ProfileView';
 import GroupsView from './views/GroupsView';
 import GroupDetailView from './views/GroupDetailView';
 import SearchView from './views/SearchView';
+import ChatView from './views/ChatView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -64,7 +65,7 @@ const App = () => {
             case 'equipas': return <StandardPlaceholder title="Escalas de Staff AI" />;
             case 'marketplace': return <StandardPlaceholder title="Marketplace" />;
             case 'hubs': return <StandardPlaceholder title="Hubs Regionais" />;
-            case 'lab': return <StandardPlaceholder title="Laboratório" />;
+            case 'lab': return <ChatView />;
             default: return <CommunityView selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />;
         }
     };
