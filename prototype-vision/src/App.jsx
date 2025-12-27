@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import DashboardBI from './views/DashboardBI';
@@ -13,6 +13,9 @@ import GroupsView from './views/GroupsView';
 import GroupDetailView from './views/GroupDetailView';
 import SearchView from './views/SearchView';
 import ChatView from './views/ChatView';
+import UpgradePROView from './views/UpgradePROView';
+import TourRapidoView from './views/TourRapidoView';
+import OnboardingView from './views/OnboardingView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -40,6 +43,15 @@ const App = () => {
     const [currentView, setView] = useState('comunidade');
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [selectedGroupId, setSelectedGroupId] = useState(null);
+    const [showOnboarding, setShowOnboarding] = useState(false);
+
+    useEffect(() => {
+        // Check if onboarding was completed
+        const onboardingCompleted = localStorage.getItem('iaMenu_onboarding_completed');
+        if (!onboardingCompleted) {
+            setShowOnboarding(true);
+        }
+    }, []);
 
     const navigateToGroupDetail = (groupId) => {
         setSelectedGroupId(groupId);
@@ -57,9 +69,10 @@ const App = () => {
             case 'foodcost': return <FoodCostView />;
             case 'marketing': return <MarketingPlanner />;
             case 'gastrolens': return <GastroLens />;
+            case 'upgrade': return <UpgradePROView />;
             case 'pagamentos': return <PaymentsAutomationView />;
             case 'aulas': return <Academy />;
-            case 'onboarding': return <StandardPlaceholder title="Onboarding" icon={Plus} />;
+            case 'onboarding': return <OnboardingView onComplete={() => setView('dashboard')} />;
             case 'visao': return <StandardPlaceholder title="Visão do Ecossistema" />;
             case 'reputacao': return <StandardPlaceholder title="Audit de Reputação" />;
             case 'equipas': return <StandardPlaceholder title="Escalas de Staff AI" />;
@@ -71,21 +84,29 @@ const App = () => {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--bg-dark)' }}>
-            <TopBar setView={setView} />
-            <div style={{ display: 'flex', flex: 1 }}>
-                <Sidebar currentView={currentView} setView={setView} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
-                <main style={{ flex: 1, padding: '32px', overflowY: 'auto', backgroundColor: '#0c0c0c' }}>
-                    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                        <AnimatePresence mode="wait">
-                            <div key={currentView}>
-                                {renderContent()}
-                            </div>
-                        </AnimatePresence>
-                    </div>
-                </main>
+        <>
+            {showOnboarding && (
+                <TourRapidoView
+                    onComplete={() => setShowOnboarding(false)}
+                    onSkip={() => setShowOnboarding(false)}
+                />
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--bg-dark)' }}>
+                <TopBar setView={setView} />
+                <div style={{ display: 'flex', flex: 1 }}>
+                    <Sidebar currentView={currentView} setView={setView} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
+                    <main style={{ flex: 1, padding: '32px', overflowY: 'auto', backgroundColor: '#0c0c0c' }}>
+                        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                            <AnimatePresence mode="wait">
+                                <div key={currentView}>
+                                    {renderContent()}
+                                </div>
+                            </AnimatePresence>
+                        </div>
+                    </main>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

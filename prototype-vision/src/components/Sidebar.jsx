@@ -147,7 +147,7 @@ const Sidebar = ({ currentView, setView, selectedGroup, setSelectedGroup }) => {
 
             <SidebarSection title="Academia e Gestão">
                 <NavItem label="Audit de Reputação Online" icon={Star} active={currentView === 'reputacao'} onClick={() => setView('reputacao')} />
-                <NavItem label="Pagamentos & Pedidos" icon={CreditCard} active={currentView === 'pagamentos'} onClick={() => setView('pagamentos')} badge="PRO" />
+                <NavItem label="iaMenu PRO - Upgrade" icon={Zap} active={currentView === 'upgrade'} onClick={() => setView('upgrade')} badge="PRO" />
                 <NavItem label="Food Cost & Fichas Técnicas" icon={Calculator} active={currentView === 'foodcost'} onClick={() => setView('foodcost')} />
                 <NavItem label="Marketing Planner AI" icon={Target} active={currentView === 'marketing'} onClick={() => setView('marketing')} />
                 <NavItem label="GastroLens AI" icon={Camera} active={currentView === 'gastrolens'} onClick={() => setView('gastrolens')} badge="NOVO" />
