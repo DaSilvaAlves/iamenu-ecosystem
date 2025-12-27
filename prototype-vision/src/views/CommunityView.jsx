@@ -18,6 +18,11 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [sortBy, setSortBy] = useState('recent');
 
+    // Feed Personalizado: Tabs and user groups
+    const [feedTab, setFeedTab] = useState('all'); // 'all' ou 'mygroups'
+    const [userGroups, setUserGroups] = useState([]);
+    const [loadingGroups, setLoadingGroups] = useState(false);
+
     // Debounce search input
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -27,14 +32,15 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
         return () => clearTimeout(timeoutId);
     }, [searchInput]);
 
-    // Load posts from backend (reload when filters change)
+    // Load posts from backend (reload when filters or tab change)
     useEffect(() => {
         loadPosts(selectedGroup?.id);
-    }, [selectedGroup, searchQuery, selectedCategory, sortBy]);
+    }, [selectedGroup, searchQuery, selectedCategory, sortBy, feedTab]);
 
     // Ensure authentication on mount
     useEffect(() => {
         ensureAuthentication();
+        loadUserGroups();
     }, []);
 
     const ensureAuthentication = async () => {
@@ -48,10 +54,31 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
         }
     };
 
+    const loadUserGroups = async () => {
+        try {
+            setLoadingGroups(true);
+            const userId = Auth.getUserId();
+            if (!userId) return;
+
+            const data = await CommunityAPI.getUserGroups(userId);
+            setUserGroups(data.data || []);
+        } catch (err) {
+            console.error('Error loading user groups:', err);
+        } finally {
+            setLoadingGroups(false);
+        }
+    };
+
     const loadPosts = async (groupId = null) => {
         try {
             setLoading(true);
             const params = { limit: 10 };
+
+            // Feed Personalizado: Add userGroupIds filter when on "Meus Grupos" tab
+            if (feedTab === 'mygroups' && userGroups.length > 0) {
+                params.userGroupIds = userGroups.map(g => g.id).join(',');
+            }
+
             if (groupId) params.groupId = groupId;
             if (searchQuery) params.search = searchQuery;
             if (selectedCategory) params.category = selectedCategory;
@@ -253,6 +280,79 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                     <Plus size={18} /> New post
                 </button>
             </div>
+
+            {/* Feed Tabs */}
+            <div style={{
+                display: 'flex',
+                gap: '12px',
+                borderBottom: '1px solid var(--border)',
+                marginTop: '20px',
+                marginBottom: '0px'
+            }}>
+                <button
+                    onClick={() => setFeedTab('all')}
+                    style={{
+                        padding: '12px 20px',
+                        backgroundColor: feedTab === 'all' ? 'var(--primary)' : 'transparent',
+                        borderBottom: feedTab === 'all' ? '3px solid var(--primary)' : '3px solid transparent',
+                        color: feedTab === 'all' ? 'var(--primary)' : 'var(--text-muted)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        fontSize: '0.95rem',
+                        fontWeight: feedTab === 'all' ? '600' : '500'
+                    }}
+                >
+                    Todos os Posts
+                </button>
+                <button
+                    onClick={() => setFeedTab('mygroups')}
+                    style={{
+                        padding: '12px 20px',
+                        backgroundColor: feedTab === 'mygroups' ? 'var(--primary)' : 'transparent',
+                        borderBottom: feedTab === 'mygroups' ? '3px solid var(--primary)' : '3px solid transparent',
+                        color: feedTab === 'mygroups' ? 'var(--primary)' : 'var(--text-muted)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        fontSize: '0.95rem',
+                        fontWeight: feedTab === 'mygroups' ? '600' : '500'
+                    }}
+                >
+                    Meus Grupos {userGroups.length > 0 && `(${userGroups.length})`}
+                </button>
+            </div>
+
+            {/* Empty State - User has no groups */}
+            {feedTab === 'mygroups' && userGroups.length === 0 && !loading && (
+                <div className="glass-panel" style={{
+                    padding: '60px 40px',
+                    textAlign: 'center',
+                    marginTop: '20px',
+                    marginBottom: '20px'
+                }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📭</div>
+                    <h3 style={{ marginBottom: '12px' }}>Ainda não és membro de nenhum grupo</h3>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
+                        Junta-te a grupos para ver posts personalizados aqui
+                    </p>
+                    <button
+                        onClick={() => window.location.href = '/grupos'}
+                        style={{
+                            padding: '12px 24px',
+                            backgroundColor: 'var(--primary)',
+                            color: 'white',
+                            borderRadius: '8px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '0.95rem',
+                            fontWeight: '500'
+                        }}
+                    >
+                        Explorar Grupos
+                    </button>
+                </div>
+            )}
 
             {/* Phase 8: Search and Filters */}
             <div className="glass-panel" style={{ padding: '20px', marginTop: '16px' }}>

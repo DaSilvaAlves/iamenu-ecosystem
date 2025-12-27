@@ -27,6 +27,18 @@ const clearToken = () => {
   localStorage.removeItem('auth_token');
 };
 
+// Get user ID from JWT token
+const getUserIdFromToken = () => {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.userId || payload.sub;
+  } catch {
+    return null;
+  }
+};
+
 export const CommunityAPI = {
   // ===== AUTHENTICATION =====
 
@@ -64,14 +76,16 @@ export const CommunityAPI = {
    * @param {number} params.limit - Items per page (default: 20)
    * @param {number} params.offset - Offset for pagination (default: 0)
    * @param {string} params.groupId - Optional group filter
+   * @param {string} params.userGroupIds - Comma-separated group IDs for "my groups" tab
    * @param {string} params.search - Search query
    * @param {string} params.category - Category filter
    * @param {string} params.sortBy - Sort by (recent, popular, commented)
    * @returns {Promise<Object>} Posts data with pagination
    */
-  getPosts: async ({ limit = 20, offset = 0, groupId, search, category, sortBy } = {}) => {
+  getPosts: async ({ limit = 20, offset = 0, groupId, userGroupIds, search, category, sortBy } = {}) => {
     let url = `${API_BASE}/posts?limit=${limit}&offset=${offset}`;
     if (groupId) url += `&groupId=${groupId}`;
+    if (userGroupIds) url += `&userGroupIds=${encodeURIComponent(userGroupIds)}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
     if (category) url += `&category=${encodeURIComponent(category)}`;
     if (sortBy) url += `&sortBy=${sortBy}`;
@@ -325,6 +339,16 @@ export const CommunityAPI = {
   },
 
   /**
+   * Get user's groups (groups the user is member of)
+   * @param {string} userId - User ID
+   * @returns {Promise<Object>} Groups data with membership info
+   */
+  getUserGroups: async (userId) => {
+    const response = await fetch(`${API_BASE}/groups/user/${userId}`);
+    return handleResponse(response);
+  },
+
+  /**
    * Create new group (requires authentication)
    * @param {Object} groupData
    * @param {string} groupData.name - Group name
@@ -542,6 +566,7 @@ export const Auth = {
   getToken,
   setToken,
   clearToken,
+  getUserId: getUserIdFromToken,
   isAuthenticated: CommunityAPI.isAuthenticated,
   logout: CommunityAPI.logout,
   getTestToken: CommunityAPI.getTestToken

@@ -19,8 +19,13 @@ export class PostsController {
       const search = req.query.search as string | undefined;
       const category = req.query.category as string | undefined;
       const sortBy = (req.query.sortBy as 'recent' | 'popular' | 'commented') || 'recent';
+      const userGroupIds = req.query.userGroupIds
+        ? (typeof req.query.userGroupIds === 'string'
+          ? req.query.userGroupIds.split(',')
+          : req.query.userGroupIds as string[])
+        : undefined;
 
-      const result = await postsService.getAllPosts(limit, offset, groupId, search, category, sortBy);
+      const result = await postsService.getAllPosts(limit, offset, groupId, search, category, sortBy, userGroupIds);
 
       res.status(200).json({
         success: true,

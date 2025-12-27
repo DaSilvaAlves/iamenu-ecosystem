@@ -27,11 +27,16 @@ export class PostsService {
     groupId?: string,
     search?: string,
     category?: string,
-    sortBy: 'recent' | 'popular' | 'commented' = 'recent'
+    sortBy: 'recent' | 'popular' | 'commented' = 'recent',
+    userGroupIds?: string[]
   ) {
     // Build where clause
     const where: any = {};
-    if (groupId) where.groupId = groupId;
+    if (userGroupIds && userGroupIds.length > 0) {
+      where.groupId = { in: userGroupIds };
+    } else if (groupId) {
+      where.groupId = groupId;
+    }
     if (category) where.category = category;
     if (search) {
       where.OR = [
