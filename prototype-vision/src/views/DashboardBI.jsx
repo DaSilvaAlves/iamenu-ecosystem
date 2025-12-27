@@ -1,525 +1,432 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
-    LayoutDashboard,
-    Package,
-    ClipboardList,
-    Grid3X3,
-    Wallet,
-    Users,
-    TrendingUp,
-    Settings,
-    RefreshCcw,
-    Plus,
-    Bell,
-    ArrowUpRight,
-    ArrowDownRight,
-    Clock,
-    CheckCircle2,
-    AlertTriangle,
-    ChevronRight,
-    Download
+  TrendingUp,
+  Users,
+  DollarSign,
+  AlertTriangle,
+  TrendingDown,
+  Calendar,
+  Clock,
+  ArrowUpRight,
+  ArrowDownRight,
+  Download,
+  RefreshCcw,
+  CheckCircle,
+  AlertCircle,
+  Info,
+  Sparkles
 } from 'lucide-react';
-import DataManager from '../utils/DataManager';
-
-// --- Sub-componentes de Vista ---
-
-const StatCard = ({ title, value, trend, type, icon: Icon }) => (
-    <div className="glass-panel p-6 rounded-[32px] border border-white/5 hover:border-white/20 transition-all group">
-        <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary/10 transition-colors">
-                <Icon size={24} />
-            </div>
-            <div className={`flex items-center gap-1 text-xs font-black ${type === 'up' ? 'text-green-500' : 'text-red-500'}`}>
-                {type === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />} {trend}
-            </div>
-        </div>
-        <h3 className="text-3xl font-black text-white mb-1 tracking-tight">{value}</h3>
-        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">{title}</p>
-    </div>
-);
-
-const OverviewTab = ({ stats, hourlySales, topProducts }) => (
-    <div className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard title="Vendas Totais" value={`€${stats.sales.toLocaleString('pt-PT', { minimumFractionDigits: 2 })}`} trend="+12.5%" type="up" icon={Wallet} />
-            <StatCard title="Pedidos" value={stats.orders} trend="+8.2%" type="up" icon={ClipboardList} />
-            <StatCard title="Receita Média" value={`€${stats.avgRevenue.toFixed(2)}`} trend="-3.1%" type="down" icon={TrendingUp} />
-            <StatCard title="Clientes" value={stats.customers} trend="+15.7%" type="up" icon={Users} />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 glass-panel p-8 rounded-[32px]">
-                <div className="flex justify-between items-center mb-8">
-                    <h3 className="text-xl font-bold text-white">Vendas por Período</h3>
-                    <div className="flex gap-2">
-                        {['Diário', 'Semanal', 'Mensal'].map(p => (
-                            <button key={p} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${p === 'Diário' ? 'bg-primary text-black' : 'text-white/40 hover:bg-white/5'}`}>{p}</button>
-                        ))}
-                    </div>
-                </div>
-                <div className="h-[300px] flex items-end gap-3 justify-between">
-                    {hourlySales.map((h, i) => (
-                        <div key={i} className="flex-1 flex flex-col items-center gap-3 group">
-                            <motion.div initial={{ height: 0 }} animate={{ height: `${Math.max(h, 5)}%` }} className={`w-full rounded-lg transition-all ${h > 80 ? 'bg-primary' : 'bg-white/10 group-hover:bg-white/20'}`} />
-                            <span className="text-[10px] font-bold text-white/30">{12 + i}h</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <div className="glass-panel p-8 rounded-[32px]">
-                <h3 className="text-xl font-bold text-white mb-6">Produtos Populares</h3>
-                <div className="space-y-4">
-                    {topProducts.slice(0, 5).map((p, i) => (
-                        <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                            <div>
-                                <h4 className="text-sm font-bold text-white">{p.name}</h4>
-                                <p className="text-[10px] text-white/30 uppercase">{p.sales || p.orders} vendas</p>
-                            </div>
-                            <span className="text-xs font-black text-green-500">{p.margin || '75%'}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    </div>
-);
-
-const ProductsTab = () => {
-    const [products] = useState(DataManager.getProducts());
-    return (
-        <div className="glass-panel rounded-[32px] overflow-hidden border border-white/5">
-            <div className="p-8 border-b border-white/5 flex justify-between items-center">
-                <h3 className="text-xl font-bold text-white uppercase italic">Inventário Operacional</h3>
-                <button className="flex items-center gap-2 px-4 py-2 bg-primary text-black text-[10px] font-black rounded-xl uppercase tracking-widest"><Plus size={14} /> Novo Item</button>
-            </div>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="border-b border-white/5 text-[10px] uppercase font-black text-white/20 tracking-widest">
-                            <th className="px-8 py-6">Produto</th>
-                            <th className="px-8 py-6">Categoria</th>
-                            <th className="px-8 py-6 text-right">Preço Unit.</th>
-                            <th className="px-8 py-6 text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                        {products.length > 0 ? products.map((p, i) => (
-                            <tr key={i} className="hover:bg-white/[0.02] transition-colors">
-                                <td className="px-8 py-5 font-bold text-white">{p.nome}</td>
-                                <td className="px-8 py-5 text-white/40 text-xs font-bold uppercase">{p.categoria}</td>
-                                <td className="px-8 py-5 text-right font-black text-white">€{p.preco.toFixed(2)}</td>
-                                <td className="px-8 py-5 text-center">
-                                    <span className="text-[9px] font-black bg-primary/10 text-primary px-2 py-1 rounded">ATIVO</span>
-                                </td>
-                            </tr>
-                        )) : (
-                            <tr><td colSpan="4" className="px-8 py-20 text-center text-white/20 font-bold uppercase italic tracking-widest">Nenhum produto registado</td></tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
-};
-
-const OrdersTab = () => {
-    const [orders] = useState(DataManager.getOrders());
-    const [filterStatus, setFilterStatus] = useState('Todos');
-
-    const statusConfig = {
-        'Pendente': { color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20', icon: Clock },
-        'Em Preparação': { color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: RefreshCcw },
-        'Pronto': { color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/20', icon: CheckCircle2 },
-        'Entregue': { color: 'text-white/40', bg: 'bg-white/5', border: 'border-white/10', icon: CheckCircle2 },
-        'Cancelado': { color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', icon: AlertTriangle }
-    };
-
-    const filtered = orders.filter(o => filterStatus === 'Todos' || o.status === filterStatus);
-
-    return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center bg-white/5 p-6 rounded-[32px] border border-white/10">
-                <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                    {['Todos', 'Pendente', 'Em Preparação', 'Pronto', 'Entregue'].map(s => (
-                        <button key={s} onClick={() => setFilterStatus(s)} className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === s ? 'bg-primary text-black' : 'text-white/40 hover:bg-white/5'}`}>{s}</button>
-                    ))}
-                </div>
-                <div className="text-right">
-                    <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">A aguardar</p>
-                    <p className="text-xl font-black text-primary uppercase">{orders.filter(o => o.status === 'Pendente').length} Pedidos</p>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filtered.map((o) => {
-                    const config = statusConfig[o.status] || statusConfig.Pendente;
-                    const Icon = config.icon;
-                    return (
-                        <motion.div layout key={o.id} className={`glass-panel p-6 rounded-[32px] border ${config.border} flex flex-col justify-between h-[280px]`}>
-                            <div>
-                                <div className="flex justify-between items-start mb-6">
-                                    <div>
-                                        <h4 className="text-xl font-black text-white tracking-tighter">#ORD-{o.id}</h4>
-                                        <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Mesa {o.mesa} • {o.garcom || 'Eurico'}</p>
-                                    </div>
-                                    <div className={`p-2 rounded-xl ${config.bg} ${config.color}`}><Icon size={16} /></div>
-                                </div>
-                                <ul className="space-y-2 mb-4">
-                                    {(o.items || []).slice(0, 3).map((item, idx) => (
-                                        <li key={idx} className="text-xs text-white/60 font-bold flex items-center gap-2 italic">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-primary/40" /> {typeof item === 'string' ? item : item.nome}
-                                        </li>
-                                    ))}
-                                    {o.items && o.items.length > 3 && <li className="text-[10px] text-white/20 font-black uppercase tracking-widest">+ {o.items.length - 3} outros itens</li>}
-                                </ul>
-                            </div>
-                            <div className="flex justify-between items-center pt-4 border-t border-white/5">
-                                <p className="text-xl font-black text-white tracking-tighter">€{o.total.toFixed(2)}</p>
-                                <button className="px-4 py-2 bg-white/5 rounded-xl text-[10px] font-black text-white/40 uppercase hover:text-white hover:bg-white/10 transition-all tracking-widest">Gerir</button>
-                            </div>
-                        </motion.div>
-                    );
-                })}
-            </div>
-        </div>
-    );
-};
-
-const TablesTab = () => {
-    const tables = DataManager.getTablesStatus();
-    return (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {tables.map(t => (
-                <div key={t.number} className={`glass-panel p-8 rounded-[40px] border flex flex-col items-center justify-center gap-4 transition-all hover:scale-105 ${t.status === 'occupied' ? 'border-red-500/20 bg-red-500/5' : t.status === 'reserved' ? 'border-orange-500/20 bg-orange-500/5' : 'border-primary/20 bg-primary/5'}`}>
-                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Mesa</span>
-                    <h4 className="text-4xl font-black text-white italic">{t.number}</h4>
-                    <span className={`text-[8px] font-black uppercase px-3 py-1.5 rounded-full tracking-widest ${t.status === 'occupied' ? 'bg-red-500/20 text-red-500' : t.status === 'reserved' ? 'bg-orange-500/20 text-orange-500' : 'bg-primary/20 text-primary'}`}>
-                        {t.status === 'occupied' ? 'Ocupada' : t.status === 'reserved' ? 'Reservada' : 'Livre'}
-                    </span>
-                </div>
-            ))}
-        </div>
-    );
-};
-
-const FinanceTab = ({ analytics }) => {
-    return (
-        <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass-panel p-8 rounded-[32px] border border-green-500/10">
-                    <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-2">Receita Total Bruta</p>
-                    <h3 className="text-3xl font-black text-green-500 tracking-tighter italic">€{analytics.revenue.toFixed(2)}</h3>
-                </div>
-                <div className="glass-panel p-8 rounded-[32px] border border-red-500/10">
-                    <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-2">Total de custo operacional</p>
-                    <h3 className="text-3xl font-black text-red-500 tracking-tighter italic">€{analytics.expenses.toFixed(2)}</h3>
-                </div>
-                <div className="glass-panel p-8 rounded-[32px] border border-primary/20 bg-primary/5">
-                    <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-2">Net Profit (Estimado)</p>
-                    <h3 className="text-3xl font-black text-primary tracking-tighter italic">€{analytics.profit.toFixed(2)}</h3>
-                </div>
-            </div>
-
-            <div className="glass-panel rounded-[40px] overflow-hidden border border-white/5">
-                <div className="p-8 border-b border-white/5 flex justify-between items-center">
-                    <h3 className="text-xl font-bold text-white uppercase italic tracking-tighter">Fluxo de Caixa Operacional</h3>
-                    <button className="flex items-center gap-2 px-6 py-3 bg-white/5 text-white/60 text-[10px] font-black rounded-2xl uppercase tracking-[0.2em] border border-white/10 hover:bg-white/10 transition-all"><Download size={14} /> Exportar Relatório</button>
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left font-medium">
-                        <thead>
-                            <tr className="border-b border-white/5 text-[9px] uppercase font-black text-white/20 tracking-[0.3em]">
-                                <th className="px-8 py-6">Timeline</th>
-                                <th className="px-8 py-6 text-center">Tipo fluxo</th>
-                                <th className="px-8 py-6">Entidade / Descrição</th>
-                                <th className="px-8 py-6 text-right">Valor líquido</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5">
-                            {analytics.history.map((e, i) => (
-                                <tr key={i} className="hover:bg-white/[0.02] transition-colors">
-                                    <td className="px-8 py-5 text-white/40 text-[10px] font-black tracking-widest">{new Date(e.date).toLocaleDateString('pt-PT')}</td>
-                                    <td className="px-8 py-5 text-center">
-                                        <span className="text-[8px] font-black px-3 py-1 rounded-full bg-red-500/10 text-red-500 uppercase tracking-widest">OUTFLOW</span>
-                                    </td>
-                                    <td className="px-8 py-5 text-white font-bold text-sm tracking-tighter">{e.description}</td>
-                                    <td className="px-8 py-5 text-right font-black text-red-500 tracking-tight">- €{e.value.toFixed(2)}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const PerformanceRadar = ({ metrics }) => {
-    const size = 300;
-    const center = size / 2;
-    const radius = 100;
-    const angleStep = (Math.PI * 2) / metrics.labels.length;
-
-    // Gerar pontos para o polígono de dados
-    const points = metrics.data.map((val, i) => {
-        const r = (val / 5) * radius;
-        const x = center + r * Math.cos(i * angleStep - Math.PI / 2);
-        const y = center + r * Math.sin(i * angleStep - Math.PI / 2);
-        return `${x},${y}`;
-    }).join(' ');
-
-    return (
-        <div className="flex flex-col items-center">
-            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="drop-shadow-2xl">
-                {/* Grelha do Radar */}
-                {[1, 2, 3, 4, 5].map(step => (
-                    <circle
-                        key={step}
-                        cx={center} cy={center}
-                        r={(step / 5) * radius}
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="0.5"
-                        strokeOpacity="0.1"
-                    />
-                ))}
-
-                {/* Eixos */}
-                {metrics.labels.map((label, i) => {
-                    const x = center + radius * Math.cos(i * angleStep - Math.PI / 2);
-                    const y = center + radius * Math.sin(i * angleStep - Math.PI / 2);
-                    const lx = center + (radius + 25) * Math.cos(i * angleStep - Math.PI / 2);
-                    const ly = center + (radius + 15) * Math.sin(i * angleStep - Math.PI / 2);
-
-                    return (
-                        <g key={i}>
-                            <line x1={center} y1={center} x2={x} y2={y} stroke="white" strokeWidth="0.5" strokeOpacity="0.1" />
-                            <text
-                                x={lx} y={ly}
-                                textAnchor="middle"
-                                className="fill-white/40 text-[8px] font-black uppercase tracking-tighter"
-                            >
-                                {label}
-                            </text>
-                        </g>
-                    );
-                })}
-
-                {/* Polígono de Dados */}
-                <motion.polygon
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    points={points}
-                    fill="var(--primary)"
-                    fillOpacity="0.2"
-                    stroke="var(--primary)"
-                    strokeWidth="2"
-                />
-            </svg>
-        </div>
-    );
-};
-
-const ReportsTab = ({ metrics }) => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="glass-panel p-10 rounded-[40px] border border-white/5 flex flex-col items-center justify-center space-y-8">
-            <div className="text-center">
-                <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-2">Performance Radar</h4>
-                <p className="text-white/40 text-xs font-bold font-mono">KPIs de Qualidade e Eficiência</p>
-            </div>
-            <PerformanceRadar metrics={metrics} />
-            <div className="grid grid-cols-2 gap-4 w-full pt-6 border-t border-white/5">
-                <div className="text-center">
-                    <p className="text-[10px] font-black text-white/20 uppercase mb-1">Score Geral</p>
-                    <p className="text-xl font-black text-white italic">4.6<span className="text-xs text-white/20">/5.0</span></p>
-                </div>
-                <div className="text-center">
-                    <p className="text-[10px] font-black text-white/20 uppercase mb-1">Status</p>
-                    <p className="text-xl font-black text-green-500 italic uppercase">Excelente</p>
-                </div>
-            </div>
-        </div>
-
-        <div className="space-y-6">
-            <div className="glass-panel p-8 rounded-[40px] border border-white/5">
-                <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-6">Próximos Relatórios</h4>
-                <div className="space-y-4">
-                    {[
-                        { title: 'Inventário e Stock', date: 'Hoje, 22:00', icon: Package },
-                        { title: 'Performance de Staff', date: 'Amanhã, 09:00', icon: Users },
-                        { title: 'Análise de Margens AI', date: '30 DEZ', icon: TrendingUp }
-                    ].map((r, i) => (
-                        <div key={i} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:bg-white/5 transition-all cursor-pointer">
-                            <div className="flex items-center gap-4">
-                                <div className="p-2 bg-white/5 rounded-lg group-hover:bg-primary/20 group-hover:text-primary transition-colors">
-                                    <r.icon size={16} />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-white">{r.title}</p>
-                                    <p className="text-[10px] text-white/20 uppercase font-black">{r.date}</p>
-                                </div>
-                            </div>
-                            <ChevronRight size={16} className="text-white/10 group-hover:text-primary" />
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    </div>
-);
-
-const CustomersTab = ({ analytics }) => (
-    <div className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StatCard title="Total Clientes" value={analytics.total} trend="+4%" type="up" icon={Users} />
-            <StatCard title="Taxa Retenção" value={`${analytics.recurringRate}%`} trend="+2.5%" type="up" icon={RefreshCcw} />
-            <StatCard title="Ticket Médio" value={`€${analytics.avgTicket}`} trend="+€5.1" type="up" icon={TrendingUp} />
-        </div>
-
-        <div className="glass-panel rounded-[40px] overflow-hidden border border-white/5">
-            <div className="p-8 border-b border-white/5 flex justify-between items-center">
-                <h3 className="text-xl font-bold text-white uppercase italic tracking-tighter">Ranking de Fidelização</h3>
-                <div className="flex gap-2">
-                    <span className="px-3 py-1 bg-primary/10 text-primary text-[8px] font-black rounded-full uppercase italic">Vips Detetados</span>
-                </div>
-            </div>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left font-medium">
-                    <thead>
-                        <tr className="border-b border-white/5 text-[9px] uppercase font-black text-white/20 tracking-[0.3em]">
-                            <th className="px-8 py-6">ID / Mesa</th>
-                            <th className="px-8 py-6">Visitas</th>
-                            <th className="px-8 py-6 text-right">Gasto Total</th>
-                            <th className="px-8 py-6 text-center">Última Visita</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                        {analytics.topCustomers.map((c, i) => (
-                            <tr key={i} className="hover:bg-white/[0.02] transition-colors">
-                                <td className="px-8 py-5 text-white font-bold flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] text-primary">#{c.id}</div>
-                                    Mesa {c.id}
-                                </td>
-                                <td className="px-8 py-5 text-white/60 font-black text-xs">{c.orders} Orders</td>
-                                <td className="px-8 py-5 text-right font-black text-white">€{c.totalSpent.toFixed(2)}</td>
-                                <td className="px-8 py-5 text-center text-[10px] font-black text-white/20 uppercase">{new Date(c.lastVisit).toLocaleDateString('pt-PT')}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-);
-
-// --- Componente Principal ---
 
 const DashboardBI = () => {
-    const [activeTab, setActiveTab] = useState('dashboard');
-    const [stats, setStats] = useState({ sales: 0, orders: 0, avgRevenue: 0, customers: 0, periodGrowth: 12.5 });
-    const [topProducts, setTopProducts] = useState([]);
-    const [hourlySales, setHourlySales] = useState([]);
-    const [performanceMetrics, setPerformanceMetrics] = useState({ labels: [], data: [] });
-    const [customerAnalytics, setCustomerAnalytics] = useState({ total: 0, recurringRate: 0, avgTicket: 0, topCustomers: [] });
-    const [financialStats, setFinancialStats] = useState({ revenue: 0, expenses: 0, profit: 0, margin: 0, history: [] });
+  const [activeTab, setActiveTab] = useState('overview');
+  const [selectedPeriod, setSelectedPeriod] = useState('hoje');
 
-    const loadData = () => {
-        setStats(DataManager.getDashboardStats('month'));
-        setTopProducts(DataManager.getTopProducts(10));
-        setHourlySales(DataManager.getSalesByHour());
-        setPerformanceMetrics(DataManager.getPerformanceMetrics());
-        setCustomerAnalytics(DataManager.getCustomerAnalytics());
-        setFinancialStats(DataManager.getFinancialStats());
-    };
+  // Mock Data (depois vem da API/Onboarding)
+  const stats = {
+    receita: { value: '€2,845.50', trend: '+12.5%', isUp: true, vs: 'vs. ontem' },
+    clientes: { value: '142', trend: '-3.2%', isUp: false, vs: 'vs. média semanal' },
+    ticketMedio: { value: '€20.04', trend: '+5.4%', isUp: true, vs: 'Meta: €19.50' },
+    foodCost: { value: '28.4%', trend: 'Atenção', isUp: false, vs: 'Meta Ideal: 30%' }
+  };
 
-    useEffect(() => {
-        loadData();
-    }, []);
+  const alerts = [
+    {
+      id: 1,
+      type: 'critical',
+      icon: AlertTriangle,
+      title: 'Food Cost Spike',
+      subtitle: 'Critical Impact • Salmão Fillet',
+      description: 'The cost of Salmão Fillet has increased by 15% this week, pushing the dish "Grilled Salmão" margin below the 70% threshold.',
+      time: '2h ago',
+      action: 'Review Recipe'
+    },
+    {
+      id: 2,
+      type: 'warning',
+      icon: AlertCircle,
+      title: 'Reputation Dip',
+      subtitle: 'Warning • Google Reviews',
+      description: 'Your rating dropped by 0.1 stars due to 2 negative reviews mentioning "Slow Service" during lunch hour yesterday.',
+      time: '1d ago',
+      action: 'View Reviews'
+    }
+  ];
 
-    const menuItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'produtos', label: 'Produtos', icon: Package },
-        { id: 'pedidos', label: 'Pedidos', icon: ClipboardList },
-        { id: 'mesas', label: 'Mesas', icon: Grid3X3 },
-        { id: 'financeiro', label: 'Financeiro', icon: Wallet },
-        { id: 'clientes', label: 'Clientes', icon: Users },
-        { id: 'relatorios', label: 'Relatórios', icon: TrendingUp },
-        { id: 'definicoes', label: 'Definições', icon: Settings },
-    ];
+  const opportunities = [
+    {
+      id: 1,
+      type: 'revenue',
+      icon: TrendingUp,
+      title: 'High Demand Expected',
+      subtitle: 'Opportunity • Meso Filler',
+      description: 'Local event "Jazz Festival" is bringing +40% traffic to your area next Friday. You have 8 tables unreserved.',
+      time: '5h ago',
+      action: 'Create Promo'
+    },
+    {
+      id: 2,
+      type: 'stock',
+      icon: Info,
+      title: 'Dead Stock Alert',
+      subtitle: 'Opportunity • Wine Cellar',
+      description: '"Vinho Verde Casa" hasn\'t sold in 30 days. Recommend creating a bundle with "Seafood Platter" to clear inventory.',
+      time: '2d ago',
+      action: 'Create Bundle'
+    }
+  ];
 
-    return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-8 pb-32 max-w-7xl mx-auto space-y-8">
-            {/* Top Bar Centralized */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white/5 p-8 rounded-[40px] border border-white/10 backdrop-blur-3xl">
-                <div>
-                    <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic text-glow">Control Center</h1>
-                    <p className="text-white/40 font-bold text-sm tracking-wide">Gestão integrada em tempo real • Eurico Alves</p>
+  const topPratos = [
+    { name: 'Bacalhau à Brás', vendas: '€18.50', margem: 'High Profit', trend: '+12%' },
+    { name: 'Polvo à Lagareiro', vendas: '€22.00', margem: 'High Profit', trend: '+8%' },
+    { name: 'Pizza Margherita', vendas: '€12.50', margem: 'Popular', trend: '+5%' },
+    { name: 'Mousse Chocolate', vendas: '€5.50', margem: 'Popular', trend: '+3%' },
+    { name: 'Arroz de Pato', vendas: '€21.00', margem: 'Opportunity', trend: '-2%' }
+  ];
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl font-black text-white mb-2 tracking-tight italic"
+          >
+            BUSINESS INTELLIGENCE
+          </motion.h1>
+          <p className="text-white/40 font-bold text-sm uppercase tracking-wider">
+            Análise detalhada de vendas e tendências do seu restaurante.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <select
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white font-semibold text-sm focus:outline-none focus:border-primary transition-all"
+          >
+            <option value="hoje">Hoje</option>
+            <option value="semana">Esta Semana</option>
+            <option value="mes">Este Mês</option>
+            <option value="ano">Este Ano</option>
+          </select>
+          <button className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white font-semibold text-sm transition-all flex items-center gap-2">
+            <RefreshCcw size={16} />
+            Atualizar
+          </button>
+          <button className="px-6 py-2 bg-primary hover:bg-primary-hover rounded-xl text-white font-bold text-sm transition-all flex items-center gap-2">
+            <Download size={16} />
+            Exportar Relatório
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-white/10 pb-4">
+        {[
+          { id: 'overview', label: 'Visão Geral', icon: '📊' },
+          { id: 'menu', label: 'Menu Engineering', icon: '🍽️' },
+          { id: 'forecast', label: 'AI Forecast', icon: '🤖' },
+          { id: 'benchmark', label: 'Benchmark', icon: '📈' }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${
+              activeTab === tab.id
+                ? 'bg-primary text-white'
+                : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <span>{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          title="RECEITA BRUTA"
+          value={stats.receita.value}
+          trend={stats.receita.trend}
+          isUp={stats.receita.isUp}
+          subtitle={stats.receita.vs}
+          icon={DollarSign}
+          color="green"
+        />
+        <StatCard
+          title="CLIENTES (COVERS)"
+          value={stats.clientes.value}
+          trend={stats.clientes.trend}
+          isUp={stats.clientes.isUp}
+          subtitle={stats.clientes.vs}
+          icon={Users}
+          color="blue"
+        />
+        <StatCard
+          title="TICKET MÉDIO"
+          value={stats.ticketMedio.value}
+          trend={stats.ticketMedio.trend}
+          isUp={stats.ticketMedio.isUp}
+          subtitle={stats.ticketMedio.vs}
+          icon={TrendingUp}
+          color="purple"
+        />
+        <StatCard
+          title="FOOD COST %"
+          value={stats.foodCost.value}
+          trend={stats.foodCost.trend}
+          isUp={stats.foodCost.isUp}
+          subtitle={stats.foodCost.vs}
+          icon={AlertTriangle}
+          color="orange"
+        />
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Tendência de Vendas - 2 cols */}
+        <div className="lg:col-span-2 bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-black text-white uppercase tracking-tight">
+              📈 Tendência de Vendas (Hora a Hora)
+            </h3>
+            <div className="flex items-center gap-2">
+              <button className="px-3 py-1 bg-primary/20 border border-primary/40 rounded-lg text-primary font-bold text-xs">
+                Hoje
+              </button>
+              <button className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-white/60 font-semibold text-xs transition-all">
+                Semana
+              </button>
+              <button className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-white/60 font-semibold text-xs transition-all">
+                Mês
+              </button>
+            </div>
+          </div>
+
+          {/* Chart Placeholder */}
+          <div className="h-64 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center">
+            <div className="text-center">
+              <TrendingUp size={48} className="mx-auto mb-3 text-white/20" />
+              <p className="text-white/40 font-semibold text-sm">Gráfico de Tendências</p>
+              <p className="text-white/20 text-xs mt-1">(Integrar Chart.js aqui)</p>
+            </div>
+          </div>
+
+          {/* Insight da IA */}
+          <div className="mt-4 p-4 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-xl">
+            <div className="flex items-start gap-3">
+              <Sparkles size={20} className="text-orange-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-bold text-white mb-1 text-sm">iaMenu Previsão IA</h4>
+                <p className="text-white/80 text-sm">
+                  Com base no histórico e eventos locais, prevemos um aumento de <strong>25%</strong> na procura para o jantar de sexta-feira. Preparar +15kg de Bacalhau e reforçar staff de sala (2 pax) para o turno das 19:00.
+                </p>
+                <button className="mt-2 px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-lg transition-all">
+                  Ver Detalhes da Previsão
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top 5 Pratos - 1 col */}
+        <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-black text-white uppercase tracking-tight">
+              🏆 Top 5 Pratos (Margem)
+            </h3>
+            <a href="#" className="text-primary hover:text-primary-hover font-bold text-xs uppercase tracking-wider transition-colors">
+              Ver Menu →
+            </a>
+          </div>
+          <div className="space-y-3">
+            {topPratos.map((prato, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all cursor-pointer group">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg ${
+                    index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
+                    index === 1 ? 'bg-gray-400/20 text-gray-300' :
+                    index === 2 ? 'bg-orange-500/20 text-orange-400' :
+                    'bg-white/10 text-white/60'
+                  } flex items-center justify-center font-black text-sm`}>
+                    {index + 1}
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold text-sm group-hover:text-primary transition-colors">{prato.name}</p>
+                    <p className="text-white/40 text-xs">{prato.margem}</p>
+                  </div>
                 </div>
-                <div className="flex gap-4">
-                    <button onClick={loadData} className="p-4 bg-white/5 rounded-2xl hover:bg-white/10 text-white/40 transition-all border border-white/10 text-primary animate-pulse"><RefreshCcw size={20} /></button>
-                    <button className="flex items-center gap-2 px-6 py-4 bg-primary text-black font-black rounded-2xl hover:scale-105 transition-all text-sm tracking-tighter italic shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]"><Plus size={18} strokeWidth={3} /> NOVO PEDIDO</button>
-                    <div className="relative">
-                        <button className="p-4 bg-white/5 rounded-2xl text-white/40 border border-white/10"><Bell size={20} /></button>
-                        <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full text-[10px] font-black flex items-center justify-center text-white border-4 border-[#121212]">3</span>
-                    </div>
+                <div className="text-right">
+                  <p className="text-white font-bold text-sm">{prato.vendas}</p>
+                  <p className={`text-xs font-bold ${prato.trend.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
+                    {prato.trend}
+                  </p>
                 </div>
-            </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
-            {/* Internal Tab Navigation */}
-            <div className="flex flex-wrap gap-2 bg-white/5 p-2 rounded-[32px] border border-white/10 overflow-x-auto no-scrollbar">
-                {menuItems.map(item => (
-                    <button
-                        key={item.id}
-                        onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center gap-3 px-6 py-3 rounded-[24px] text-[10px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === item.id ? 'bg-primary text-black shadow-lg shadow-primary/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-                    >
-                        <item.icon size={14} />
-                        {item.label}
-                    </button>
-                ))}
+      {/* Alerts & Opportunities */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Critical Alerts */}
+        <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-black text-white uppercase tracking-tight">
+                🚨 Alertas Críticos
+              </h3>
+              <span className="px-2 py-1 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 font-bold text-xs">
+                {alerts.length} Novos
+              </span>
             </div>
+          </div>
+          <div className="space-y-4">
+            {alerts.map((alert) => (
+              <AlertCard key={alert.id} alert={alert} />
+            ))}
+          </div>
+        </div>
 
-            {/* Content Swapper */}
-            <div className="min-h-[500px]">
-                <AnimatePresence mode='wait'>
-                    <motion.div
-                        key={activeTab}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
-                    >
-                        {activeTab === 'dashboard' && <OverviewTab stats={stats} hourlySales={hourlySales} topProducts={topProducts} />}
-                        {activeTab === 'produtos' && <ProductsTab />}
-                        {activeTab === 'pedidos' && <OrdersTab />}
-                        {activeTab === 'mesas' && <TablesTab />}
-                        {activeTab === 'financeiro' && <FinanceTab analytics={financialStats} />}
-                        {activeTab === 'clientes' && <CustomersTab analytics={customerAnalytics} />}
-                        {activeTab === 'relatorios' && <ReportsTab metrics={performanceMetrics} />}
-                        {activeTab === 'definicoes' && (
-                            <div className="glass-panel p-20 rounded-[40px] text-center border border-white/5 border-dashed bg-white/[0.01]">
-                                <h3 className="text-3xl font-black text-white/10 uppercase italic tracking-tighter">Módulo Configurações</h3>
-                                <p className="text-white/5 font-bold mt-2 uppercase text-[10px] tracking-[0.5em]">Ajuste as preferências do motor de IA iaMenu...</p>
-                            </div>
-                        )}
-                    </motion.div>
-                </AnimatePresence>
+        {/* Opportunities */}
+        <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-black text-white uppercase tracking-tight">
+                💰 Potential Revenue
+              </h3>
+              <span className="px-2 py-1 bg-green-500/20 border border-green-500/30 rounded-lg text-green-400 font-bold text-xs">
+                +€1,240
+              </span>
             </div>
+          </div>
+          <div className="space-y-4">
+            {opportunities.map((opp) => (
+              <AlertCard key={opp.id} alert={opp} isOpportunity />
+            ))}
+          </div>
+        </div>
+      </div>
 
-            {/* Floating Action Menu */}
-            <div className="fixed bottom-10 right-10 z-[1000]">
-                <motion.button
-                    whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="w-16 h-16 bg-primary text-black rounded-full shadow-2xl shadow-primary/40 flex items-center justify-center border-4 border-[#121212] transition-colors"
-                >
-                    <Plus size={32} strokeWidth={3} />
-                </motion.button>
-            </div>
-        </motion.div>
-    );
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <QuickAction
+          icon="📊"
+          title="Editar Fichas Técnicas"
+          subtitle="Atualizar custos e receitas"
+        />
+        <QuickAction
+          icon="💰"
+          title="Ajustar Preços de Venda"
+          subtitle="Otimizar margem de lucro"
+        />
+        <QuickAction
+          icon="📈"
+          title="Ver Análise Completa"
+          subtitle="Relatório detalhado em PDF"
+        />
+        <QuickAction
+          icon="🤖"
+          title="Sugestões da IA"
+          subtitle="Menu engineering automático"
+        />
+      </div>
+    </div>
+  );
 };
+
+// Stat Card Component
+const StatCard = ({ title, value, trend, isUp, subtitle, icon: Icon, color }) => {
+  const colorClasses = {
+    green: 'from-green-500/10 to-green-600/5 border-green-500/20',
+    blue: 'from-blue-500/10 to-blue-600/5 border-blue-500/20',
+    purple: 'from-purple-500/10 to-purple-600/5 border-purple-500/20',
+    orange: 'from-orange-500/10 to-orange-600/5 border-orange-500/20'
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className={`bg-gradient-to-br ${colorClasses[color]} border rounded-2xl p-6 backdrop-blur-xl hover:scale-105 transition-all cursor-pointer`}
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
+          <Icon size={24} className="text-white" />
+        </div>
+        <div className={`flex items-center gap-1 px-2 py-1 rounded-lg font-bold text-xs ${
+          isUp ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+        }`}>
+          {isUp ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+          {trend}
+        </div>
+      </div>
+      <h3 className="text-3xl font-black text-white mb-2">{value}</h3>
+      <p className="text-xs font-bold text-white/40 uppercase tracking-wider">{title}</p>
+      <p className="text-xs text-white/60 mt-1">{subtitle}</p>
+    </motion.div>
+  );
+};
+
+// Alert Card Component
+const AlertCard = ({ alert, isOpportunity = false }) => {
+  const Icon = alert.icon;
+  const borderColor = alert.type === 'critical' ? 'border-red-500/30' :
+                      alert.type === 'warning' ? 'border-yellow-500/30' :
+                      alert.type === 'revenue' ? 'border-green-500/30' :
+                      'border-blue-500/30';
+
+  const bgColor = alert.type === 'critical' ? 'from-red-500/10' :
+                  alert.type === 'warning' ? 'from-yellow-500/10' :
+                  alert.type === 'revenue' ? 'from-green-500/10' :
+                  'from-blue-500/10';
+
+  const iconColor = alert.type === 'critical' ? 'text-red-400' :
+                    alert.type === 'warning' ? 'text-yellow-400' :
+                    alert.type === 'revenue' ? 'text-green-400' :
+                    'text-blue-400';
+
+  const actionColor = alert.type === 'critical' ? 'bg-red-500 hover:bg-red-600' :
+                      alert.type === 'warning' ? 'bg-yellow-500 hover:bg-yellow-600' :
+                      alert.type === 'revenue' ? 'bg-green-500 hover:bg-green-600' :
+                      'bg-blue-500 hover:bg-blue-600';
+
+  return (
+    <div className={`bg-gradient-to-br ${bgColor} to-transparent border ${borderColor} rounded-xl p-4`}>
+      <div className="flex items-start gap-3 mb-3">
+        <div className={`w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 ${iconColor}`}>
+          <Icon size={20} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="font-bold text-white text-sm mb-0.5">{alert.title}</h4>
+          <p className={`text-xs font-semibold ${iconColor}`}>{alert.subtitle}</p>
+        </div>
+        <span className="text-xs text-white/40 font-medium flex-shrink-0">{alert.time}</span>
+      </div>
+      <p className="text-white/70 text-sm mb-3 leading-relaxed">{alert.description}</p>
+      <div className="flex items-center justify-between">
+        <button className="text-white/60 hover:text-white font-semibold text-xs transition-colors">
+          Dismiss
+        </button>
+        <button className={`px-4 py-2 ${actionColor} text-white font-bold text-xs rounded-lg transition-all`}>
+          {alert.action}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Quick Action Component
+const QuickAction = ({ icon, title, subtitle }) => (
+  <button className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all group text-left">
+    <div className="text-3xl mb-2">{icon}</div>
+    <h4 className="font-bold text-white text-sm mb-1 group-hover:text-primary transition-colors">{title}</h4>
+    <p className="text-xs text-white/60">{subtitle}</p>
+  </button>
+);
 
 export default DashboardBI;
