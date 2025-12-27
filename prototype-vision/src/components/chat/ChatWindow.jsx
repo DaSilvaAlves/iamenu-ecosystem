@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { CURRENT_USER } from '../../utils/chatConstants';
-import { generateChefResponse } from '../../services/geminiService';
 
 const ChatWindow = ({ chat, onSendMessage, onReceiveMessage }) => {
   const [inputValue, setInputValue] = useState('');
@@ -25,21 +24,13 @@ const ChatWindow = ({ chat, onSendMessage, onReceiveMessage }) => {
     );
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
     const messageText = inputValue;
     setInputValue('');
     onSendMessage(chat.id, messageText);
-
-    // AI logic simulation for "Restaurante O Pátio"
-    if (chat.user.id === 'patio') {
-      setIsTyping(true);
-      const aiReply = await generateChefResponse(messageText, []);
-      setIsTyping(false);
-      onReceiveMessage(chat.id, aiReply || "Desculpa, não percebi.");
-    }
   };
 
   return (

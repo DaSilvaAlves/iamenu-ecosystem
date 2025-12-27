@@ -196,7 +196,7 @@ const Sidebar = ({ currentView, setView, selectedGroup, setSelectedGroup }) => {
             <SidebarSection title="Hub de Negócios">
                 <NavItem label="Marketplace Fornecedores" icon={ShoppingCart} active={currentView === 'marketplace'} onClick={() => setView('marketplace')} />
                 <NavItem label="Hubs Regionais (Algarve)" icon={MapPin} active={currentView === 'hubs'} onClick={() => setView('hubs')} badge="5" />
-                <NavItem label="Laboratório de Inovação" icon={FlaskConical} active={currentView === 'lab'} onClick={() => setView('lab')} badge="99+" />
+                <NavItem label="Chat Comunidade" icon={MessageSquare} active={currentView === 'lab'} onClick={() => setView('lab')} badge="99+" />
             </SidebarSection>
 
             <div style={{
