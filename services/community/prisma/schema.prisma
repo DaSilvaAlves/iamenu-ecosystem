@@ -78,6 +78,7 @@ model GroupMembership {
 
 model Profile {
   userId         String   @id
+  username       String?  @unique
   restaurantName String?
   locationCity   String?
   locationRegion String?

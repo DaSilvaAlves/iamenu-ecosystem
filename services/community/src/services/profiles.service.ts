@@ -99,6 +99,29 @@ export class ProfilesService {
   }
 
   /**
+   * Search profiles by username
+   */
+  async searchProfiles(query: string, limit = 10) {
+    const profiles = await prisma.profile.findMany({
+      where: {
+        username: {
+          contains: query,
+        },
+      },
+      select: {
+        userId: true,
+        username: true,
+        restaurantName: true,
+        profilePhoto: true,
+      },
+      take: limit,
+      orderBy: { username: 'asc' },
+    });
+
+    return profiles;
+  }
+
+  /**
    * Get user's posts
    */
   async getUserPosts(userId: string, limit = 10, offset = 0) {

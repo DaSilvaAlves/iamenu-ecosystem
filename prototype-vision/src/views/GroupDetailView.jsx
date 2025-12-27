@@ -4,6 +4,8 @@ import {
     Heart, MessageCircle, Eye, Send, X, Plus, MoreVertical, Edit2, Trash2
 } from 'lucide-react';
 import CommunityAPI from '../services/api';
+import TextRenderer from '../components/TextRenderer';
+import MentionInput from '../components/MentionInput';
 
 const GroupDetailView = ({ groupId, onBack }) => {
     const [group, setGroup] = useState(null);
@@ -775,14 +777,10 @@ const GroupDetailView = ({ groupId, onBack }) => {
                                     <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '12px' }}>
                                         {post.title}
                                     </h3>
-                                    <p style={{
-                                        color: 'var(--text-muted)',
-                                        lineHeight: '1.6',
-                                        whiteSpace: 'pre-line',
-                                        marginBottom: '16px'
-                                    }}>
-                                        {post.body}
-                                    </p>
+                                    <TextRenderer
+                                        text={post.body}
+                                        style={{ color: 'var(--text-muted)', marginBottom: '16px' }}
+                                    />
 
                                     {/* Post Image */}
                                     {post.imageUrl && (
@@ -935,9 +933,10 @@ const GroupDetailView = ({ groupId, onBack }) => {
                                                                 {new Date(comment.createdAt).toLocaleDateString('pt-PT')}
                                                             </span>
                                                         </div>
-                                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                            {comment.body}
-                                                        </p>
+                                                        <TextRenderer
+                                                            text={comment.body}
+                                                            style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '8px' }}
+                                                        />
 
                                                         {/* Reaction buttons for comments */}
                                                         <div style={{
@@ -1156,21 +1155,11 @@ const GroupDetailView = ({ groupId, onBack }) => {
                                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
                                     Conteúdo *
                                 </label>
-                                <textarea
+                                <MentionInput
                                     value={newPostBody}
-                                    onChange={(e) => setNewPostBody(e.target.value)}
-                                    rows={6}
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px',
-                                        backgroundColor: 'rgba(255,255,255,0.05)',
-                                        border: '1px solid var(--border)',
-                                        borderRadius: '8px',
-                                        color: 'white',
-                                        resize: 'vertical'
-                                    }}
-                                    placeholder="Escreve o teu post..."
-                                    disabled={submittingPost}
+                                    onChange={setNewPostBody}
+                                    placeholder="Escreve o teu post... (usa @username para mencionar)"
+                                    minHeight="150px"
                                 />
                             </div>
 
@@ -1386,21 +1375,11 @@ const GroupDetailView = ({ groupId, onBack }) => {
                                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
                                     Conteúdo *
                                 </label>
-                                <textarea
+                                <MentionInput
                                     value={editBody}
-                                    onChange={(e) => setEditBody(e.target.value)}
-                                    rows={6}
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px',
-                                        backgroundColor: 'rgba(255,255,255,0.05)',
-                                        border: '1px solid var(--border)',
-                                        borderRadius: '8px',
-                                        color: 'white',
-                                        resize: 'vertical'
-                                    }}
-                                    placeholder="Escreve o teu post..."
-                                    disabled={submittingEdit}
+                                    onChange={setEditBody}
+                                    placeholder="Escreve o teu post... (usa @username para mencionar)"
+                                    minHeight="150px"
                                 />
                             </div>
 

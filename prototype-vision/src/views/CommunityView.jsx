@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare, Award, MoreHorizontal, Plus, Loader } from 'lucide-react';
 import { CommunityAPI, Auth } from '../services/api';
+import TextRenderer from '../components/TextRenderer';
+import MentionInput from '../components/MentionInput';
 
 const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
     const [posts, setPosts] = useState([]);
@@ -506,14 +508,7 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                                 </h3>
 
                                 {/* Post Body */}
-                                <p style={{
-                                    color: 'rgba(255,255,255,0.8)',
-                                    lineHeight: '1.6',
-                                    marginBottom: '20px',
-                                    whiteSpace: 'pre-line'
-                                }}>
-                                    {post.body}
-                                </p>
+                                <TextRenderer text={post.body} />
 
                                 {/* Post Image */}
                                 {post.imageUrl && (
@@ -628,9 +623,10 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                                                             {formatTimeAgo(comment.createdAt)}
                                                         </span>
                                                     </div>
-                                                    <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.9)' }}>
-                                                        {comment.body || comment.content}
-                                                    </p>
+                                                    <TextRenderer
+                                                        text={comment.body || comment.content}
+                                                        style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}
+                                                    />
                                                 </div>
                                             ))
                                         ) : (
@@ -893,20 +889,11 @@ const NewPostModal = ({ onClose, onSubmit }) => {
 
                     <div style={{ marginBottom: '16px' }}>
                         <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Conteúdo *</label>
-                        <textarea
+                        <MentionInput
                             value={body}
-                            onChange={(e) => setBody(e.target.value)}
-                            rows={6}
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                backgroundColor: 'rgba(255,255,255,0.05)',
-                                border: '1px solid var(--border)',
-                                borderRadius: '8px',
-                                color: 'white',
-                                resize: 'vertical'
-                            }}
-                            placeholder="Partilha a tua experiência..."
+                            onChange={setBody}
+                            placeholder="Partilha a tua experiência... (usa @username para mencionar)"
+                            minHeight="150px"
                         />
                     </div>
 

@@ -7,6 +7,36 @@ import { profilesService } from '../services/profiles.service';
  */
 export class ProfilesController {
   /**
+   * GET /api/v1/community/profiles/search
+   * Search profiles by username
+   */
+  async searchProfiles(req: Request, res: Response) {
+    try {
+      const { q } = req.query;
+
+      if (!q || q.length < 1) {
+        return res.status(400).json({
+          success: false,
+          error: 'Search query required (minimum 1 character)',
+        });
+      }
+
+      const profiles = await profilesService.searchProfiles(q as string, 10);
+
+      res.status(200).json({
+        success: true,
+        data: profiles,
+      });
+    } catch (error) {
+      console.error('Error searching profiles:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to search profiles',
+      });
+    }
+  }
+
+  /**
    * GET /api/v1/community/profiles/:userId
    * Get user profile
    */

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { notificationsService } from './notifications.service';
+import { extractMentions, resolveMentions } from '../utils/mention.utils';
 
 const prisma = new PrismaClient();
 
@@ -154,6 +155,29 @@ export class PostsService {
         },
       },
     });
+
+    // Handle mentions
+    try {
+      const mentions = extractMentions(data.body);
+      if (mentions.length > 0) {
+        const mentionMap = await resolveMentions(mentions, prisma);
+
+        for (const [username, userId] of mentionMap) {
+          if (userId !== data.authorId) {
+            await notificationsService.createNotification({
+              userId,
+              type: 'mention',
+              title: 'Foste mencionado num post',
+              body: `No post "${post.title}"`,
+              link: `/posts/${post.id}`
+            });
+          }
+        }
+      }
+    } catch (mentionError) {
+      console.error('Failed to process mentions:', mentionError);
+      // Don't fail post creation if mention processing fails
+    }
 
     return post;
   }

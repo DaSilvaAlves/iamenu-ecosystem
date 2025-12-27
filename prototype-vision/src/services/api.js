@@ -558,6 +558,17 @@ export const CommunityAPI = {
 
     const response = await fetch(`${API_BASE}/profiles/${userId}/posts?${queryParams}`);
     return handleResponse(response);
+  },
+
+  /**
+   * Search profiles by username
+   * @param {Object} params - Query parameters
+   * @param {string} params.q - Search query
+   * @returns {Promise<Object>} Matching profiles
+   */
+  searchProfiles: async ({ q }) => {
+    const response = await fetch(`${API_BASE}/profiles/search?q=${encodeURIComponent(q)}`);
+    return handleResponse(response);
   }
 };
 

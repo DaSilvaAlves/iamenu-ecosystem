@@ -10,6 +10,9 @@ const router = Router();
  * Base path: /api/v1/community/profiles
  */
 
+// Search endpoint - must come before /:userId routes
+router.get('/search', profilesController.searchProfiles.bind(profilesController));
+
 // Public routes (anyone can view profiles)
 router.get('/:userId', profilesController.getProfile.bind(profilesController));
 router.get('/:userId/stats', profilesController.getUserStats.bind(profilesController));

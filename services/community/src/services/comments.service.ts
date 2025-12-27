@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { notificationsService } from './notifications.service';
 import { reactionsService } from './reactions.service';
+import { extractMentions, resolveMentions } from '../utils/mention.utils';
 
 const prisma = new PrismaClient();
 
@@ -77,6 +78,28 @@ export class CommentsService {
         body: `Alguém comentou no teu post "${post.title}"`,
         link: `/posts/${data.postId}`,
       });
+    }
+
+    // Handle mentions in comment
+    try {
+      const mentions = extractMentions(data.body);
+      if (mentions.length > 0) {
+        const mentionMap = await resolveMentions(mentions, prisma);
+
+        for (const [username, userId] of mentionMap) {
+          if (userId !== data.authorId) {
+            await notificationsService.createNotification({
+              userId,
+              type: 'mention',
+              title: 'Foste mencionado num comentário',
+              body: post ? `No post "${post.title}"` : 'Num comentário',
+              link: `/posts/${data.postId}`
+            });
+          }
+        }
+      }
+    } catch (mentionError) {
+      console.error('Failed to process mentions:', mentionError);
     }
 
     return comment;
