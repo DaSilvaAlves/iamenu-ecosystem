@@ -153,3 +153,61 @@ export const optionalAuth = (
     next();
   }
 };
+
+/**
+ * Admin authorization middleware
+ * Requires authenticateJWT to run first
+ * Checks if user has admin role
+ */
+export const authorizeAdmin = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!req.user) {
+    res.status(401).json({
+      error: 'Unauthorized',
+      message: 'Authentication required'
+    });
+    return;
+  }
+
+  if (req.user.role !== 'admin') {
+    res.status(403).json({
+      error: 'Forbidden',
+      message: 'Admin access required',
+      hint: 'Only administrators can perform this action'
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
+ * Optional: Moderator or Admin authorization
+ * For future use when adding moderator role
+ */
+export const authorizeModerator = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!req.user) {
+    res.status(401).json({
+      error: 'Unauthorized',
+      message: 'Authentication required'
+    });
+    return;
+  }
+
+  if (req.user.role !== 'admin' && req.user.role !== 'moderator') {
+    res.status(403).json({
+      error: 'Forbidden',
+      message: 'Moderator or admin access required'
+    });
+    return;
+  }
+
+  next();
+};

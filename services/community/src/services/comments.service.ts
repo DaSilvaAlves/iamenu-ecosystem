@@ -22,13 +22,13 @@ export class CommentsService {
   async getCommentsByPostId(postId: string, limit: number = 20, offset: number = 0) {
     const [comments, total] = await Promise.all([
       prisma.comment.findMany({
-        where: { postId },
+        where: { postId, status: 'active' },
         take: limit,
         skip: offset,
         orderBy: { createdAt: 'desc' },
       }),
       prisma.comment.count({
-        where: { postId },
+        where: { postId, status: 'active' },
       }),
     ]);
 

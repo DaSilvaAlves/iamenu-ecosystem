@@ -32,7 +32,9 @@ export class PostsService {
     userGroupIds?: string[]
   ) {
     // Build where clause
-    const where: any = {};
+    const where: any = {
+      status: 'active'
+    };
     if (userGroupIds && userGroupIds.length > 0) {
       where.groupId = { in: userGroupIds };
     } else if (groupId) {
@@ -125,7 +127,7 @@ export class PostsService {
       },
     });
 
-    if (!post) {
+    if (!post || post.status === 'removed') {
       return null;
     }
 

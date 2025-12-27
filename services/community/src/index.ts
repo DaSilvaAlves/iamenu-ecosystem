@@ -16,6 +16,7 @@ import groupsRouter from './routes/groups';
 import notificationsRouter from './routes/notifications';
 import profilesRouter from './routes/profiles';
 import gamificationRouter from './routes/gamification';
+import moderationRouter from './routes/moderation';
 
 // Import middleware
 import { authenticateJWT } from './middleware/auth';
@@ -101,6 +102,7 @@ app.use('/api/v1/community/groups', groupsRouter);
 app.use('/api/v1/community/notifications', notificationsRouter);
 app.use('/api/v1/community/profiles', profilesRouter);
 app.use('/api/v1/community/gamification', gamificationRouter);
+app.use('/api/v1/community', moderationRouter);
 
 // Placeholder para outras rotas (remover depois)
 app.get('/api/v1/community/*', authenticateJWT, (req: Request, res: Response) => {
