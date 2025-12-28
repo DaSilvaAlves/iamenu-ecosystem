@@ -124,6 +124,91 @@ export class DashboardController {
       });
     }
   }
+
+  /**
+   * GET /api/v1/business/dashboard/sales-trends
+   * Tendências de vendas
+   */
+  async getSalesTrends(req: Request, res: Response) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: 'Authentication required'
+        });
+      }
+
+      const period = (req.query.period as any) || 'hoje';
+      const trends = await dashboardService.getSalesTrends(req.user.userId, period);
+
+      res.json({
+        success: true,
+        data: trends
+      });
+    } catch (error: any) {
+      console.error('Error getting sales trends:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to get sales trends'
+      });
+    }
+  }
+
+  /**
+   * GET /api/v1/business/dashboard/ai-prediction
+   * Previsão IA
+   */
+  async getAIPrediction(req: Request, res: Response) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: 'Authentication required'
+        });
+      }
+
+      const prediction = await dashboardService.getAIPrediction(req.user.userId);
+
+      res.json({
+        success: true,
+        data: prediction
+      });
+    } catch (error: any) {
+      console.error('Error getting AI prediction:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to get AI prediction'
+      });
+    }
+  }
+
+  /**
+   * GET /api/v1/business/dashboard/menu-engineering
+   * Matriz de rentabilidade
+   */
+  async getMenuEngineering(req: Request, res: Response) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: 'Authentication required'
+        });
+      }
+
+      const matrix = await dashboardService.getMenuEngineering(req.user.userId);
+
+      res.json({
+        success: true,
+        data: matrix
+      });
+    } catch (error: any) {
+      console.error('Error getting menu engineering:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to get menu engineering data'
+      });
+    }
+  }
 }
 
 export const dashboardController = new DashboardController();

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client-business';
 
 const prisma = new PrismaClient();
 
@@ -6,7 +6,7 @@ async function main() {
   console.log('🌱 Seeding database...');
 
   // User ID de teste (mesmo do Community)
-  const TEST_USER_ID = 'test-user-123';
+  const TEST_USER_ID = 'test-user-001';
 
   // Clear existing data
   await prisma.orderItem.deleteMany({});

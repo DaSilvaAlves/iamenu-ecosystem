@@ -7,7 +7,7 @@ const API_BASE = 'http://localhost:3003/api/v1/business';
 
 // Helper para obter token (assumindo que está no localStorage)
 const getToken = () => {
-  return localStorage.getItem('authToken') || null;
+  return localStorage.getItem('auth_token') || null;
 };
 
 // Helper para headers com auth
@@ -161,6 +161,55 @@ export const DashboardAPI = {
     }
 
     return response.json();
+  },
+
+  /**
+   * Obter tendências de vendas (hora a hora ou diárias)
+   * @param {string} period - 'hoje', 'semana', 'mes'
+   */
+  async getSalesTrends(period = 'hoje') {
+    const response = await fetch(`${API_BASE}/dashboard/sales-trends?period=${period}`, {
+      headers: getHeaders()
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get sales trends');
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Obter previsão IA com sugestões acionáveis
+   */
+  async getAIPrediction() {
+    const response = await fetch(`${API_BASE}/dashboard/ai-prediction`, {
+      headers: getHeaders()
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get AI prediction');
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Obter matriz de rentabilidade (Menu Engineering)
+   */
+  async getMenuEngineering() {
+    const response = await fetch(`${API_BASE}/dashboard/menu-engineering`, {
+      headers: getHeaders()
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get menu engineering data');
+    }
+
+    return response.json();
   }
 };
 
@@ -168,11 +217,11 @@ export const DashboardAPI = {
  * Helpers
  */
 export const setAuthToken = (token) => {
-  localStorage.setItem('authToken', token);
+  localStorage.setItem('auth_token', token);
 };
 
 export const clearAuthToken = () => {
-  localStorage.removeItem('authToken');
+  localStorage.removeItem('auth_token');
 };
 
 export const hasAuthToken = () => {

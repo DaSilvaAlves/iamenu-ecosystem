@@ -24,4 +24,13 @@ router.get('/alerts', dashboardController.getAlerts.bind(dashboardController));
 // GET /opportunities - Oportunidades
 router.get('/opportunities', dashboardController.getOpportunities.bind(dashboardController));
 
+// GET /sales-trends - Tendências de vendas (hora a hora ou diárias)
+router.get('/sales-trends', dashboardController.getSalesTrends.bind(dashboardController));
+
+// GET /ai-prediction - Previsão IA com sugestões
+router.get('/ai-prediction', dashboardController.getAIPrediction.bind(dashboardController));
+
+// GET /menu-engineering - Matriz de rentabilidade
+router.get('/menu-engineering', dashboardController.getMenuEngineering.bind(dashboardController));
+
 export default router;

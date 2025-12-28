@@ -143,7 +143,7 @@ const GroupDetailView = ({ groupId, onBack }) => {
 
     const joinGroup = async () => {
         try {
-            const token = localStorage.getItem('authToken') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LXVzZXItMDAxIiwiZW1haWwiOiJldXJpY29AaWFtZW51LnB0Iiwicm9sZSI6InJlc3RhdXJhZG9yIiwiaWF0IjoxNzY2NjM2MzU1LCJleHAiOjE3NjY3MjI3NTV9.7PG9LRK7y8UkhU1zpc7vHe1Zsf748NMp0cLFS2-vFLU';
+            const token = localStorage.getItem('auth_token') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LXVzZXItMDAxIiwiZW1haWwiOiJldXJpY29AaWFtZW51LnB0Iiwicm9sZSI6InJlc3RhdXJhZG9yIiwiaWF0IjoxNzY2NjM2MzU1LCJleHAiOjE3NjY3MjI3NTV9.7PG9LRK7y8UkhU1zpc7vHe1Zsf748NMp0cLFS2-vFLU';
 
             const response = await fetch(`http://localhost:3001/api/v1/community/groups/${groupId}/join`, {
                 method: 'POST',
@@ -171,7 +171,7 @@ const GroupDetailView = ({ groupId, onBack }) => {
         if (!confirm('Tens a certeza que queres sair deste grupo?')) return;
 
         try {
-            const token = localStorage.getItem('authToken') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LXVzZXItMDAxIiwiZW1haWwiOiJldXJpY29AaWFtZW51LnB0Iiwicm9sZSI6InJlc3RhdXJhZG9yIiwiaWF0IjoxNzY2NjM2MzU1LCJleHAiOjE3NjY3MjI3NTV9.7PG9LRK7y8UkhU1zpc7vHe1Zsf748NMp0cLFS2-vFLU';
+            const token = localStorage.getItem('auth_token') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LXVzZXItMDAxIiwiZW1haWwiOiJldXJpY29AaWFtZW51LnB0Iiwicm9sZSI6InJlc3RhdXJhZG9yIiwiaWF0IjoxNzY2NjM2MzU1LCJleHAiOjE3NjY3MjI3NTV9.7PG9LRK7y8UkhU1zpc7vHe1Zsf748NMp0cLFS2-vFLU';
 
             const response = await fetch(`http://localhost:3001/api/v1/community/groups/${groupId}/leave`, {
                 method: 'POST',

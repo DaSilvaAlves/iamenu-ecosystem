@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const SYSTEM_INSTRUCTION = `
 # SYSTEM INSTRUCTIONS
@@ -114,7 +114,7 @@ export const generateMarketingPlan = async (data) => {
         throw new Error("API Key is missing. Please provide your Google Gemini API key.");
     }
 
-    const ai = new GoogleGenAI({ apiKey: data.apiKey });
+    const ai = new GoogleGenerativeAI({ apiKey: data.apiKey });
 
     const prompt = `
         Por favor, crie um plano de marketing de 30 dias para o seguinte restaurante:
@@ -173,7 +173,7 @@ GUIA DE REFERÊNCIA DE ALÉRGENOS (Culinária Portuguesa):
  */
 export const generateDishAnalysis = async (apiKey, base64Image, mimeType, dishName, ingredients) => {
     try {
-        const ai = new GoogleGenAI({ apiKey });
+        const ai = new GoogleGenerativeAI({ apiKey });
         const response = await ai.models.generateContent({
             model: 'gemini-1.5-flash',
             contents: [{
@@ -231,7 +231,7 @@ export const generateDishAnalysis = async (apiKey, base64Image, mimeType, dishNa
  */
 export const enhanceFoodImage = async (apiKey, base64Image, mimeType) => {
     try {
-        const ai = new GoogleGenAI({ apiKey });
+        const ai = new GoogleGenerativeAI({ apiKey });
         const response = await ai.models.generateContent({
             model: 'gemini-1.5-flash', // Using flash for speed, or gemini-2.0-flash-exp if available
             contents: [{

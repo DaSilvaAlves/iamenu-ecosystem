@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client-community';
 import { gamificationService } from './gamification.service';
 
 const prisma = new PrismaClient();

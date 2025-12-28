@@ -18,90 +18,64 @@ import {
   Sparkles
 } from 'lucide-react';
 import { DashboardAPI } from '../services/businessAPI';
+import SalesTrendChart from '../components/SalesTrendChart';
 
 const DashboardBI = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPeriod, setSelectedPeriod] = useState('semana');
+  const [trendPeriod, setTrendPeriod] = useState('hoje');
   const [stats, setStats] = useState(null);
+  const [salesTrends, setSalesTrends] = useState([]);
+  const [aiPrediction, setAIPrediction] = useState(null);
+  const [topProducts, setTopProducts] = useState([]);
+  const [alerts, setAlerts] = useState([]);
+  const [menuEngineering, setMenuEngineering] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Carregar stats da API
+  // Carregar todos os dados da API
   useEffect(() => {
-    loadStats();
-  }, [selectedPeriod]);
+    loadDashboardData();
+  }, [selectedPeriod, trendPeriod, activeTab]);
 
-  const loadStats = async () => {
+  const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await DashboardAPI.getStats(selectedPeriod);
-      setStats(response.data);
+
+      if (activeTab === 'menu') {
+        // Carregar apenas Menu Engineering
+        const menuRes = await DashboardAPI.getMenuEngineering();
+        setMenuEngineering(menuRes.data);
+      } else {
+        // Buscar dados do overview em paralelo
+        const [statsRes, trendsRes, predictionRes, productsRes, alertsRes] = await Promise.all([
+          DashboardAPI.getStats(selectedPeriod),
+          DashboardAPI.getSalesTrends(trendPeriod),
+          DashboardAPI.getAIPrediction(),
+          DashboardAPI.getTopProducts(5),
+          DashboardAPI.getAlerts()
+        ]);
+
+        setStats(statsRes.data);
+        setSalesTrends(trendsRes.data?.data || []);
+        setAIPrediction(predictionRes.data);
+        setTopProducts(productsRes.data || []);
+        setAlerts(alertsRes.data || []);
+      }
     } catch (error) {
-      console.error('Error loading stats:', error);
+      console.error('Error loading dashboard data:', error);
       // Fallback para dados mock
-      setStats({
-        receita: { formatted: '€0', trend: '0%', isUp: true, vs: 'Sem dados' },
-        clientes: { value: 0, trend: '0%', isUp: false, vs: 'Sem dados' },
-        ticketMedio: { formatted: '€0', trend: '0%', isUp: true, vs: 'Sem dados' },
-        foodCost: { formatted: '0%', trend: 'Sem dados', isUp: true, vs: 'Sem dados' }
-      });
+      if (activeTab !== 'menu') {
+        setStats({
+          receita: { formatted: '€0', trend: '0%', isUp: true, vs: 'Sem dados' },
+          clientes: { value: 0, trend: '0%', isUp: false, vs: 'Sem dados' },
+          ticketMedio: { formatted: '€0', trend: '0%', isUp: true, vs: 'Sem dados' },
+          foodCost: { formatted: '0%', trend: 'Sem dados', isUp: true, vs: 'Sem dados' }
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
-
-  const alerts = [
-    {
-      id: 1,
-      type: 'critical',
-      icon: AlertTriangle,
-      title: 'Food Cost Spike',
-      subtitle: 'Critical Impact • Salmão Fillet',
-      description: 'The cost of Salmão Fillet has increased by 15% this week, pushing the dish "Grilled Salmão" margin below the 70% threshold.',
-      time: '2h ago',
-      action: 'Review Recipe'
-    },
-    {
-      id: 2,
-      type: 'warning',
-      icon: AlertCircle,
-      title: 'Reputation Dip',
-      subtitle: 'Warning • Google Reviews',
-      description: 'Your rating dropped by 0.1 stars due to 2 negative reviews mentioning "Slow Service" during lunch hour yesterday.',
-      time: '1d ago',
-      action: 'View Reviews'
-    }
-  ];
-
-  const opportunities = [
-    {
-      id: 1,
-      type: 'revenue',
-      icon: TrendingUp,
-      title: 'High Demand Expected',
-      subtitle: 'Opportunity • Meso Filler',
-      description: 'Local event "Jazz Festival" is bringing +40% traffic to your area next Friday. You have 8 tables unreserved.',
-      time: '5h ago',
-      action: 'Create Promo'
-    },
-    {
-      id: 2,
-      type: 'stock',
-      icon: Info,
-      title: 'Dead Stock Alert',
-      subtitle: 'Opportunity • Wine Cellar',
-      description: '"Vinho Verde Casa" hasn\'t sold in 30 days. Recommend creating a bundle with "Seafood Platter" to clear inventory.',
-      time: '2d ago',
-      action: 'Create Bundle'
-    }
-  ];
-
-  const topPratos = [
-    { name: 'Bacalhau à Brás', vendas: '€18.50', margem: 'High Profit', trend: '+12%' },
-    { name: 'Polvo à Lagareiro', vendas: '€22.00', margem: 'High Profit', trend: '+8%' },
-    { name: 'Pizza Margherita', vendas: '€12.50', margem: 'Popular', trend: '+5%' },
-    { name: 'Mousse Chocolate', vendas: '€5.50', margem: 'Popular', trend: '+3%' },
-    { name: 'Arroz de Pato', vendas: '€21.00', margem: 'Opportunity', trend: '-2%' }
-  ];
 
   return (
     <div className="space-y-8">
@@ -164,13 +138,151 @@ const DashboardBI = () => {
         ))}
       </div>
 
-      {/* Stats Grid */}
+      {/* Content Based on Active Tab */}
       {loading ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="mt-4 text-white/60">Carregando estatísticas...</p>
+          <p className="mt-4 text-white/60">Carregando...</p>
         </div>
-      ) : stats ? (
+      ) : activeTab === 'menu' && menuEngineering ? (
+        /* MENU ENGINEERING */
+        <div className="space-y-6">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border border-yellow-500/20 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-4xl">⭐</span>
+                <span className="text-3xl font-black text-yellow-400">{menuEngineering.stars.length}</span>
+              </div>
+              <h3 className="text-white font-bold text-sm">STARS</h3>
+              <p className="text-white/60 text-xs mt-1">Alta margem + Alto volume</p>
+            </div>
+            <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-4xl">💎</span>
+                <span className="text-3xl font-black text-green-400">{menuEngineering.gems.length}</span>
+              </div>
+              <h3 className="text-white font-bold text-sm">GEMS</h3>
+              <p className="text-white/60 text-xs mt-1">Alta margem + Baixo volume</p>
+            </div>
+            <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-4xl">🐴</span>
+                <span className="text-3xl font-black text-blue-400">{menuEngineering.populars.length}</span>
+              </div>
+              <h3 className="text-white font-bold text-sm">POPULARS</h3>
+              <p className="text-white/60 text-xs mt-1">Baixa margem + Alto volume</p>
+            </div>
+            <div className="bg-gradient-to-br from-red-500/10 to-red-600/5 border border-red-500/20 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-4xl">🐕</span>
+                <span className="text-3xl font-black text-red-400">{menuEngineering.dogs.length}</span>
+              </div>
+              <h3 className="text-white font-bold text-sm">DOGS</h3>
+              <p className="text-white/60 text-xs mt-1">Baixa margem + Baixo volume</p>
+            </div>
+          </div>
+
+          {/* AI Suggestions */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {menuEngineering.opportunities.gems.count > 0 && (
+              <div className="bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20 rounded-xl p-4">
+                <h4 className="text-green-400 font-bold text-sm mb-2">💎 Oportunidade - Gems</h4>
+                <p className="text-white/80 text-sm mb-3">{menuEngineering.opportunities.gems.suggestion}</p>
+                <p className="text-green-400 font-bold text-xs">Potencial: +€{menuEngineering.opportunities.gems.potential.toFixed(0)}</p>
+              </div>
+            )}
+            {menuEngineering.opportunities.populars.count > 0 && (
+              <div className="bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 rounded-xl p-4">
+                <h4 className="text-blue-400 font-bold text-sm mb-2">🐴 Otimização - Populars</h4>
+                <p className="text-white/80 text-sm mb-3">{menuEngineering.opportunities.populars.suggestion}</p>
+                <p className="text-blue-400 font-bold text-xs">Potencial: +€{menuEngineering.opportunities.populars.potential.toFixed(0)}</p>
+              </div>
+            )}
+            {menuEngineering.opportunities.dogs.count > 0 && (
+              <div className="bg-gradient-to-br from-red-500/10 to-transparent border border-red-500/20 rounded-xl p-4">
+                <h4 className="text-red-400 font-bold text-sm mb-2">🐕 Ação - Dogs</h4>
+                <p className="text-white/80 text-sm">{menuEngineering.opportunities.dogs.suggestion}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Products Lists */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Stars */}
+            {menuEngineering.stars.length > 0 && (
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <h3 className="text-white font-bold mb-4">⭐ Stars - Manter & Promover</h3>
+                <div className="space-y-2">
+                  {menuEngineering.stars.map(p => (
+                    <div key={p.id} className="flex justify-between items-center p-3 bg-yellow-500/10 rounded-lg">
+                      <div>
+                        <p className="text-white font-semibold text-sm">{p.name}</p>
+                        <p className="text-white/60 text-xs">{p.sales} vendas • Margem: {p.margin}%</p>
+                      </div>
+                      <p className="text-yellow-400 font-bold">€{p.revenue.toFixed(0)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Gems */}
+            {menuEngineering.gems.length > 0 && (
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <h3 className="text-white font-bold mb-4">💎 Gems - Promover Mais</h3>
+                <div className="space-y-2">
+                  {menuEngineering.gems.map(p => (
+                    <div key={p.id} className="flex justify-between items-center p-3 bg-green-500/10 rounded-lg">
+                      <div>
+                        <p className="text-white font-semibold text-sm">{p.name}</p>
+                        <p className="text-white/60 text-xs">{p.sales} vendas • Margem: {p.margin}%</p>
+                      </div>
+                      <p className="text-green-400 font-bold">€{p.revenue.toFixed(0)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Populars */}
+            {menuEngineering.populars.length > 0 && (
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <h3 className="text-white font-bold mb-4">🐴 Populars - Otimizar Custo</h3>
+                <div className="space-y-2">
+                  {menuEngineering.populars.map(p => (
+                    <div key={p.id} className="flex justify-between items-center p-3 bg-blue-500/10 rounded-lg">
+                      <div>
+                        <p className="text-white font-semibold text-sm">{p.name}</p>
+                        <p className="text-white/60 text-xs">{p.sales} vendas • Margem: {p.margin}%</p>
+                      </div>
+                      <p className="text-blue-400 font-bold">€{p.revenue.toFixed(0)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Dogs */}
+            {menuEngineering.dogs.length > 0 && (
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <h3 className="text-white font-bold mb-4">🐕 Dogs - Reformular ou Remover</h3>
+                <div className="space-y-2">
+                  {menuEngineering.dogs.map(p => (
+                    <div key={p.id} className="flex justify-between items-center p-3 bg-red-500/10 rounded-lg">
+                      <div>
+                        <p className="text-white font-semibold text-sm">{p.name}</p>
+                        <p className="text-white/60 text-xs">{p.sales} vendas • Margem: {p.margin}%</p>
+                      </div>
+                      <p className="text-red-400 font-bold">€{p.revenue.toFixed(0)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : activeTab === 'overview' && stats ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             title="RECEITA BRUTA"
@@ -192,7 +304,7 @@ const DashboardBI = () => {
         />
         <StatCard
           title="TICKET MÉDIO"
-          value={stats.ticketMedio.value}
+          value={stats.ticketMedio.formatted}
           trend={stats.ticketMedio.trend}
           isUp={stats.ticketMedio.isUp}
           subtitle={stats.ticketMedio.vs}
@@ -201,7 +313,7 @@ const DashboardBI = () => {
         />
         <StatCard
           title="FOOD COST %"
-          value={stats.foodCost.value}
+          value={stats.foodCost.formatted}
           trend={stats.foodCost.trend}
           isUp={stats.foodCost.isUp}
           subtitle={stats.foodCost.vs}
@@ -217,45 +329,72 @@ const DashboardBI = () => {
         <div className="lg:col-span-2 bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-black text-white uppercase tracking-tight">
-              📈 Tendência de Vendas (Hora a Hora)
+              📈 Tendência de Vendas {trendPeriod === 'hoje' ? '(Hora a Hora)' : trendPeriod === 'semana' ? '(7 Dias)' : '(30 Dias)'}
             </h3>
             <div className="flex items-center gap-2">
-              <button className="px-3 py-1 bg-primary/20 border border-primary/40 rounded-lg text-primary font-bold text-xs">
+              <button
+                onClick={() => setTrendPeriod('hoje')}
+                className={`px-3 py-1 rounded-lg font-bold text-xs transition-all ${
+                  trendPeriod === 'hoje'
+                    ? 'bg-primary/20 border border-primary/40 text-primary'
+                    : 'bg-white/5 hover:bg-white/10 text-white/60'
+                }`}
+              >
                 Hoje
               </button>
-              <button className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-white/60 font-semibold text-xs transition-all">
+              <button
+                onClick={() => setTrendPeriod('semana')}
+                className={`px-3 py-1 rounded-lg font-bold text-xs transition-all ${
+                  trendPeriod === 'semana'
+                    ? 'bg-primary/20 border border-primary/40 text-primary'
+                    : 'bg-white/5 hover:bg-white/10 text-white/60'
+                }`}
+              >
                 Semana
               </button>
-              <button className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-white/60 font-semibold text-xs transition-all">
+              <button
+                onClick={() => setTrendPeriod('mes')}
+                className={`px-3 py-1 rounded-lg font-bold text-xs transition-all ${
+                  trendPeriod === 'mes'
+                    ? 'bg-primary/20 border border-primary/40 text-primary'
+                    : 'bg-white/5 hover:bg-white/10 text-white/60'
+                }`}
+              >
                 Mês
               </button>
             </div>
           </div>
 
-          {/* Chart Placeholder */}
-          <div className="h-64 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center">
-            <div className="text-center">
-              <TrendingUp size={48} className="mx-auto mb-3 text-white/20" />
-              <p className="text-white/40 font-semibold text-sm">Gráfico de Tendências</p>
-              <p className="text-white/20 text-xs mt-1">(Integrar Chart.js aqui)</p>
-            </div>
-          </div>
+          {/* Chart Real */}
+          <SalesTrendChart data={salesTrends} period={trendPeriod} />
 
           {/* Insight da IA */}
-          <div className="mt-4 p-4 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-xl">
-            <div className="flex items-start gap-3">
-              <Sparkles size={20} className="text-orange-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-bold text-white mb-1 text-sm">iaMenu Previsão IA</h4>
-                <p className="text-white/80 text-sm">
-                  Com base no histórico e eventos locais, prevemos um aumento de <strong>25%</strong> na procura para o jantar de sexta-feira. Preparar +15kg de Bacalhau e reforçar staff de sala (2 pax) para o turno das 19:00.
-                </p>
-                <button className="mt-2 px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-lg transition-all">
-                  Ver Detalhes da Previsão
-                </button>
+          {aiPrediction && (
+            <div className="mt-4 p-4 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-xl">
+              <div className="flex items-start gap-3">
+                <Sparkles size={20} className="text-orange-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="font-bold text-white text-sm">iaMenu Previsão IA</h4>
+                    <span className="text-xs text-orange-400 font-semibold">
+                      {aiPrediction.confidence}% confiança • {aiPrediction.dayOfWeek}
+                    </span>
+                  </div>
+                  <p className="text-white/80 text-sm">
+                    {aiPrediction.suggestion}
+                  </p>
+                  <div className="mt-2 flex items-center gap-3">
+                    <button className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-lg transition-all">
+                      {aiPrediction.action}
+                    </button>
+                    <span className="text-xs text-white/60">
+                      Estimativa: <strong className="text-white">{aiPrediction.estimatedCovers} cobertos</strong> • €{aiPrediction.estimatedRevenue.toFixed(0)}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Top 5 Pratos - 1 col */}
@@ -269,30 +408,34 @@ const DashboardBI = () => {
             </a>
           </div>
           <div className="space-y-3">
-            {topPratos.map((prato, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all cursor-pointer group">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg ${
-                    index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
-                    index === 1 ? 'bg-gray-400/20 text-gray-300' :
-                    index === 2 ? 'bg-orange-500/20 text-orange-400' :
-                    'bg-white/10 text-white/60'
-                  } flex items-center justify-center font-black text-sm`}>
-                    {index + 1}
+            {topProducts && topProducts.length > 0 ? (
+              topProducts.map((produto, index) => (
+                <div key={produto.id} className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-lg ${
+                      index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
+                      index === 1 ? 'bg-gray-400/20 text-gray-300' :
+                      index === 2 ? 'bg-orange-500/20 text-orange-400' :
+                      'bg-white/10 text-white/60'
+                    } flex items-center justify-center font-black text-sm`}>
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold text-sm group-hover:text-primary transition-colors">{produto.name}</p>
+                      <p className="text-white/40 text-xs capitalize">{produto.classification}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-white font-semibold text-sm group-hover:text-primary transition-colors">{prato.name}</p>
-                    <p className="text-white/40 text-xs">{prato.margem}</p>
+                  <div className="text-right">
+                    <p className="text-white font-bold text-sm">€{produto.revenue.toFixed(2)}</p>
+                    <p className={`text-xs font-bold ${produto.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>
+                      {produto.margin}
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-white font-bold text-sm">{prato.vendas}</p>
-                  <p className={`text-xs font-bold ${prato.trend.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
-                    {prato.trend}
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-white/40 text-sm text-center py-4">Sem produtos disponíveis</p>
+            )}
           </div>
         </div>
       </div>
@@ -323,17 +466,23 @@ const DashboardBI = () => {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <h3 className="text-lg font-black text-white uppercase tracking-tight">
-                💰 Potential Revenue
+                💰 Oportunidades
               </h3>
-              <span className="px-2 py-1 bg-green-500/20 border border-green-500/30 rounded-lg text-green-400 font-bold text-xs">
-                +€1,240
-              </span>
+              {alerts && alerts.length > 0 && (
+                <span className="px-2 py-1 bg-green-500/20 border border-green-500/30 rounded-lg text-green-400 font-bold text-xs">
+                  {alerts.length} oportunidades
+                </span>
+              )}
             </div>
           </div>
           <div className="space-y-4">
-            {opportunities.map((opp) => (
-              <AlertCard key={opp.id} alert={opp} isOpportunity />
-            ))}
+            {alerts && alerts.length > 0 ? (
+              alerts.filter(a => a.type !== 'critical' && a.type !== 'warning').map((opp) => (
+                <AlertCard key={opp.id || opp.title} alert={opp} isOpportunity />
+              ))
+            ) : (
+              <p className="text-white/40 text-sm text-center py-4">Sem oportunidades no momento</p>
+            )}
           </div>
         </div>
       </div>
@@ -400,7 +549,23 @@ const StatCard = ({ title, value, trend, isUp, subtitle, icon: Icon, color }) =>
 
 // Alert Card Component
 const AlertCard = ({ alert, isOpportunity = false }) => {
-  const Icon = alert.icon;
+  // Mapear tipo para ícone
+  const getIcon = () => {
+    switch (alert.type) {
+      case 'critical':
+        return AlertTriangle;
+      case 'warning':
+        return AlertCircle;
+      case 'revenue':
+        return TrendingUp;
+      case 'capacity':
+        return Info;
+      default:
+        return Info;
+    }
+  };
+
+  const Icon = getIcon();
   const borderColor = alert.type === 'critical' ? 'border-red-500/30' :
                       alert.type === 'warning' ? 'border-yellow-500/30' :
                       alert.type === 'revenue' ? 'border-green-500/30' :
