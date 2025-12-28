@@ -654,30 +654,211 @@ const DashboardBI = ({ setView }) => {
             </div>
           </div>
 
-          {/* Demand Forecast Chart */}
-          <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-black text-white uppercase tracking-tight">
-                📈 Previsão de Demanda - Próximos 7 Dias
-              </h3>
-              <span className="px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 font-bold text-xs">
-                ML Forecast
-              </span>
+          {/* Insight do Dia */}
+          <div className="bg-gradient-to-br from-orange-500/10 to-yellow-500/5 border border-orange-500/30 rounded-3xl p-6 backdrop-blur-xl">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 bg-orange-500/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <Sparkles size={28} className="text-orange-400" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xl font-black text-white uppercase tracking-tight">
+                    💡 Insight do Dia
+                  </h3>
+                  <span className="px-3 py-1 bg-orange-500/20 border border-orange-500/30 rounded-lg text-orange-400 font-bold text-xs">
+                    BETA
+                  </span>
+                </div>
+                <p className="text-white/80 text-base leading-relaxed mb-4">
+                  Sexta-feira chuvosa prevista. O modelo sugere reforçar o delivery em 20% e reduzir staff de sala em 1 pessoa.
+                </p>
+                <button
+                  onClick={() => toast.success('✅ Sugestão aplicada! Ajustes automáticos programados.')}
+                  className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-lg transition-all hover:scale-105 flex items-center gap-2"
+                >
+                  <CheckCircle size={16} />
+                  Aplicar Sugestão
+                </button>
+              </div>
             </div>
-            <DemandForecastChart data={demandForecast} />
           </div>
 
-          {/* Peak Hours Heatmap */}
-          <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-black text-white uppercase tracking-tight">
-                🔥 Mapa de Calor - Horários de Pico
-              </h3>
-              <span className="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-400 font-bold text-xs">
-                Últimos 30 dias
-              </span>
+          {/* Demand Forecast Chart + Fatores de Influência */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Demand Forecast Chart - 2 cols */}
+            <div className="lg:col-span-2 bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-black text-white uppercase tracking-tight">
+                  📈 Previsão de Demanda - Próximos 7 Dias
+                </h3>
+                <span className="px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 font-bold text-xs">
+                  ML Forecast
+                </span>
+              </div>
+              <DemandForecastChart data={demandForecast} />
             </div>
-            <PeakHoursHeatmap data={peakHoursHeatmap} />
+
+            {/* Fatores de Influência - 1 col */}
+            <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+              <h3 className="text-lg font-black text-white uppercase tracking-tight mb-6">
+                🌍 Fatores de Influência
+              </h3>
+              <div className="space-y-4">
+                {/* Meteorologia */}
+                <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">🌤️</span>
+                      <h4 className="text-white font-bold text-sm">Meteorologia</h4>
+                    </div>
+                    <span className="text-blue-400 font-bold text-lg">-15%</span>
+                  </div>
+                  <p className="text-white/60 text-xs">Chuva forte prevista para Sexta e Sábado</p>
+                </div>
+
+                {/* Eventos Locais */}
+                <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">🎉</span>
+                      <h4 className="text-white font-bold text-sm">Eventos Locais</h4>
+                    </div>
+                    <span className="text-purple-400 font-bold text-lg">+25%</span>
+                  </div>
+                  <p className="text-white/60 text-xs">Concerto no Pavilhão Atlântico (Domingo)</p>
+                </div>
+
+                {/* Sazonalidade */}
+                <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">📅</span>
+                      <h4 className="text-white font-bold text-sm">Sazonalidade</h4>
+                    </div>
+                    <span className="text-green-400 font-bold text-lg">+10%</span>
+                  </div>
+                  <p className="text-white/60 text-xs">Fim de mês (Payday weekend)</p>
+                </div>
+
+                {/* Ver todos os fatores */}
+                <button
+                  onClick={() => toast('📊 Fatores adicionais: Feriados (+5%), Clima histórico (+3%), Tendências de mercado (+2%)', {
+                    duration: 4000,
+                    icon: '🌍',
+                  })}
+                  className="w-full mt-2 text-primary hover:text-primary-hover font-bold text-sm flex items-center justify-center gap-1 transition-colors"
+                >
+                  Ver todos os fatores
+                  <ArrowUpRight size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Peak Hours Heatmap + Recomendações + Breakdown */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Peak Hours Heatmap - 2 cols */}
+            <div className="lg:col-span-2 bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-black text-white uppercase tracking-tight">
+                  🔥 Mapa de Calor - Horários de Pico
+                </h3>
+                <span className="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-400 font-bold text-xs">
+                  Últimos 30 dias
+                </span>
+              </div>
+              <PeakHoursHeatmap data={peakHoursHeatmap} />
+            </div>
+
+            {/* Recomendações da AI + Breakdown por Zona - 1 col */}
+            <div className="space-y-6">
+              {/* Recomendações da AI */}
+              <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                <h3 className="text-lg font-black text-white uppercase tracking-tight mb-4">
+                  🤖 Recomendações da AI
+                </h3>
+                <div className="space-y-3">
+                  {/* Recomendação 1 */}
+                  <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+                    <div className="flex items-start gap-2 mb-2">
+                      <span className="text-lg">⚠️</span>
+                      <div className="flex-1">
+                        <h4 className="text-orange-400 font-bold text-xs mb-1">Reforçar Terça ao Almoço</h4>
+                        <p className="text-white/70 text-xs leading-relaxed">
+                          A previsão indica um aumento de 25% nas reservas corporativas. Considere +1 empregado de mesa.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => toast.success('✅ Escala ajustada automaticamente!')}
+                      className="w-full px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-lg transition-all"
+                    >
+                      Ajustar Escala
+                    </button>
+                  </div>
+
+                  {/* Recomendação 2 */}
+                  <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl">
+                    <div className="flex items-start gap-2 mb-2">
+                      <span className="text-lg">💰</span>
+                      <div className="flex-1">
+                        <h4 className="text-green-400 font-bold text-xs mb-1">Corte de Custo: Segunda-feira</h4>
+                        <p className="text-white/70 text-xs leading-relaxed">
+                          Historicamente, segundas das 15h às 18h {'<'} 10 clientes. Reduza a equipa de cozinha ao mínimo.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => toast.success('✅ Otimização aplicada!')}
+                      className="w-full px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white font-bold text-xs rounded-lg transition-all"
+                    >
+                      Otimizar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Breakdown por Zona */}
+              <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                <h3 className="text-lg font-black text-white uppercase tracking-tight mb-4">
+                  📍 Breakdown por Zona
+                </h3>
+                <div className="space-y-4">
+                  {/* Sala Principal */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold text-sm">Sala Principal</span>
+                      <span className="text-green-400 font-bold text-sm">85%</span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-green-500 to-green-400" style={{ width: '85%' }}></div>
+                    </div>
+                  </div>
+
+                  {/* Esplanada */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold text-sm">Esplanada</span>
+                      <span className="text-yellow-400 font-bold text-sm">42%</span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-yellow-500 to-yellow-400" style={{ width: '42%' }}></div>
+                    </div>
+                  </div>
+
+                  {/* Balcão */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold text-sm">Balcão</span>
+                      <span className="text-red-400 font-bold text-sm">12%</span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-red-500 to-red-400" style={{ width: '12%' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       ) : activeTab === 'benchmark' && benchmark ? (
