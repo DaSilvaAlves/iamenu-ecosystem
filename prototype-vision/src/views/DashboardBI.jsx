@@ -44,6 +44,8 @@ const DashboardBI = ({ setView }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortColumn, setSortColumn] = useState('sales'); // Default sort by sales
+  const [sortDirection, setSortDirection] = useState('desc'); // desc or asc
 
   // Carregar todos os dados da API
   useEffect(() => {
@@ -149,6 +151,69 @@ const DashboardBI = ({ setView }) => {
       // Ação genérica
       showComingSoon(alert.action);
     }
+  };
+
+  // Função para lidar com sorting da tabela
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      // Toggle direction if clicking same column
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // New column, default to desc
+      setSortColumn(column);
+      setSortDirection('desc');
+    }
+  };
+
+  // Função para ordenar array de produtos
+  const sortProducts = (products) => {
+    return [...products].sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortColumn) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'category':
+          aValue = (a.classification || '').toLowerCase();
+          bValue = (b.classification || '').toLowerCase();
+          break;
+        case 'cost':
+          aValue = a.revenue / a.sales * (1 - parseFloat(a.margin) / 100);
+          bValue = b.revenue / b.sales * (1 - parseFloat(b.margin) / 100);
+          break;
+        case 'price':
+          aValue = a.revenue / a.sales;
+          bValue = b.revenue / b.sales;
+          break;
+        case 'margin':
+          aValue = parseFloat(a.margin);
+          bValue = parseFloat(b.margin);
+          break;
+        case 'sales':
+          aValue = a.sales;
+          bValue = b.sales;
+          break;
+        case 'classification':
+          const order = { Star: 1, Gem: 2, Popular: 3, Dog: 4 };
+          aValue = order[a.category] || 5;
+          bValue = order[b.category] || 5;
+          break;
+        default:
+          return 0;
+      }
+
+      if (typeof aValue === 'string') {
+        return sortDirection === 'asc'
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      } else {
+        return sortDirection === 'asc'
+          ? aValue - bValue
+          : bValue - aValue;
+      }
+    });
   };
 
   // Função para exportar relatório em PDF
@@ -480,23 +545,93 @@ const DashboardBI = ({ setView }) => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-white/10">
-                    <th className="text-left py-3 px-4 text-white/60 font-bold text-xs uppercase">Item</th>
-                    <th className="text-left py-3 px-4 text-white/60 font-bold text-xs uppercase">Categoria</th>
-                    <th className="text-right py-3 px-4 text-white/60 font-bold text-xs uppercase">Custo (€)</th>
-                    <th className="text-right py-3 px-4 text-white/60 font-bold text-xs uppercase">Preço Venda (€)</th>
-                    <th className="text-right py-3 px-4 text-white/60 font-bold text-xs uppercase">Margem (%)</th>
-                    <th className="text-right py-3 px-4 text-white/60 font-bold text-xs uppercase">Vendas (QTD)</th>
-                    <th className="text-center py-3 px-4 text-white/60 font-bold text-xs uppercase">Classificação</th>
+                    <th
+                      onClick={() => handleSort('name')}
+                      className="text-left py-3 px-4 text-white/60 hover:text-white font-bold text-xs uppercase cursor-pointer select-none transition-colors"
+                    >
+                      <div className="flex items-center gap-1">
+                        Item
+                        {sortColumn === 'name' && (
+                          <span className="text-primary">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('category')}
+                      className="text-left py-3 px-4 text-white/60 hover:text-white font-bold text-xs uppercase cursor-pointer select-none transition-colors"
+                    >
+                      <div className="flex items-center gap-1">
+                        Categoria
+                        {sortColumn === 'category' && (
+                          <span className="text-primary">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('cost')}
+                      className="text-right py-3 px-4 text-white/60 hover:text-white font-bold text-xs uppercase cursor-pointer select-none transition-colors"
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        Custo (€)
+                        {sortColumn === 'cost' && (
+                          <span className="text-primary">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('price')}
+                      className="text-right py-3 px-4 text-white/60 hover:text-white font-bold text-xs uppercase cursor-pointer select-none transition-colors"
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        Preço Venda (€)
+                        {sortColumn === 'price' && (
+                          <span className="text-primary">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('margin')}
+                      className="text-right py-3 px-4 text-white/60 hover:text-white font-bold text-xs uppercase cursor-pointer select-none transition-colors"
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        Margem (%)
+                        {sortColumn === 'margin' && (
+                          <span className="text-primary">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('sales')}
+                      className="text-right py-3 px-4 text-white/60 hover:text-white font-bold text-xs uppercase cursor-pointer select-none transition-colors"
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        Vendas (QTD)
+                        {sortColumn === 'sales' && (
+                          <span className="text-primary">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('classification')}
+                      className="text-center py-3 px-4 text-white/60 hover:text-white font-bold text-xs uppercase cursor-pointer select-none transition-colors"
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        Classificação
+                        {sortColumn === 'classification' && (
+                          <span className="text-primary">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                        )}
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[
+                  {sortProducts([
                     ...(menuEngineering.stars || []).map(p => ({ ...p, category: 'Star' })),
                     ...(menuEngineering.gems || []).map(p => ({ ...p, category: 'Gem' })),
                     ...(menuEngineering.populars || []).map(p => ({ ...p, category: 'Popular' })),
                     ...(menuEngineering.dogs || []).map(p => ({ ...p, category: 'Dog' }))
                   ]
-                    .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())))
                     .map((product, index) => {
                       const cost = product.revenue / product.sales * (1 - parseFloat(product.margin) / 100);
                       const price = product.revenue / product.sales;
@@ -1162,44 +1297,180 @@ const DashboardBI = ({ setView }) => {
           </div>
         </div>
       ) : activeTab === 'overview' && stats ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatCard
+              title="RECEITA BRUTA"
+              value={stats.receita.formatted}
+              trend={stats.receita.trend}
+            isUp={stats.receita.isUp}
+            subtitle={stats.receita.vs}
+            icon={DollarSign}
+            color="green"
+          />
           <StatCard
-            title="RECEITA BRUTA"
-            value={stats.receita.formatted}
-            trend={stats.receita.trend}
-          isUp={stats.receita.isUp}
-          subtitle={stats.receita.vs}
-          icon={DollarSign}
-          color="green"
-        />
-        <StatCard
-          title="CLIENTES (COVERS)"
-          value={stats.clientes.value}
-          trend={stats.clientes.trend}
-          isUp={stats.clientes.isUp}
-          subtitle={stats.clientes.vs}
-          icon={Users}
-          color="blue"
-        />
-        <StatCard
-          title="TICKET MÉDIO"
-          value={stats.ticketMedio.formatted}
-          trend={stats.ticketMedio.trend}
-          isUp={stats.ticketMedio.isUp}
-          subtitle={stats.ticketMedio.vs}
-          icon={TrendingUp}
-          color="purple"
-        />
-        <StatCard
-          title="FOOD COST %"
-          value={stats.foodCost.formatted}
-          trend={stats.foodCost.trend}
-          isUp={stats.foodCost.isUp}
-          subtitle={stats.foodCost.vs}
-          icon={AlertTriangle}
-          color="orange"
-        />
-      </div>
+            title="CLIENTES (COVERS)"
+            value={stats.clientes.value}
+            trend={stats.clientes.trend}
+            isUp={stats.clientes.isUp}
+            subtitle={stats.clientes.vs}
+            icon={Users}
+            color="blue"
+          />
+          <StatCard
+            title="TICKET MÉDIO"
+            value={stats.ticketMedio.formatted}
+            trend={stats.ticketMedio.trend}
+            isUp={stats.ticketMedio.isUp}
+            subtitle={stats.ticketMedio.vs}
+            icon={TrendingUp}
+            color="purple"
+          />
+          <StatCard
+            title="FOOD COST %"
+            value={stats.foodCost.formatted}
+            trend={stats.foodCost.trend}
+            isUp={stats.foodCost.isUp}
+            subtitle={stats.foodCost.vs}
+            icon={AlertTriangle}
+            color="orange"
+          />
+        </div>
+
+        {/* Categoria Vencedora Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-red-500/5 border border-yellow-500/30 rounded-3xl p-8 backdrop-blur-xl"
+        >
+          <div className="flex items-start justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-yellow-500/20 rounded-2xl flex items-center justify-center">
+                <span className="text-4xl">🏆</span>
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-1">
+                  Categoria Vencedora
+                </h3>
+                <p className="text-white/60 text-sm font-semibold">
+                  Melhor desempenho do período
+                </p>
+              </div>
+            </div>
+            <span className="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-yellow-400 font-bold text-xs">
+              #{selectedPeriod === 'hoje' ? 'HOJE' : selectedPeriod === 'semana' ? 'SEMANA' : selectedPeriod === 'mes' ? 'MÊS' : 'ANO'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Categoria Principal */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-3xl">🍝</span>
+                <div className="flex-1">
+                  <h4 className="text-xl font-black text-white">Pratos Principais</h4>
+                  <p className="text-white/60 text-xs font-semibold">Categoria líder em vendas</p>
+                </div>
+                <div className="px-3 py-1 bg-yellow-500/20 rounded-lg">
+                  <span className="text-yellow-400 font-black text-sm">#1</span>
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60 text-sm font-semibold">Receita Total</span>
+                  <span className="text-white font-black text-lg">€{(parseFloat(stats.receita.formatted.replace('€', '').replace(',', '')) * 0.52).toFixed(0)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60 text-sm font-semibold">% do Total</span>
+                  <span className="text-green-400 font-black text-lg">52%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60 text-sm font-semibold">Pratos Vendidos</span>
+                  <span className="text-white font-bold text-sm">{Math.floor(stats.clientes.value * 0.65)} unidades</span>
+                </div>
+              </div>
+
+              <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500" style={{ width: '52%' }}></div>
+              </div>
+            </div>
+
+            {/* Ranking Top 3 Categorias */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+              <h4 className="text-white font-black text-sm uppercase tracking-tight mb-4">
+                📊 Ranking de Categorias
+              </h4>
+              <div className="space-y-3">
+                {/* #1 - Pratos Principais */}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                    <span className="text-yellow-400 font-black text-xs">#1</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-white font-semibold text-sm">🍝 Pratos Principais</span>
+                      <span className="text-yellow-400 font-bold text-sm">52%</span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-yellow-500 to-yellow-400" style={{ width: '52%' }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* #2 - Bebidas */}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gray-400/20 rounded-lg flex items-center justify-center">
+                    <span className="text-gray-300 font-black text-xs">#2</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-white font-semibold text-sm">🍷 Bebidas</span>
+                      <span className="text-gray-300 font-bold text-sm">28%</span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-gray-400 to-gray-300" style={{ width: '28%' }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* #3 - Entradas */}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                    <span className="text-orange-400 font-black text-xs">#3</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-white font-semibold text-sm">🥗 Entradas</span>
+                      <span className="text-orange-400 font-bold text-sm">15%</span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-orange-500 to-orange-400" style={{ width: '15%' }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* #4 - Sobremesas */}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+                    <span className="text-white/60 font-black text-xs">#4</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-white/80 font-semibold text-sm">🍰 Sobremesas</span>
+                      <span className="text-white/60 font-bold text-sm">5%</span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-white/30" style={{ width: '5%' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+        </>
       ) : null}
 
       {/* Main Content Grid */}
