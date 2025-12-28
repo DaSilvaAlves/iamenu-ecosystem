@@ -209,6 +209,7 @@ const DashboardBI = () => {
           color="orange"
         />
       </div>
+      ) : null}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
