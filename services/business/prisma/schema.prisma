@@ -1,0 +1,146 @@
+// Prisma Schema - Business Intelligence API - SQLite (Local Development)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Restaurant (1 por user)
+model Restaurant {
+  id             String   @id @default(uuid())
+  userId         String   @unique // FK para user do Community
+
+  // Dados Básicos (Step 1)
+  name           String
+  address        String?
+  cuisine        String   // 'portuguesa', 'italiana', 'japonesa', etc
+  tables         Int?
+  openHour       String?  // "12:00"
+  closeHour      String?  // "23:00"
+
+  // Financeiro (Step 3)
+  monthlyCosts   Float?   // Custos fixos mensais
+  staffCount     Int?
+  averageTicket  Float?   // Ticket médio atual
+  suppliers      String?  // Lista de fornecedores (comma-separated)
+
+  // Metadata
+  onboardingCompleted Boolean @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  products       Product[]
+  orders         Order[]
+  settings       RestaurantSettings?
+
+  @@map("restaurants")
+}
+
+// Configurações e Metas (Step 4)
+model RestaurantSettings {
+  id               String @id @default(uuid())
+  restaurantId     String @unique
+
+  // Objetivos (Step 4)
+  revenueGoal      Float?  // Meta de receita mensal
+  foodCostTarget   Float?  // Food cost % ideal (ex: 30)
+  tableRotation    Int?    // Rotação de mesa alvo
+  segment          String? // 'fast-casual', 'casual', 'fine-dining', 'fast-food'
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  restaurant       Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@map("restaurant_settings")
+}
+
+// Produtos/Pratos do Menu
+model Product {
+  id             String   @id @default(uuid())
+  restaurantId   String
+
+  // Dados do Produto
+  name           String
+  category       String   // 'Main Course', 'Appetizer', 'Dessert', 'Beverage'
+  price          Float    // Preço de venda
+  cost           Float    // Custo de produção (food cost)
+  description    String?
+
+  // Métricas
+  popularity     Int      @default(0)  // 0-10 (manual ou calculado por vendas)
+  sales          Int      @default(0)  // Total de vendas
+  totalRevenue   Float    @default(0)  // Receita total gerada
+
+  // Flags
+  isActive       Boolean  @default(true)
+
+  // Metadata
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  restaurant     Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderItems     OrderItem[]
+
+  @@map("products")
+}
+
+// Vendas/Pedidos
+model Order {
+  id             String   @id @default(uuid())
+  restaurantId   String
+
+  // Dados do Pedido
+  customerId     String?  // Opcional: FK para customer (futuro)
+  total          Float    // Valor total do pedido
+  status         String   @default("completed") // 'pending', 'completed', 'cancelled'
+
+  // Metadata
+  orderDate      DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  // Relations
+  restaurant     Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  items          OrderItem[]
+
+  @@map("orders")
+}
+
+// Itens de cada pedido
+model OrderItem {
+  id             String   @id @default(uuid())
+  orderId        String
+  productId      String
+
+  quantity       Int
+  priceAtTime    Float    // Preço no momento da venda
+  costAtTime     Float    // Custo no momento da venda
+
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product  @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+// Analytics Cache (Opcional - para performance)
+model DailyStats {
+  id             String   @id @default(uuid())
+  restaurantId   String
+  date           DateTime
+
+  revenue        Float
+  customers      Int
+  avgTicket      Float
+  foodCostPct    Float
+
+  createdAt      DateTime @default(now())
+
+  @@unique([restaurantId, date])
+  @@map("daily_stats")
+}
