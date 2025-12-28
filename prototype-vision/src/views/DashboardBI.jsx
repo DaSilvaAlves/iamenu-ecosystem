@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { DashboardAPI } from '../services/businessAPI';
 import SalesTrendChart from '../components/SalesTrendChart';
+import DemandForecastChart from '../components/DemandForecastChart';
+import PeakHoursHeatmap from '../components/PeakHoursHeatmap';
 
 const DashboardBI = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -30,6 +32,8 @@ const DashboardBI = () => {
   const [topProducts, setTopProducts] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [menuEngineering, setMenuEngineering] = useState(null);
+  const [demandForecast, setDemandForecast] = useState(null);
+  const [peakHoursHeatmap, setPeakHoursHeatmap] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Carregar todos os dados da API
@@ -45,6 +49,15 @@ const DashboardBI = () => {
         // Carregar apenas Menu Engineering
         const menuRes = await DashboardAPI.getMenuEngineering();
         setMenuEngineering(menuRes.data);
+      } else if (activeTab === 'forecast') {
+        // Carregar apenas AI Forecast
+        const [forecastRes, heatmapRes] = await Promise.all([
+          DashboardAPI.getDemandForecast(),
+          DashboardAPI.getPeakHoursHeatmap()
+        ]);
+
+        setDemandForecast(forecastRes.data);
+        setPeakHoursHeatmap(heatmapRes.data);
       } else {
         // Buscar dados do overview em paralelo
         const [statsRes, trendsRes, predictionRes, productsRes, alertsRes] = await Promise.all([
@@ -280,6 +293,71 @@ const DashboardBI = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      ) : activeTab === 'forecast' && demandForecast && peakHoursHeatmap ? (
+        /* AI FORECAST */
+        <div className="space-y-6">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-3xl">📅</span>
+                <span className="text-2xl font-black text-blue-400">7 dias</span>
+              </div>
+              <h3 className="text-white font-bold text-sm">PREVISÃO</h3>
+              <p className="text-white/60 text-xs mt-1">Próxima semana</p>
+            </div>
+            <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-3xl">💰</span>
+                <span className="text-2xl font-black text-green-400">€{demandForecast.summary.totalRevenue.toFixed(0)}</span>
+              </div>
+              <h3 className="text-white font-bold text-sm">RECEITA PREVISTA</h3>
+              <p className="text-white/60 text-xs mt-1">Total 7 dias</p>
+            </div>
+            <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-3xl">📊</span>
+                <span className="text-2xl font-black text-purple-400">{demandForecast.summary.totalOrders}</span>
+              </div>
+              <h3 className="text-white font-bold text-sm">PEDIDOS PREVISTOS</h3>
+              <p className="text-white/60 text-xs mt-1">Total 7 dias</p>
+            </div>
+            <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/20 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-3xl">🎯</span>
+                <span className="text-2xl font-black text-orange-400">{demandForecast.summary.confidence}%</span>
+              </div>
+              <h3 className="text-white font-bold text-sm">CONFIANÇA</h3>
+              <p className="text-white/60 text-xs mt-1">Baseado em 30 dias</p>
+            </div>
+          </div>
+
+          {/* Demand Forecast Chart */}
+          <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-black text-white uppercase tracking-tight">
+                📈 Previsão de Demanda - Próximos 7 Dias
+              </h3>
+              <span className="px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 font-bold text-xs">
+                ML Forecast
+              </span>
+            </div>
+            <DemandForecastChart data={demandForecast} />
+          </div>
+
+          {/* Peak Hours Heatmap */}
+          <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-black text-white uppercase tracking-tight">
+                🔥 Mapa de Calor - Horários de Pico
+              </h3>
+              <span className="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-400 font-bold text-xs">
+                Últimos 30 dias
+              </span>
+            </div>
+            <PeakHoursHeatmap data={peakHoursHeatmap} />
           </div>
         </div>
       ) : activeTab === 'overview' && stats ? (

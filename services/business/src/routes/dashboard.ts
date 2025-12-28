@@ -33,4 +33,10 @@ router.get('/ai-prediction', dashboardController.getAIPrediction.bind(dashboardC
 // GET /menu-engineering - Matriz de rentabilidade
 router.get('/menu-engineering', dashboardController.getMenuEngineering.bind(dashboardController));
 
+// GET /demand-forecast - Previsão de demanda 7 dias
+router.get('/demand-forecast', dashboardController.getDemandForecast.bind(dashboardController));
+
+// GET /peak-hours-heatmap - Mapa de calor horários de pico
+router.get('/peak-hours-heatmap', dashboardController.getPeakHoursHeatmap.bind(dashboardController));
+
 export default router;

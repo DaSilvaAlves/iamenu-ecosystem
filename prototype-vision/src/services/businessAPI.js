@@ -210,6 +210,38 @@ export const DashboardAPI = {
     }
 
     return response.json();
+  },
+
+  /**
+   * Obter previsão de demanda para próximos 7 dias
+   */
+  async getDemandForecast() {
+    const response = await fetch(`${API_BASE}/dashboard/demand-forecast`, {
+      headers: getHeaders()
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get demand forecast');
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Obter mapa de calor de horários de pico semanais
+   */
+  async getPeakHoursHeatmap() {
+    const response = await fetch(`${API_BASE}/dashboard/peak-hours-heatmap`, {
+      headers: getHeaders()
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get peak hours heatmap');
+    }
+
+    return response.json();
   }
 };
 

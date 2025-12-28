@@ -209,6 +209,62 @@ export class DashboardController {
       });
     }
   }
+
+  /**
+   * GET /api/v1/business/dashboard/demand-forecast
+   * Previsão de demanda 7 dias
+   */
+  async getDemandForecast(req: Request, res: Response) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: 'Authentication required'
+        });
+      }
+
+      const forecast = await dashboardService.getDemandForecast(req.user.userId);
+
+      res.json({
+        success: true,
+        data: forecast
+      });
+    } catch (error: any) {
+      console.error('Error getting demand forecast:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to get demand forecast'
+      });
+    }
+  }
+
+  /**
+   * GET /api/v1/business/dashboard/peak-hours-heatmap
+   * Mapa de calor horários de pico
+   */
+  async getPeakHoursHeatmap(req: Request, res: Response) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: 'Authentication required'
+        });
+      }
+
+      const heatmap = await dashboardService.getPeakHoursHeatmap(req.user.userId);
+
+      res.json({
+        success: true,
+        data: heatmap
+      });
+    } catch (error: any) {
+      console.error('Error getting peak hours heatmap:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to get peak hours heatmap'
+      });
+    }
+  }
 }
 
 export const dashboardController = new DashboardController();

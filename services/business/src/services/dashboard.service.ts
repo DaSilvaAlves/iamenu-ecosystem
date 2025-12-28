@@ -586,6 +586,220 @@ export class DashboardService {
     };
   }
 
+  /**
+   * GET /dashboard/demand-forecast
+   * Previsão de demanda para próximos 7 dias
+   */
+  async getDemandForecast(userId: string) {
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { userId }
+    });
+
+    if (!restaurant) {
+      throw new Error('Restaurant not found');
+    }
+
+    // Analisar últimos 30 dias
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const orders = await prisma.order.findMany({
+      where: {
+        restaurantId: restaurant.id,
+        orderDate: {
+          gte: thirtyDaysAgo
+        },
+        status: 'completed'
+      }
+    });
+
+    // Agrupar vendas por dia da semana
+    const salesByDayOfWeek: Record<number, { revenue: number[]; orders: number[] }> = {
+      0: { revenue: [], orders: [] },
+      1: { revenue: [], orders: [] },
+      2: { revenue: [], orders: [] },
+      3: { revenue: [], orders: [] },
+      4: { revenue: [], orders: [] },
+      5: { revenue: [], orders: [] },
+      6: { revenue: [], orders: [] }
+    };
+
+    orders.forEach(order => {
+      const dayOfWeek = new Date(order.orderDate).getDay();
+      salesByDayOfWeek[dayOfWeek].revenue.push(order.total);
+      salesByDayOfWeek[dayOfWeek].orders.push(1);
+    });
+
+    // Gerar previsão para próximos 7 dias
+    const forecast = [];
+    const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const today = new Date();
+
+    for (let i = 1; i <= 7; i++) {
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() + i);
+      const dayOfWeek = targetDate.getDay();
+
+      const historicalRevenue = salesByDayOfWeek[dayOfWeek].revenue;
+      const historicalOrders = salesByDayOfWeek[dayOfWeek].orders;
+
+      // Calcular média
+      const avgRevenue = historicalRevenue.length > 0
+        ? historicalRevenue.reduce((a, b) => a + b, 0) / historicalRevenue.length
+        : 0;
+
+      const avgOrders = historicalOrders.length;
+
+      // Aplicar fator de sazonalidade (fim de semana +20%, meio da semana -10%)
+      let seasonalityFactor = 1.0;
+      if (dayOfWeek === 0 || dayOfWeek === 6) { // Domingo ou Sábado
+        seasonalityFactor = 1.2;
+      } else if (dayOfWeek === 2 || dayOfWeek === 3) { // Terça ou Quarta
+        seasonalityFactor = 0.9;
+      }
+
+      const predictedRevenue = avgRevenue * seasonalityFactor;
+      const predictedOrders = Math.round(avgOrders * seasonalityFactor);
+
+      // Calcular confiança (baseado em quantidade de dados históricos)
+      const confidence = Math.min(95, Math.round((historicalRevenue.length / 4) * 100));
+
+      forecast.push({
+        date: targetDate.toISOString().split('T')[0],
+        dayName: dayNames[dayOfWeek],
+        dayOfWeek,
+        revenue: Math.round(predictedRevenue),
+        orders: predictedOrders,
+        confidence,
+        trend: dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6 ? 'up' : 'stable'
+      });
+    }
+
+    // Calcular totais
+    const totalPredictedRevenue = forecast.reduce((sum, f) => sum + f.revenue, 0);
+    const totalPredictedOrders = forecast.reduce((sum, f) => sum + f.orders, 0);
+
+    return {
+      forecast,
+      summary: {
+        totalRevenue: totalPredictedRevenue,
+        totalOrders: totalPredictedOrders,
+        avgDailyRevenue: Math.round(totalPredictedRevenue / 7),
+        peakDay: forecast.reduce((max, f) => f.revenue > max.revenue ? f : max, forecast[0]),
+        confidence: Math.round(forecast.reduce((sum, f) => sum + f.confidence, 0) / 7)
+      }
+    };
+  }
+
+  /**
+   * GET /dashboard/peak-hours-heatmap
+   * Mapa de calor com horários de pico semanais
+   */
+  async getPeakHoursHeatmap(userId: string) {
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { userId }
+    });
+
+    if (!restaurant) {
+      throw new Error('Restaurant not found');
+    }
+
+    // Analisar últimos 30 dias
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const orders = await prisma.order.findMany({
+      where: {
+        restaurantId: restaurant.id,
+        orderDate: {
+          gte: thirtyDaysAgo
+        },
+        status: 'completed'
+      }
+    });
+
+    // Criar matriz 7 dias x 24 horas
+    const heatmapData: Record<number, Record<number, { count: number; revenue: number }>> = {};
+
+    // Inicializar matriz
+    for (let day = 0; day < 7; day++) {
+      heatmapData[day] = {};
+      for (let hour = 0; hour < 24; hour++) {
+        heatmapData[day][hour] = { count: 0, revenue: 0 };
+      }
+    }
+
+    // Preencher com dados reais
+    orders.forEach(order => {
+      const date = new Date(order.orderDate);
+      const dayOfWeek = date.getDay();
+      const hour = date.getHours();
+
+      heatmapData[dayOfWeek][hour].count += 1;
+      heatmapData[dayOfWeek][hour].revenue += order.total;
+    });
+
+    // Encontrar intensidade máxima (para normalização)
+    let maxCount = 0;
+    for (let day = 0; day < 7; day++) {
+      for (let hour = 0; hour < 24; hour++) {
+        if (heatmapData[day][hour].count > maxCount) {
+          maxCount = heatmapData[day][hour].count;
+        }
+      }
+    }
+
+    // Converter para formato do frontend
+    const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const heatmap = [];
+
+    for (let day = 0; day < 7; day++) {
+      const dayData = [];
+      for (let hour = 0; hour < 24; hour++) {
+        const cell = heatmapData[day][hour];
+        const intensity = maxCount > 0 ? (cell.count / maxCount) * 100 : 0;
+
+        dayData.push({
+          hour,
+          count: cell.count,
+          revenue: Math.round(cell.revenue),
+          intensity: Math.round(intensity) // 0-100 para cor do heatmap
+        });
+      }
+
+      heatmap.push({
+        day,
+        dayName: dayNames[day],
+        hours: dayData
+      });
+    }
+
+    // Identificar peak hours globais
+    const allCells = heatmap.flatMap(day =>
+      day.hours.map(h => ({ day: day.dayName, hour: h.hour, count: h.count, revenue: h.revenue }))
+    );
+
+    const peakHours = allCells
+      .filter(c => c.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    return {
+      heatmap,
+      peakHours,
+      summary: {
+        totalOrders: orders.length,
+        busiestDay: heatmap.reduce((max, day) => {
+          const dayTotal = day.hours.reduce((sum, h) => sum + h.count, 0);
+          const maxTotal = max.hours.reduce((sum, h) => sum + h.count, 0);
+          return dayTotal > maxTotal ? day : max;
+        }),
+        busiestHour: peakHours[0]?.hour || 12,
+        maxIntensity: maxCount
+      }
+    };
+  }
+
   // Helper
   private getPeriodLabel(period: string): string {
     const labels: Record<string, string> = {
