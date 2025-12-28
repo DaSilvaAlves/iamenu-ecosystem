@@ -22,6 +22,8 @@ import SalesTrendChart from '../components/SalesTrendChart';
 import DemandForecastChart from '../components/DemandForecastChart';
 import PeakHoursHeatmap from '../components/PeakHoursHeatmap';
 import BenchmarkChart from '../components/BenchmarkChart';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const DashboardBI = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -37,6 +39,8 @@ const DashboardBI = () => {
   const [peakHoursHeatmap, setPeakHoursHeatmap] = useState(null);
   const [benchmark, setBenchmark] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
   // Carregar todos os dados da API
   useEffect(() => {
@@ -96,6 +100,153 @@ const DashboardBI = () => {
     }
   };
 
+  // Função para atualizar/refresh dos dados
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadDashboardData();
+    setLastUpdated(new Date());
+    setRefreshing(false);
+  };
+
+  // Função para remover alerta (dismiss)
+  const handleDismissAlert = (alertId) => {
+    setAlerts(prevAlerts => prevAlerts.filter(alert => alert.id !== alertId && alert.title !== alertId));
+  };
+
+  // Função para exportar relatório em PDF
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(40, 40, 40);
+    doc.text('iaMenu Business Intelligence', 105, 20, { align: 'center' });
+
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Relatório de Performance', 105, 28, { align: 'center' });
+
+    doc.setFontSize(10);
+    const now = new Date();
+    doc.text(`Gerado em: ${now.toLocaleDateString('pt-PT')} às ${now.toLocaleTimeString('pt-PT')}`, 105, 35, { align: 'center' });
+
+    // Linha separadora
+    doc.setDrawColor(200, 200, 200);
+    doc.line(20, 40, 190, 40);
+
+    let yPos = 50;
+
+    // Estatísticas Principais
+    if (stats) {
+      doc.setFontSize(14);
+      doc.setTextColor(40, 40, 40);
+      doc.text('Estatísticas Principais', 20, yPos);
+      yPos += 10;
+
+      const statsData = [
+        ['Métrica', 'Valor', 'Tendência'],
+        ['Receita Bruta', stats.receita.formatted, stats.receita.trend],
+        ['Clientes (Covers)', stats.clientes.value.toString(), stats.clientes.trend],
+        ['Ticket Médio', stats.ticketMedio.formatted, stats.ticketMedio.trend],
+        ['Food Cost %', stats.foodCost.formatted, stats.foodCost.trend]
+      ];
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [statsData[0]],
+        body: statsData.slice(1),
+        theme: 'grid',
+        headStyles: { fillColor: [255, 107, 53], textColor: 255 },
+        styles: { fontSize: 10 },
+        margin: { left: 20, right: 20 }
+      });
+
+      yPos = doc.lastAutoTable.finalY + 15;
+    }
+
+    // Top 5 Produtos
+    if (topProducts && topProducts.length > 0) {
+      doc.setFontSize(14);
+      doc.setTextColor(40, 40, 40);
+      doc.text('Top 5 Produtos', 20, yPos);
+      yPos += 10;
+
+      const productsData = [
+        ['Produto', 'Vendas', 'Revenue', 'Margem'],
+        ...topProducts.slice(0, 5).map(p => [
+          p.name,
+          p.sales.toString(),
+          `€${p.revenue.toFixed(2)}`,
+          p.margin
+        ])
+      ];
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [productsData[0]],
+        body: productsData.slice(1),
+        theme: 'striped',
+        headStyles: { fillColor: [255, 107, 53], textColor: 255 },
+        styles: { fontSize: 9 },
+        margin: { left: 20, right: 20 }
+      });
+
+      yPos = doc.lastAutoTable.finalY + 15;
+    }
+
+    // Menu Engineering Summary
+    if (menuEngineering && yPos < 250) {
+      doc.setFontSize(14);
+      doc.setTextColor(40, 40, 40);
+      doc.text('Menu Engineering - Resumo', 20, yPos);
+      yPos += 10;
+
+      const menuData = [
+        ['Categoria', 'Produtos', 'Descrição'],
+        ['Stars ⭐', menuEngineering.stars?.length || 0, 'Alta margem + Alto volume'],
+        ['Gems 💎', menuEngineering.gems?.length || 0, 'Alta margem + Baixo volume'],
+        ['Populars 🐴', menuEngineering.populars?.length || 0, 'Baixa margem + Alto volume'],
+        ['Dogs 🐕', menuEngineering.dogs?.length || 0, 'Baixa margem + Baixo volume']
+      ];
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [menuData[0]],
+        body: menuData.slice(1),
+        theme: 'grid',
+        headStyles: { fillColor: [255, 107, 53], textColor: 255 },
+        styles: { fontSize: 9 },
+        margin: { left: 20, right: 20 }
+      });
+
+      yPos = doc.lastAutoTable.finalY + 15;
+    }
+
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        `Página ${i} de ${pageCount}`,
+        105,
+        doc.internal.pageSize.height - 10,
+        { align: 'center' }
+      );
+      doc.text(
+        'Gerado com iaMenu Business Intelligence',
+        105,
+        doc.internal.pageSize.height - 5,
+        { align: 'center' }
+      );
+    }
+
+    // Download
+    const fileName = `iamenu-relatorio-${now.toISOString().split('T')[0]}.pdf`;
+    doc.save(fileName);
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -123,11 +274,19 @@ const DashboardBI = () => {
             <option value="mes">Este Mês</option>
             <option value="ano">Este Ano</option>
           </select>
-          <button className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white font-semibold text-sm transition-all flex items-center gap-2">
-            <RefreshCcw size={16} />
-            Atualizar
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCcw size={16} className={refreshing ? 'animate-spin' : ''} />
+            {refreshing ? 'Atualizando...' : 'Atualizar'}
           </button>
-          <button className="px-6 py-2 bg-primary hover:bg-primary-hover rounded-xl text-white font-bold text-sm transition-all flex items-center gap-2">
+          <button
+            onClick={handleExportPDF}
+            disabled={loading || !stats}
+            className="px-6 py-2 bg-primary hover:bg-primary-hover rounded-xl text-white font-bold text-sm transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Download size={16} />
             Exportar Relatório
           </button>
@@ -684,7 +843,7 @@ const DashboardBI = () => {
           </div>
           <div className="space-y-4">
             {alerts.map((alert) => (
-              <AlertCard key={alert.id} alert={alert} />
+              <AlertCard key={alert.id} alert={alert} onDismiss={handleDismissAlert} />
             ))}
           </div>
         </div>
@@ -706,7 +865,7 @@ const DashboardBI = () => {
           <div className="space-y-4">
             {alerts && alerts.length > 0 ? (
               alerts.filter(a => a.type !== 'critical' && a.type !== 'warning').map((opp) => (
-                <AlertCard key={opp.id || opp.title} alert={opp} isOpportunity />
+                <AlertCard key={opp.id || opp.title} alert={opp} isOpportunity onDismiss={handleDismissAlert} />
               ))
             ) : (
               <p className="text-white/40 text-sm text-center py-4">Sem oportunidades no momento</p>
@@ -776,7 +935,7 @@ const StatCard = ({ title, value, trend, isUp, subtitle, icon: Icon, color }) =>
 };
 
 // Alert Card Component
-const AlertCard = ({ alert, isOpportunity = false }) => {
+const AlertCard = ({ alert, isOpportunity = false, onDismiss }) => {
   // Mapear tipo para ícone
   const getIcon = () => {
     switch (alert.type) {
@@ -828,7 +987,10 @@ const AlertCard = ({ alert, isOpportunity = false }) => {
       </div>
       <p className="text-white/70 text-sm mb-3 leading-relaxed">{alert.description}</p>
       <div className="flex items-center justify-between">
-        <button className="text-white/60 hover:text-white font-semibold text-xs transition-colors">
+        <button
+          onClick={() => onDismiss && onDismiss(alert.id || alert.title)}
+          className="text-white/60 hover:text-white font-semibold text-xs transition-colors hover:underline"
+        >
           Dismiss
         </button>
         <button className={`px-4 py-2 ${actionColor} text-white font-bold text-xs rounded-lg transition-all`}>
