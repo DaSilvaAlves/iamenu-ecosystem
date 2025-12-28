@@ -24,8 +24,9 @@ import PeakHoursHeatmap from '../components/PeakHoursHeatmap';
 import BenchmarkChart from '../components/BenchmarkChart';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import toast, { Toaster } from 'react-hot-toast';
 
-const DashboardBI = () => {
+const DashboardBI = ({ setView }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPeriod, setSelectedPeriod] = useState('semana');
   const [trendPeriod, setTrendPeriod] = useState('hoje');
@@ -111,6 +112,41 @@ const DashboardBI = () => {
   // Função para remover alerta (dismiss)
   const handleDismissAlert = (alertId) => {
     setAlerts(prevAlerts => prevAlerts.filter(alert => alert.id !== alertId && alert.title !== alertId));
+  };
+
+  // Funções de navegação
+  const handleNavigateToFoodCost = () => {
+    if (setView) {
+      setView('foodcost');
+    } else {
+      toast.error('Navegação não disponível');
+    }
+  };
+
+  // Funções de toast para funcionalidades em desenvolvimento
+  const showComingSoon = (featureName) => {
+    toast('🚧 ' + featureName + ' disponível em breve!', {
+      duration: 3000,
+      position: 'top-center',
+      style: {
+        background: '#1f2937',
+        color: '#fff',
+        border: '1px solid #374151',
+      },
+    });
+  };
+
+  // Handler para ações dos alertas
+  const handleAlertAction = (alert) => {
+    // Mapear ações específicas
+    if (alert.action === 'Rever Produto' || alert.action === 'Ver Detalhes') {
+      handleNavigateToFoodCost();
+    } else if (alert.action === 'Ver Estratégias' || alert.action === 'Ver Sugestões') {
+      showComingSoon('Estratégias de Precificação');
+    } else {
+      // Ação genérica
+      showComingSoon(alert.action);
+    }
   };
 
   // Função para exportar relatório em PDF
@@ -249,6 +285,9 @@ const DashboardBI = () => {
 
   return (
     <div className="space-y-8">
+      {/* Toast Notifications */}
+      <Toaster />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -771,7 +810,12 @@ const DashboardBI = () => {
                     {aiPrediction.suggestion}
                   </p>
                   <div className="mt-2 flex items-center gap-3">
-                    <button className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-lg transition-all">
+                    <button
+                      onClick={() => {
+                        toast.success(`✅ ${aiPrediction.action} confirmada! Prepare ${aiPrediction.estimatedCovers} cobertos e mantenha stock normal.`);
+                      }}
+                      className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-lg transition-all hover:scale-105"
+                    >
                       {aiPrediction.action}
                     </button>
                     <span className="text-xs text-white/60">
@@ -790,9 +834,12 @@ const DashboardBI = () => {
             <h3 className="text-lg font-black text-white uppercase tracking-tight">
               🏆 Top 5 Pratos (Margem)
             </h3>
-            <a href="#" className="text-primary hover:text-primary-hover font-bold text-xs uppercase tracking-wider transition-colors">
+            <button
+              onClick={() => setActiveTab('menu')}
+              className="text-primary hover:text-primary-hover font-bold text-xs uppercase tracking-wider transition-colors"
+            >
               Ver Menu →
-            </a>
+            </button>
           </div>
           <div className="space-y-3">
             {topProducts && topProducts.length > 0 ? (
@@ -843,7 +890,12 @@ const DashboardBI = () => {
           </div>
           <div className="space-y-4">
             {alerts.map((alert) => (
-              <AlertCard key={alert.id} alert={alert} onDismiss={handleDismissAlert} />
+              <AlertCard
+                key={alert.id}
+                alert={alert}
+                onDismiss={handleDismissAlert}
+                onAction={handleAlertAction}
+              />
             ))}
           </div>
         </div>
@@ -865,7 +917,13 @@ const DashboardBI = () => {
           <div className="space-y-4">
             {alerts && alerts.length > 0 ? (
               alerts.filter(a => a.type !== 'critical' && a.type !== 'warning').map((opp) => (
-                <AlertCard key={opp.id || opp.title} alert={opp} isOpportunity onDismiss={handleDismissAlert} />
+                <AlertCard
+                  key={opp.id || opp.title}
+                  alert={opp}
+                  isOpportunity
+                  onDismiss={handleDismissAlert}
+                  onAction={handleAlertAction}
+                />
               ))
             ) : (
               <p className="text-white/40 text-sm text-center py-4">Sem oportunidades no momento</p>
@@ -880,21 +938,25 @@ const DashboardBI = () => {
           icon="📊"
           title="Editar Fichas Técnicas"
           subtitle="Atualizar custos e receitas"
+          onClick={handleNavigateToFoodCost}
         />
         <QuickAction
           icon="💰"
           title="Ajustar Preços de Venda"
           subtitle="Otimizar margem de lucro"
+          onClick={handleNavigateToFoodCost}
         />
         <QuickAction
           icon="📈"
           title="Ver Análise Completa"
-          subtitle="Relatório detalhado em PDF"
+          subtitle="Todos os alertas e oportunidades"
+          onClick={() => setView && setView('alerts')}
         />
         <QuickAction
           icon="🤖"
           title="Sugestões da IA"
           subtitle="Menu engineering automático"
+          onClick={() => setActiveTab('menu')}
         />
       </div>
     </div>
@@ -935,7 +997,7 @@ const StatCard = ({ title, value, trend, isUp, subtitle, icon: Icon, color }) =>
 };
 
 // Alert Card Component
-const AlertCard = ({ alert, isOpportunity = false, onDismiss }) => {
+const AlertCard = ({ alert, isOpportunity = false, onDismiss, onAction }) => {
   // Mapear tipo para ícone
   const getIcon = () => {
     switch (alert.type) {
@@ -993,7 +1055,10 @@ const AlertCard = ({ alert, isOpportunity = false, onDismiss }) => {
         >
           Dismiss
         </button>
-        <button className={`px-4 py-2 ${actionColor} text-white font-bold text-xs rounded-lg transition-all`}>
+        <button
+          onClick={() => onAction && onAction(alert)}
+          className={`px-4 py-2 ${actionColor} text-white font-bold text-xs rounded-lg transition-all hover:scale-105`}
+        >
           {alert.action}
         </button>
       </div>
@@ -1002,8 +1067,11 @@ const AlertCard = ({ alert, isOpportunity = false, onDismiss }) => {
 };
 
 // Quick Action Component
-const QuickAction = ({ icon, title, subtitle }) => (
-  <button className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all group text-left">
+const QuickAction = ({ icon, title, subtitle, onClick }) => (
+  <button
+    onClick={onClick}
+    className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all group text-left hover:scale-105"
+  >
     <div className="text-3xl mb-2">{icon}</div>
     <h4 className="font-bold text-white text-sm mb-1 group-hover:text-primary transition-colors">{title}</h4>
     <p className="text-xs text-white/60">{subtitle}</p>

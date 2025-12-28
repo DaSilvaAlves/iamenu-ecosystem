@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import DashboardBI from './views/DashboardBI';
+import AlertsView from './views/AlertsView';
 import Academy from './views/Academy';
 import MarketingPlanner from './views/MarketingPlanner';
 import PaymentsAutomationView from './views/PaymentsAutomationView';
@@ -65,7 +66,8 @@ const App = () => {
             case 'grupo-detalhe': return <GroupDetailView groupId={selectedGroupId} onBack={() => setView('grupos')} />;
             case 'pesquisa': return <SearchView onNavigateToGroup={navigateToGroupDetail} />;
             case 'perfil': return <ProfileView />;
-            case 'dashboard': return <DashboardBI />;
+            case 'dashboard': return <DashboardBI setView={setView} />;
+            case 'alerts': return <AlertsView setView={setView} />;
             case 'foodcost': return <FoodCostView />;
             case 'marketing': return <MarketingPlanner />;
             case 'gastrolens': return <GastroLens />;
