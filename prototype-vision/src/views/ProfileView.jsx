@@ -129,9 +129,14 @@ const ProfileView = ({ userId }) => {
 
                         {/* Name & Info */}
                         <div style={{ flex: 1, paddingTop: '40px' }}>
-                            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '8px' }}>
+                            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '4px' }}>
                                 {profile?.restaurantName || 'Restaurador'}
                             </h1>
+                            {profile?.username && (
+                                <div style={{ fontSize: '0.95rem', color: 'var(--primary)', marginBottom: '8px' }}>
+                                    @{profile.username}
+                                </div>
+                            )}
                             <div style={{ display: 'flex', gap: '24px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                                 {profile?.restaurantType && (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -299,6 +304,7 @@ const ProfileView = ({ userId }) => {
 // Edit Profile Modal Component
 const EditProfileModal = ({ profile, onClose, onSave, userId }) => {
     const [formData, setFormData] = useState({
+        username: profile?.username || '',
         restaurantName: profile?.restaurantName || '',
         locationCity: profile?.locationCity || '',
         locationRegion: profile?.locationRegion || '',
@@ -308,9 +314,45 @@ const EditProfileModal = ({ profile, onClose, onSave, userId }) => {
     const [profilePhoto, setProfilePhoto] = useState(null);
     const [coverPhoto, setCoverPhoto] = useState(null);
     const [submitting, setSubmitting] = useState(false);
+    const [usernameError, setUsernameError] = useState('');
+
+    // Validate username: only alphanumeric and underscore
+    const validateUsername = (username) => {
+        if (!username) {
+            setUsernameError('');
+            return true;
+        }
+        const usernameRegex = /^[a-zA-Z0-9_]+$/;
+        if (!usernameRegex.test(username)) {
+            setUsernameError('Username só pode conter letras, números e underscore (_)');
+            return false;
+        }
+        if (username.length < 3) {
+            setUsernameError('Username deve ter pelo menos 3 caracteres');
+            return false;
+        }
+        if (username.length > 20) {
+            setUsernameError('Username deve ter no máximo 20 caracteres');
+            return false;
+        }
+        setUsernameError('');
+        return true;
+    };
+
+    const handleUsernameChange = (e) => {
+        const newUsername = e.target.value;
+        setFormData({ ...formData, username: newUsername });
+        validateUsername(newUsername);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validate username before submitting
+        if (!validateUsername(formData.username)) {
+            return;
+        }
+
         setSubmitting(true);
 
         try {
@@ -358,6 +400,37 @@ const EditProfileModal = ({ profile, onClose, onSave, userId }) => {
                 </div>
 
                 <form onSubmit={handleSubmit}>
+                    {/* Username */}
+                    <div style={{ marginBottom: '16px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>
+                            Username <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>(para menções @)</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.username}
+                            onChange={handleUsernameChange}
+                            placeholder="ex: chef_mario"
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                border: `1px solid ${usernameError ? '#ff6b6b' : 'var(--border)'}`,
+                                borderRadius: '8px',
+                                color: 'white'
+                            }}
+                        />
+                        {usernameError && (
+                            <div style={{ color: '#ff6b6b', fontSize: '0.8rem', marginTop: '6px' }}>
+                                {usernameError}
+                            </div>
+                        )}
+                        {!usernameError && formData.username && (
+                            <div style={{ color: '#51cf66', fontSize: '0.8rem', marginTop: '6px' }}>
+                                ✓ Username válido
+                            </div>
+                        )}
+                    </div>
+
                     {/* Restaurant Name */}
                     <div style={{ marginBottom: '16px' }}>
                         <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Nome do Restaurante</label>

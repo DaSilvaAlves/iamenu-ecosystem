@@ -1,7 +1,7 @@
 // ===== COMMUNITY API CLIENT =====
-// Connects Prototype-Vision to Community API Backend (localhost:3001)
+// Connects Prototype-Vision to Community API Backend (localhost:3003)
 
-const API_BASE = 'http://localhost:3001/api/v1/community';
+const API_BASE = 'http://localhost:3003/api/v1/community';
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {

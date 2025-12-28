@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   TrendingUp,
@@ -17,17 +17,36 @@ import {
   Info,
   Sparkles
 } from 'lucide-react';
+import { DashboardAPI } from '../services/businessAPI';
 
 const DashboardBI = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [selectedPeriod, setSelectedPeriod] = useState('hoje');
+  const [selectedPeriod, setSelectedPeriod] = useState('semana');
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock Data (depois vem da API/Onboarding)
-  const stats = {
-    receita: { value: '€2,845.50', trend: '+12.5%', isUp: true, vs: 'vs. ontem' },
-    clientes: { value: '142', trend: '-3.2%', isUp: false, vs: 'vs. média semanal' },
-    ticketMedio: { value: '€20.04', trend: '+5.4%', isUp: true, vs: 'Meta: €19.50' },
-    foodCost: { value: '28.4%', trend: 'Atenção', isUp: false, vs: 'Meta Ideal: 30%' }
+  // Carregar stats da API
+  useEffect(() => {
+    loadStats();
+  }, [selectedPeriod]);
+
+  const loadStats = async () => {
+    try {
+      setLoading(true);
+      const response = await DashboardAPI.getStats(selectedPeriod);
+      setStats(response.data);
+    } catch (error) {
+      console.error('Error loading stats:', error);
+      // Fallback para dados mock
+      setStats({
+        receita: { formatted: '€0', trend: '0%', isUp: true, vs: 'Sem dados' },
+        clientes: { value: 0, trend: '0%', isUp: false, vs: 'Sem dados' },
+        ticketMedio: { formatted: '€0', trend: '0%', isUp: true, vs: 'Sem dados' },
+        foodCost: { formatted: '0%', trend: 'Sem dados', isUp: true, vs: 'Sem dados' }
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const alerts = [
@@ -146,11 +165,17 @@ const DashboardBI = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="RECEITA BRUTA"
-          value={stats.receita.value}
-          trend={stats.receita.trend}
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-white/60">Carregando estatísticas...</p>
+        </div>
+      ) : stats ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard
+            title="RECEITA BRUTA"
+            value={stats.receita.formatted}
+            trend={stats.receita.trend}
           isUp={stats.receita.isUp}
           subtitle={stats.receita.vs}
           icon={DollarSign}

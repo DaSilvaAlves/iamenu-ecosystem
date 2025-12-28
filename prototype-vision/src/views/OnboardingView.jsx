@@ -15,10 +15,12 @@ import {
   Utensils,
   FileSpreadsheet
 } from 'lucide-react';
+import { OnboardingAPI } from '../services/businessAPI';
 
 const OnboardingView = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [apiResponse, setApiResponse] = useState(null);
   const [formData, setFormData] = useState({
     // Step 1: Dados Básicos
     restaurantName: '',
@@ -97,15 +99,46 @@ const OnboardingView = ({ onComplete }) => {
 
   const currentStepData = steps[currentStep];
 
-  const nextStep = () => {
+  const nextStep = async () => {
     if (currentStep === 3) {
-      // Trigger IA processing
+      // Trigger API call
       setCurrentStep(4);
       setIsProcessing(true);
-      setTimeout(() => {
+
+      try {
+        // Criar FormData para enviar
+        const apiFormData = new FormData();
+        apiFormData.append('restaurantName', formData.restaurantName);
+        apiFormData.append('address', formData.address);
+        apiFormData.append('cuisine', formData.cuisine);
+        apiFormData.append('tables', formData.tables || 0);
+        apiFormData.append('openHour', formData.openHour);
+        apiFormData.append('closeHour', formData.closeHour);
+        apiFormData.append('menuUploadType', formData.menuUploadType);
+        if (formData.menuFile) {
+          apiFormData.append('menuFile', formData.menuFile);
+        }
+        apiFormData.append('monthlyCosts', formData.monthlyCosts || 0);
+        apiFormData.append('staffCount', formData.staffCount || 0);
+        apiFormData.append('averageTicket', formData.averageTicket || 0);
+        apiFormData.append('suppliers', formData.suppliers || '');
+        apiFormData.append('revenueGoal', formData.revenueGoal || 0);
+        apiFormData.append('foodCostTarget', formData.foodCostTarget || 30);
+        apiFormData.append('tableRotation', formData.tableRotation || 3);
+        apiFormData.append('segment', formData.segment);
+
+        // Chamar API
+        const response = await OnboardingAPI.setup(apiFormData);
+        setApiResponse(response.data);
+
         setIsProcessing(false);
         setCurrentStep(5);
-      }, 3000);
+      } catch (error) {
+        console.error('Onboarding error:', error);
+        alert('Erro ao configurar restaurante: ' + error.message);
+        setIsProcessing(false);
+        setCurrentStep(3); // Voltar para step anterior
+      }
     } else if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
@@ -420,64 +453,78 @@ const OnboardingView = ({ onComplete }) => {
   );
 
   // Step 6: Results
-  const renderStep6 = () => (
-    <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-8">
-        <div className="text-6xl mb-4">🎉</div>
-        <h3 className="text-3xl font-black text-white mb-2">Dashboard Configurado!</h3>
-        <p className="text-white/60">Já identificámos oportunidades de melhoria</p>
-      </div>
+  const renderStep6 = () => {
+    const insights = apiResponse?.insights || {};
+    const productsCount = apiResponse?.productsCount || 0;
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 rounded-xl p-6">
-          <div className="flex items-start gap-3">
-            <TrendingUp size={24} className="text-green-400 flex-shrink-0" />
-            <div>
-              <h4 className="font-bold text-white mb-1">Potencial de Receita</h4>
-              <p className="text-2xl font-black text-green-400 mb-2">+€1,240</p>
-              <p className="text-sm text-white/60">4 oportunidades identificadas</p>
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="text-6xl mb-4">🎉</div>
+          <h3 className="text-3xl font-black text-white mb-2">Dashboard Configurado!</h3>
+          <p className="text-white/60">
+            {productsCount} produtos analisados - Já identificámos oportunidades de melhoria
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 rounded-xl p-6">
+            <div className="flex items-start gap-3">
+              <TrendingUp size={24} className="text-green-400 flex-shrink-0" />
+              <div>
+                <h4 className="font-bold text-white mb-1">Potencial de Receita</h4>
+                <p className="text-2xl font-black text-green-400 mb-2">
+                  +€{insights.potentialRevenue?.toFixed(0) || '0'}
+                </p>
+                <p className="text-sm text-white/60">
+                  {insights.opportunities || 0} oportunidades identificadas
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border border-yellow-500/30 rounded-xl p-6">
+            <div className="flex items-start gap-3">
+              <AlertTriangle size={24} className="text-yellow-400 flex-shrink-0" />
+              <div>
+                <h4 className="font-bold text-white mb-1">Alertas Críticos</h4>
+                <p className="text-2xl font-black text-yellow-400 mb-2">
+                  {insights.criticalAlerts || 0}
+                </p>
+                <p className="text-sm text-white/60">Requerem atenção imediata</p>
+              </div>
             </div>
           </div>
         </div>
-
-        <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border border-yellow-500/30 rounded-xl p-6">
-          <div className="flex items-start gap-3">
-            <AlertTriangle size={24} className="text-yellow-400 flex-shrink-0" />
-            <div>
-              <h4 className="font-bold text-white mb-1">Alertas Críticos</h4>
-              <p className="text-2xl font-black text-yellow-400 mb-2">3</p>
-              <p className="text-sm text-white/60">Requerem atenção imediata</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div className="bg-white/5 border border-white/20 rounded-xl p-6 mb-8">
         <h4 className="font-bold text-white mb-4">🎯 Primeiras Recomendações:</h4>
-        <ul className="space-y-3">
-          <li className="flex items-start gap-3 text-white/80">
-            <span className="text-green-400">✓</span>
-            <span><strong>Menu Engineering:</strong> 3 pratos com alta margem mas baixas vendas. Promova-os!</span>
-          </li>
-          <li className="flex items-start gap-3 text-white/80">
-            <span className="text-yellow-400">⚠</span>
-            <span><strong>Food Cost:</strong> "Bacalhau à Brás" tem custo 15% acima do ideal. Reveja fornecedor.</span>
-          </li>
-          <li className="flex items-start gap-3 text-white/80">
-            <span className="text-blue-400">ℹ</span>
-            <span><strong>Peak Hours:</strong> Sexta 20h-22h está a 98% de ocupação. Considere reservas.</span>
-          </li>
-        </ul>
+        {insights.recommendations && insights.recommendations.length > 0 ? (
+          <ul className="space-y-3">
+            {insights.recommendations.slice(0, 3).map((rec, idx) => (
+              <li key={idx} className="flex items-start gap-3 text-white/80">
+                <span className="text-green-400">✓</span>
+                <span>{rec}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-white/60">
+            Análise completa! Food Cost médio: {insights.avgFoodCost?.toFixed(1)}% |
+            Margem média: {insights.avgMargin?.toFixed(1)}%
+          </p>
+        )}
       </div>
 
-      <button
-        onClick={completeOnboarding}
-        className="w-full px-8 py-4 bg-[#ff4d00] hover:bg-[#e64500] text-white font-black text-lg rounded-xl transition-all shadow-lg shadow-[#ff4d00]/30"
-      >
-        Ir para o Dashboard →
-      </button>
-    </div>
-  );
+        <button
+          onClick={completeOnboarding}
+          className="w-full px-8 py-4 bg-[#ff4d00] hover:bg-[#e64500] text-white font-black text-lg rounded-xl transition-all shadow-lg shadow-[#ff4d00]/30"
+        >
+          Ir para o Dashboard →
+        </button>
+      </div>
+    );
+  };
 
   const renderStepContent = () => {
     switch (currentStep) {
