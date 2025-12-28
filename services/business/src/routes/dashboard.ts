@@ -39,4 +39,7 @@ router.get('/demand-forecast', dashboardController.getDemandForecast.bind(dashbo
 // GET /peak-hours-heatmap - Mapa de calor horários de pico
 router.get('/peak-hours-heatmap', dashboardController.getPeakHoursHeatmap.bind(dashboardController));
 
+// GET /benchmark - Benchmark vs. Setor
+router.get('/benchmark', dashboardController.getBenchmark.bind(dashboardController));
+
 export default router;

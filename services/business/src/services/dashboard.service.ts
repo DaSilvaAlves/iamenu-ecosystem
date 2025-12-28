@@ -800,6 +800,215 @@ export class DashboardService {
     };
   }
 
+  /**
+   * GET /dashboard/benchmark
+   * Benchmark vs. Setor (comparação com médias do mercado)
+   */
+  async getBenchmark(userId: string) {
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { userId },
+      include: { settings: true }
+    });
+
+    if (!restaurant) {
+      throw new Error('Restaurant not found');
+    }
+
+    // Obter dados atuais do restaurante (último mês)
+    const lastMonth = new Date();
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+
+    const orders = await prisma.order.findMany({
+      where: {
+        restaurantId: restaurant.id,
+        orderDate: {
+          gte: lastMonth
+        },
+        status: 'completed'
+      }
+    });
+
+    const products = await prisma.product.findMany({
+      where: { restaurantId: restaurant.id }
+    });
+
+    // Calcular métricas do restaurante
+    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+    const totalOrders = orders.length;
+    const avgTicket = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+    // Food Cost médio
+    const foodCosts = products.map(p => (p.cost / p.price) * 100);
+    const avgFoodCost = foodCosts.length > 0
+      ? foodCosts.reduce((sum, fc) => sum + fc, 0) / foodCosts.length
+      : 0;
+
+    // Calcular revenue per seat (se tiver mesas configuradas)
+    const tables = restaurant.tables || 20; // Default 20 mesas
+    const seatsPerTable = 4; // Default 4 lugares por mesa
+    const totalSeats = tables * seatsPerTable;
+    const revenuePerSeat = totalRevenue / totalSeats;
+
+    // Taxa de ocupação estimada (baseado em ticket médio e capacidade)
+    const maxDailyCapacity = totalSeats * 2; // 2 rotações por dia
+    const daysInMonth = 30;
+    const maxMonthlyOrders = maxDailyCapacity * daysInMonth;
+    const occupancyRate = (totalOrders / maxMonthlyOrders) * 100;
+
+    // BENCHMARKS DO SETOR (médias de mercado - Portugal/Europa)
+    const industryBenchmarks = {
+      foodCost: {
+        min: 28,
+        max: 32,
+        ideal: 30,
+        label: 'Food Cost Ideal'
+      },
+      avgTicket: {
+        casual: 15,
+        midRange: 25,
+        fine: 40,
+        label: 'Ticket Médio por Segmento'
+      },
+      occupancyRate: {
+        min: 60,
+        ideal: 75,
+        max: 85,
+        label: 'Taxa de Ocupação'
+      },
+      revenuePerSeat: {
+        casual: 800,
+        midRange: 1200,
+        fine: 2000,
+        label: 'Revenue per Seat/Mês'
+      }
+    };
+
+    // Determinar segmento do restaurante (baseado em ticket médio)
+    let segment: 'casual' | 'midRange' | 'fine' = 'midRange';
+    if (avgTicket < 20) segment = 'casual';
+    else if (avgTicket > 35) segment = 'fine';
+
+    // Comparações
+    const comparisons = {
+      foodCost: {
+        yours: parseFloat(avgFoodCost.toFixed(1)),
+        industry: industryBenchmarks.foodCost.ideal,
+        status: avgFoodCost <= industryBenchmarks.foodCost.max ? 'good' : 'warning',
+        diff: parseFloat((avgFoodCost - industryBenchmarks.foodCost.ideal).toFixed(1)),
+        label: 'Food Cost %'
+      },
+      avgTicket: {
+        yours: parseFloat(avgTicket.toFixed(2)),
+        industry: industryBenchmarks.avgTicket[segment],
+        status: avgTicket >= industryBenchmarks.avgTicket[segment] ? 'good' : 'warning',
+        diff: parseFloat((avgTicket - industryBenchmarks.avgTicket[segment]).toFixed(2)),
+        label: 'Ticket Médio'
+      },
+      occupancyRate: {
+        yours: parseFloat(occupancyRate.toFixed(1)),
+        industry: industryBenchmarks.occupancyRate.ideal,
+        status: occupancyRate >= industryBenchmarks.occupancyRate.min ? 'good' : 'warning',
+        diff: parseFloat((occupancyRate - industryBenchmarks.occupancyRate.ideal).toFixed(1)),
+        label: 'Taxa de Ocupação %'
+      },
+      revenuePerSeat: {
+        yours: parseFloat(revenuePerSeat.toFixed(2)),
+        industry: industryBenchmarks.revenuePerSeat[segment],
+        status: revenuePerSeat >= industryBenchmarks.revenuePerSeat[segment] * 0.8 ? 'good' : 'warning',
+        diff: parseFloat((revenuePerSeat - industryBenchmarks.revenuePerSeat[segment]).toFixed(2)),
+        label: 'Revenue per Seat'
+      }
+    };
+
+    // Classificação geral de performance
+    const scores = Object.values(comparisons).map(c => c.status === 'good' ? 1 : 0);
+    const totalScore = scores.reduce((sum, s) => sum + s, 0);
+    const scorePercentage = (totalScore / scores.length) * 100;
+
+    let performanceRating: 'excellent' | 'good' | 'average' | 'below' = 'average';
+    let performanceLabel = 'Médio';
+    let performanceColor = 'yellow';
+
+    if (scorePercentage >= 75) {
+      performanceRating = 'excellent';
+      performanceLabel = 'Excelente';
+      performanceColor = 'green';
+    } else if (scorePercentage >= 50) {
+      performanceRating = 'good';
+      performanceLabel = 'Bom';
+      performanceColor = 'blue';
+    } else if (scorePercentage < 25) {
+      performanceRating = 'below';
+      performanceLabel = 'Abaixo da Média';
+      performanceColor = 'red';
+    }
+
+    // Identificar oportunidades automaticamente
+    const opportunities = [];
+
+    if (comparisons.foodCost.status === 'warning') {
+      opportunities.push({
+        type: 'cost',
+        title: 'Reduzir Food Cost',
+        description: `Seu food cost de ${avgFoodCost.toFixed(1)}% está acima do ideal (30%). Reveja fornecedores e porções.`,
+        impact: 'high',
+        potentialSavings: totalRevenue * ((avgFoodCost - 30) / 100)
+      });
+    }
+
+    if (comparisons.avgTicket.status === 'warning') {
+      opportunities.push({
+        type: 'revenue',
+        title: 'Aumentar Ticket Médio',
+        description: `Ticket médio de €${avgTicket.toFixed(2)} está abaixo do mercado ${segment} (€${industryBenchmarks.avgTicket[segment]}). Implemente upselling.`,
+        impact: 'high',
+        potentialRevenue: (industryBenchmarks.avgTicket[segment] - avgTicket) * totalOrders
+      });
+    }
+
+    if (comparisons.occupancyRate.status === 'warning') {
+      opportunities.push({
+        type: 'capacity',
+        title: 'Melhorar Taxa de Ocupação',
+        description: `Taxa de ocupação de ${occupancyRate.toFixed(1)}% está abaixo do ideal (75%). Aumente marketing e sistema de reservas.`,
+        impact: 'medium',
+        potentialRevenue: (maxMonthlyOrders * 0.75 - totalOrders) * avgTicket
+      });
+    }
+
+    if (comparisons.revenuePerSeat.status === 'warning') {
+      opportunities.push({
+        type: 'efficiency',
+        title: 'Otimizar Revenue per Seat',
+        description: `Revenue per Seat de €${revenuePerSeat.toFixed(2)} está abaixo do mercado. Aumente rotação de mesas.`,
+        impact: 'medium',
+        potentialRevenue: (industryBenchmarks.revenuePerSeat[segment] - revenuePerSeat) * totalSeats
+      });
+    }
+
+    return {
+      segment,
+      segmentLabel: segment === 'casual' ? 'Casual Dining' : segment === 'fine' ? 'Fine Dining' : 'Mid-Range',
+      performance: {
+        rating: performanceRating,
+        label: performanceLabel,
+        color: performanceColor,
+        score: scorePercentage
+      },
+      comparisons,
+      opportunities,
+      summary: {
+        totalRevenue,
+        totalOrders,
+        avgTicket,
+        avgFoodCost,
+        occupancyRate,
+        revenuePerSeat,
+        totalSeats
+      }
+    };
+  }
+
   // Helper
   private getPeriodLabel(period: string): string {
     const labels: Record<string, string> = {

@@ -265,6 +265,34 @@ export class DashboardController {
       });
     }
   }
+
+  /**
+   * GET /api/v1/business/dashboard/benchmark
+   * Benchmark vs. Setor
+   */
+  async getBenchmark(req: Request, res: Response) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          error: 'Authentication required'
+        });
+      }
+
+      const benchmark = await dashboardService.getBenchmark(req.user.userId);
+
+      res.json({
+        success: true,
+        data: benchmark
+      });
+    } catch (error: any) {
+      console.error('Error getting benchmark:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to get benchmark data'
+      });
+    }
+  }
 }
 
 export const dashboardController = new DashboardController();

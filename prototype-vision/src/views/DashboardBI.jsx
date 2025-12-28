@@ -21,6 +21,7 @@ import { DashboardAPI } from '../services/businessAPI';
 import SalesTrendChart from '../components/SalesTrendChart';
 import DemandForecastChart from '../components/DemandForecastChart';
 import PeakHoursHeatmap from '../components/PeakHoursHeatmap';
+import BenchmarkChart from '../components/BenchmarkChart';
 
 const DashboardBI = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -34,6 +35,7 @@ const DashboardBI = () => {
   const [menuEngineering, setMenuEngineering] = useState(null);
   const [demandForecast, setDemandForecast] = useState(null);
   const [peakHoursHeatmap, setPeakHoursHeatmap] = useState(null);
+  const [benchmark, setBenchmark] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Carregar todos os dados da API
@@ -58,6 +60,10 @@ const DashboardBI = () => {
 
         setDemandForecast(forecastRes.data);
         setPeakHoursHeatmap(heatmapRes.data);
+      } else if (activeTab === 'benchmark') {
+        // Carregar apenas Benchmark
+        const benchmarkRes = await DashboardAPI.getBenchmark();
+        setBenchmark(benchmarkRes.data);
       } else {
         // Buscar dados do overview em paralelo
         const [statsRes, trendsRes, predictionRes, productsRes, alertsRes] = await Promise.all([
@@ -359,6 +365,150 @@ const DashboardBI = () => {
             </div>
             <PeakHoursHeatmap data={peakHoursHeatmap} />
           </div>
+        </div>
+      ) : activeTab === 'benchmark' && benchmark ? (
+        /* BENCHMARK */
+        <div className="space-y-6">
+          {/* Performance Card */}
+          <div className={`bg-gradient-to-br from-${benchmark.performance.color}-500/10 to-${benchmark.performance.color}-600/5 border border-${benchmark.performance.color}-500/20 rounded-3xl p-8 text-center`}>
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-${benchmark.performance.color}-500/20 mb-4">
+              <span className="text-4xl">
+                {benchmark.performance.rating === 'excellent' ? '🏆' :
+                 benchmark.performance.rating === 'good' ? '👍' :
+                 benchmark.performance.rating === 'average' ? '📊' : '⚠️'}
+              </span>
+            </div>
+            <h2 className="text-3xl font-black text-white mb-2">{benchmark.performance.label}</h2>
+            <p className="text-white/60 text-sm mb-4">
+              Performance Geral: {benchmark.performance.score.toFixed(0)}% • Segmento: {benchmark.segmentLabel}
+            </p>
+            <div className="flex justify-center gap-4 text-sm">
+              <div className="bg-white/5 px-4 py-2 rounded-lg">
+                <span className="text-white/60">Receita Mensal:</span>
+                <span className="ml-2 font-bold text-white">€{benchmark.summary.totalRevenue.toFixed(0)}</span>
+              </div>
+              <div className="bg-white/5 px-4 py-2 rounded-lg">
+                <span className="text-white/60">Pedidos:</span>
+                <span className="ml-2 font-bold text-white">{benchmark.summary.totalOrders}</span>
+              </div>
+              <div className="bg-white/5 px-4 py-2 rounded-lg">
+                <span className="text-white/60">Lugares:</span>
+                <span className="ml-2 font-bold text-white">{benchmark.summary.totalSeats}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Comparison Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Object.entries(benchmark.comparisons).map(([key, comp]) => (
+              <div
+                key={key}
+                className={`bg-gradient-to-br ${
+                  comp.status === 'good'
+                    ? 'from-green-500/10 to-green-600/5 border-green-500/20'
+                    : 'from-orange-500/10 to-orange-600/5 border-orange-500/20'
+                } border rounded-2xl p-6`}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white/60 text-xs font-bold uppercase">{comp.label}</h3>
+                  <span className="text-xl">{comp.status === 'good' ? '✅' : '⚠️'}</span>
+                </div>
+                <div className="mb-3">
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <span className="text-2xl font-black text-white">
+                      {comp.label.includes('%') || comp.label.includes('Food Cost')
+                        ? `${comp.yours}%`
+                        : comp.label.includes('Ticket') || comp.label.includes('Seat')
+                        ? `€${comp.yours.toFixed(2)}`
+                        : comp.yours.toFixed(1)}
+                    </span>
+                    <span className="text-xs text-white/60">você</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-semibold text-white/60">
+                      {comp.label.includes('%') || comp.label.includes('Food Cost')
+                        ? `${comp.industry}%`
+                        : comp.label.includes('Ticket') || comp.label.includes('Seat')
+                        ? `€${comp.industry.toFixed(2)}`
+                        : comp.industry.toFixed(1)}
+                    </span>
+                    <span className="text-xs text-white/40">setor</span>
+                  </div>
+                </div>
+                <div className={`text-xs font-bold ${comp.diff >= 0 && comp.label.includes('Food Cost') ? 'text-orange-400' : comp.diff >= 0 ? 'text-green-400' : 'text-orange-400'}`}>
+                  {comp.diff > 0 ? '+' : ''}{comp.label.includes('%') || comp.label.includes('Food Cost') ? `${comp.diff}%` : comp.label.includes('Ticket') || comp.label.includes('Seat') ? `€${comp.diff.toFixed(2)}` : comp.diff.toFixed(1)} vs. mercado
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Benchmark Chart */}
+          <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-black text-white uppercase tracking-tight">
+                📊 Comparação vs. Setor
+              </h3>
+              <span className="px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 font-bold text-xs">
+                {benchmark.segmentLabel}
+              </span>
+            </div>
+            <BenchmarkChart data={benchmark} />
+          </div>
+
+          {/* Opportunities */}
+          {benchmark.opportunities && benchmark.opportunities.length > 0 && (
+            <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-black text-white uppercase tracking-tight">
+                  💡 Oportunidades Identificadas
+                </h3>
+                <span className="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-yellow-400 font-bold text-xs">
+                  {benchmark.opportunities.length} Ações
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {benchmark.opportunities.map((opp, index) => (
+                  <div
+                    key={index}
+                    className={`bg-gradient-to-br ${
+                      opp.impact === 'high'
+                        ? 'from-red-500/10 to-transparent border-red-500/20'
+                        : 'from-yellow-500/10 to-transparent border-yellow-500/20'
+                    } border rounded-xl p-4`}
+                  >
+                    <div className="flex items-start gap-3 mb-3">
+                      <span className="text-2xl">
+                        {opp.type === 'cost' ? '💰' :
+                         opp.type === 'revenue' ? '📈' :
+                         opp.type === 'capacity' ? '👥' : '⚙️'}
+                      </span>
+                      <div className="flex-1">
+                        <h4 className="text-white font-bold text-sm mb-1">{opp.title}</h4>
+                        <span className={`text-xs font-semibold ${
+                          opp.impact === 'high' ? 'text-red-400' : 'text-yellow-400'
+                        }`}>
+                          {opp.impact === 'high' ? 'Alto Impacto' : 'Médio Impacto'}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-white/70 text-sm mb-3 leading-relaxed">{opp.description}</p>
+                    {opp.potentialRevenue !== undefined && (
+                      <div className="bg-white/5 rounded-lg p-2 text-center">
+                        <span className="text-green-400 font-bold">+€{opp.potentialRevenue.toFixed(0)}</span>
+                        <span className="text-white/60 text-xs ml-2">potencial/mês</span>
+                      </div>
+                    )}
+                    {opp.potentialSavings !== undefined && (
+                      <div className="bg-white/5 rounded-lg p-2 text-center">
+                        <span className="text-green-400 font-bold">-€{opp.potentialSavings.toFixed(0)}</span>
+                        <span className="text-white/60 text-xs ml-2">economia/mês</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : activeTab === 'overview' && stats ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

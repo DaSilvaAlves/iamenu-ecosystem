@@ -242,6 +242,22 @@ export const DashboardAPI = {
     }
 
     return response.json();
+  },
+
+  /**
+   * Obter benchmark vs. setor (comparação com médias do mercado)
+   */
+  async getBenchmark() {
+    const response = await fetch(`${API_BASE}/dashboard/benchmark`, {
+      headers: getHeaders()
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get benchmark data');
+    }
+
+    return response.json();
   }
 };
 
