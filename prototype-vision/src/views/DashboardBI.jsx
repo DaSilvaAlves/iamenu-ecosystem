@@ -22,6 +22,7 @@ import SalesTrendChart from '../components/SalesTrendChart';
 import DemandForecastChart from '../components/DemandForecastChart';
 import PeakHoursHeatmap from '../components/PeakHoursHeatmap';
 import BenchmarkChart from '../components/BenchmarkChart';
+import MenuEngineeringMatrix from '../components/MenuEngineeringMatrix';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import toast, { Toaster } from 'react-hot-toast';
@@ -42,6 +43,7 @@ const DashboardBI = ({ setView }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Carregar todos os dados da API
   useEffect(() => {
@@ -422,6 +424,120 @@ const DashboardBI = ({ setView }) => {
                 <p className="text-white/80 text-sm">{menuEngineering.opportunities.dogs.suggestion}</p>
               </div>
             )}
+          </div>
+
+          {/* Matriz de Popularidade vs. Lucratividade */}
+          <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-black text-white uppercase tracking-tight">
+                📊 Matriz de Popularidade vs. Lucratividade
+              </h3>
+              <span className="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-400 font-bold text-xs">
+                Menu Engineering
+              </span>
+            </div>
+            <MenuEngineeringMatrix data={menuEngineering} />
+          </div>
+
+          {/* Detalhes dos Items - Tabela Completa */}
+          <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-black text-white uppercase tracking-tight">
+                📋 Detalhes dos Items
+              </h3>
+              <div className="flex items-center gap-3">
+                {/* Search Bar */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Pesquisar item..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 text-sm focus:outline-none focus:border-primary transition-all w-64"
+                  />
+                  <svg
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                {/* Gerar Novas Análises */}
+                <button
+                  onClick={handleRefresh}
+                  className="px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-bold text-sm transition-all flex items-center gap-2"
+                >
+                  <Sparkles size={16} />
+                  Gerar novas análises
+                </button>
+              </div>
+            </div>
+
+            {/* Tabela */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left py-3 px-4 text-white/60 font-bold text-xs uppercase">Item</th>
+                    <th className="text-left py-3 px-4 text-white/60 font-bold text-xs uppercase">Categoria</th>
+                    <th className="text-right py-3 px-4 text-white/60 font-bold text-xs uppercase">Custo (€)</th>
+                    <th className="text-right py-3 px-4 text-white/60 font-bold text-xs uppercase">Preço Venda (€)</th>
+                    <th className="text-right py-3 px-4 text-white/60 font-bold text-xs uppercase">Margem (%)</th>
+                    <th className="text-right py-3 px-4 text-white/60 font-bold text-xs uppercase">Vendas (QTD)</th>
+                    <th className="text-center py-3 px-4 text-white/60 font-bold text-xs uppercase">Classificação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ...(menuEngineering.stars || []).map(p => ({ ...p, category: 'Star' })),
+                    ...(menuEngineering.gems || []).map(p => ({ ...p, category: 'Gem' })),
+                    ...(menuEngineering.populars || []).map(p => ({ ...p, category: 'Popular' })),
+                    ...(menuEngineering.dogs || []).map(p => ({ ...p, category: 'Dog' }))
+                  ]
+                    .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map((product, index) => {
+                      const cost = product.revenue / product.sales * (1 - parseFloat(product.margin) / 100);
+                      const price = product.revenue / product.sales;
+                      const categoryColors = {
+                        Star: 'text-yellow-400',
+                        Gem: 'text-green-400',
+                        Popular: 'text-blue-400',
+                        Dog: 'text-red-400'
+                      };
+                      const categoryBg = {
+                        Star: 'bg-yellow-500/10',
+                        Gem: 'bg-green-500/10',
+                        Popular: 'bg-blue-500/10',
+                        Dog: 'bg-red-500/10'
+                      };
+                      const categoryEmoji = {
+                        Star: '⭐',
+                        Gem: '💎',
+                        Popular: '🐴',
+                        Dog: '🐕'
+                      };
+
+                      return (
+                        <tr key={product.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                          <td className="py-3 px-4 text-white font-semibold text-sm">{product.name}</td>
+                          <td className="py-3 px-4 text-white/60 text-sm">{product.classification || 'N/A'}</td>
+                          <td className="py-3 px-4 text-white text-sm text-right">€{cost.toFixed(2)}</td>
+                          <td className="py-3 px-4 text-white text-sm text-right">€{price.toFixed(2)}</td>
+                          <td className="py-3 px-4 text-white font-bold text-sm text-right">{product.margin}%</td>
+                          <td className="py-3 px-4 text-white text-sm text-right">{product.sales}</td>
+                          <td className="py-3 px-4 text-center">
+                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${categoryBg[product.category]} ${categoryColors[product.category]}`}>
+                              {categoryEmoji[product.category]} {product.category}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Products Lists */}
