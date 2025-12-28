@@ -1004,6 +1004,162 @@ const DashboardBI = ({ setView }) => {
               </div>
             </div>
           )}
+
+          {/* Performance Mensal vs. Mercado */}
+          <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-black text-white uppercase tracking-tight">
+                📈 Performance Mensal vs. Mercado
+              </h3>
+              <span className="px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 font-bold text-xs">
+                Últimas 4 semanas
+              </span>
+            </div>
+            <div style={{ height: '300px' }}>
+              <div className="relative h-full">
+                {/* Gráfico simplificado com SVG */}
+                <svg viewBox="0 0 800 300" className="w-full h-full">
+                  {/* Grid lines */}
+                  <line x1="50" y1="250" x2="750" y2="250" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                  <line x1="50" y1="187.5" x2="750" y2="187.5" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                  <line x1="50" y1="125" x2="750" y2="125" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                  <line x1="50" y1="62.5" x2="750" y2="62.5" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+
+                  {/* Linha Você (azul) */}
+                  <polyline
+                    points="100,150 275,180 450,160 625,140"
+                    fill="none"
+                    stroke="#3b82f6"
+                    strokeWidth="3"
+                  />
+
+                  {/* Linha Média (amarela) */}
+                  <polyline
+                    points="100,170 275,175 450,172 625,165"
+                    fill="none"
+                    stroke="#eab308"
+                    strokeWidth="3"
+                    strokeDasharray="5,5"
+                  />
+
+                  {/* Linha Top 10% (verde) */}
+                  <polyline
+                    points="100,100 275,110 450,105 625,95"
+                    fill="none"
+                    stroke="#22c55e"
+                    strokeWidth="3"
+                    strokeDasharray="5,5"
+                  />
+
+                  {/* Labels */}
+                  <text x="100" y="275" fill="rgba(255,255,255,0.6)" fontSize="12" textAnchor="middle">Sem 1</text>
+                  <text x="275" y="275" fill="rgba(255,255,255,0.6)" fontSize="12" textAnchor="middle">Sem 2</text>
+                  <text x="450" y="275" fill="rgba(255,255,255,0.6)" fontSize="12" textAnchor="middle">Sem 3</text>
+                  <text x="625" y="275" fill="rgba(255,255,255,0.6)" fontSize="12" textAnchor="middle">Sem 4</text>
+                </svg>
+
+                {/* Legend */}
+                <div className="flex items-center justify-center gap-6 mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-0.5 bg-blue-500"></div>
+                    <span className="text-white/80 text-xs font-semibold">Você</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-0.5 bg-yellow-500" style={{ backgroundImage: 'repeating-linear-gradient(to right, #eab308 0px, #eab308 5px, transparent 5px, transparent 10px)' }}></div>
+                    <span className="text-white/80 text-xs font-semibold">Média</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-0.5 bg-green-500" style={{ backgroundImage: 'repeating-linear-gradient(to right, #22c55e 0px, #22c55e 5px, transparent 5px, transparent 10px)' }}></div>
+                    <span className="text-white/80 text-xs font-semibold">Top 10%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Análise Detalhada por Categoria */}
+          <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-black text-white uppercase tracking-tight">
+                📊 Análise Detalhada por Categoria
+              </h3>
+              <button
+                onClick={() => toast.success('📄 Relatório completo será enviado para o email!')}
+                className="text-primary hover:text-primary-hover font-bold text-sm flex items-center gap-1 transition-colors"
+              >
+                Ver relatório completo
+                <ArrowUpRight size={14} />
+              </button>
+            </div>
+
+            {/* Tabela */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left py-3 px-4 text-white/60 font-bold text-xs uppercase">Métrica</th>
+                    <th className="text-right py-3 px-4 text-white/60 font-bold text-xs uppercase">Seu Restaurante</th>
+                    <th className="text-right py-3 px-4 text-white/60 font-bold text-xs uppercase">Média do Setor</th>
+                    <th className="text-right py-3 px-4 text-white/60 font-bold text-xs uppercase">Top Performers</th>
+                    <th className="text-center py-3 px-4 text-white/60 font-bold text-xs uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* CMV */}
+                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td className="py-3 px-4 text-white font-semibold text-sm">Custo da Matéria Prima (CMV)</td>
+                    <td className="py-3 px-4 text-white text-sm text-right font-bold">28%</td>
+                    <td className="py-3 px-4 text-white/60 text-sm text-right">30%</td>
+                    <td className="py-3 px-4 text-green-400 text-sm text-right font-semibold">25%</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-400">
+                        ✅ Bom
+                      </span>
+                    </td>
+                  </tr>
+
+                  {/* Rotação de Mesa */}
+                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td className="py-3 px-4 text-white font-semibold text-sm">Rotação de Mesa</td>
+                    <td className="py-3 px-4 text-white text-sm text-right font-bold">1.2x</td>
+                    <td className="py-3 px-4 text-white/60 text-sm text-right">1.5x</td>
+                    <td className="py-3 px-4 text-green-400 text-sm text-right font-semibold">2.1x</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-orange-500/10 text-orange-400">
+                        ⚠️ Atenção
+                      </span>
+                    </td>
+                  </tr>
+
+                  {/* Staff Cost */}
+                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td className="py-3 px-4 text-white font-semibold text-sm">Staff Cost %</td>
+                    <td className="py-3 px-4 text-white text-sm text-right font-bold">32%</td>
+                    <td className="py-3 px-4 text-white/60 text-sm text-right">35%</td>
+                    <td className="py-3 px-4 text-green-400 text-sm text-right font-semibold">28%</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-400">
+                        ✅ Bom
+                      </span>
+                    </td>
+                  </tr>
+
+                  {/* Receita por m² */}
+                  <tr className="hover:bg-white/5 transition-colors">
+                    <td className="py-3 px-4 text-white font-semibold text-sm">Receita por m²</td>
+                    <td className="py-3 px-4 text-white text-sm text-right font-bold">€450/m²</td>
+                    <td className="py-3 px-4 text-white/60 text-sm text-right">€420/m²</td>
+                    <td className="py-3 px-4 text-green-400 text-sm text-right font-semibold">€580/m²</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-400">
+                        ✅ Bom
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       ) : activeTab === 'overview' && stats ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
