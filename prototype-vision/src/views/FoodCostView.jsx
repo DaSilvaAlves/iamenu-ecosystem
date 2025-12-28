@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import {
     Calculator,
     TrendingUp,
@@ -26,7 +28,9 @@ import {
     Utensils,
     Box,
     Sparkles,
-    CheckCircle2
+    CheckCircle2,
+    Download,
+    Image as ImageIcon
 } from 'lucide-react';
 
 const FoodCostView = () => {
@@ -34,6 +38,9 @@ const FoodCostView = () => {
     const [viewMode, setViewMode] = useState('analise'); // 'analise', 'gestor'
     const [selectedId, setSelectedId] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterCategoria, setFilterCategoria] = useState('all');
+    const [filterMargem, setFilterMargem] = useState('all');
 
     // Dados iniciais (O Conselho do Eurico)
     const dadosIniciais = [
@@ -120,6 +127,26 @@ const FoodCostView = () => {
     const selectedFicha = useMemo(() => fichas.find(f => f.id === selectedId) || fichas[0], [fichas, selectedId]);
     const metricasSelect = useMemo(() => calcularMetricas(selectedFicha), [selectedFicha]);
 
+    // 2.5. LÓGICA DE FILTRAGEM
+    const fichasFiltradas = useMemo(() => {
+        return fichas.filter(f => {
+            const m = calcularMetricas(f);
+
+            // Filtro de search
+            const matchSearch = f.nomePrato.toLowerCase().includes(searchQuery.toLowerCase());
+
+            // Filtro de categoria
+            const matchCategoria = filterCategoria === 'all' || f.categoria === filterCategoria;
+
+            // Filtro de margem
+            let matchMargem = true;
+            if (filterMargem === 'alta') matchMargem = m.margemReal >= 65;
+            if (filterMargem === 'baixa') matchMargem = m.margemReal < 65;
+
+            return matchSearch && matchCategoria && matchMargem;
+        });
+    }, [fichas, searchQuery, filterCategoria, filterMargem]);
+
     // 3. HANDLERS CRUD
     const handleSaveFicha = (novaFicha) => {
         if (novaFicha.id) {
@@ -138,6 +165,126 @@ const FoodCostView = () => {
             setFichas(filtered);
             if (selectedId === id) setSelectedId(filtered[0]?.id || null);
         }
+    };
+
+    const handleExportPDF = (ficha) => {
+        const doc = new jsPDF();
+        const metricas = calcularMetricas(ficha);
+        let yPos = 15;
+
+        // Header com fundo colorido
+        doc.setFillColor(247, 168, 51);
+        doc.rect(0, 0, 210, 35, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.text(ficha.nomePrato, 15, 20);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${ficha.categoria} • ${ficha.rendimento} doses • SKU: ${ficha.id}`, 15, 28);
+
+        // Reset para texto preto
+        doc.setTextColor(0, 0, 0);
+        yPos = 45;
+
+        // Métricas Financeiras
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('MÉTRICAS FINANCEIRAS', 15, yPos);
+        yPos += 8;
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Custo por Porção: €${metricas.custoPorPorcao.toFixed(2)}`, 20, yPos);
+        yPos += 6;
+        doc.text(`Preço de Venda: €${ficha.precoVendaAtual.toFixed(2)}`, 20, yPos);
+        yPos += 6;
+        doc.text(`Margem Real: ${metricas.margemReal.toFixed(1)}%`, 20, yPos);
+        yPos += 6;
+        doc.text(`Lucro por Prato: €${metricas.lucroPorPrato.toFixed(2)}`, 20, yPos);
+        yPos += 6;
+        doc.text(`Preço Sugerido: €${metricas.precoSugerido.toFixed(2)}`, 20, yPos);
+        yPos += 12;
+
+        // Lista de Materiais
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('LISTA DE MATERIAIS (BOM)', 15, yPos);
+        yPos += 8;
+
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Ingrediente', 20, yPos);
+        doc.text('Qtd', 100, yPos);
+        doc.text('FC', 130, yPos);
+        doc.text('Custo', 160, yPos);
+        yPos += 2;
+        doc.setLineWidth(0.5);
+        doc.line(15, yPos, 195, yPos);
+        yPos += 5;
+
+        doc.setFont('helvetica', 'normal');
+        ficha.ingredientes.forEach(ing => {
+            const custoLiq = ((ing.qtdBruta / ing.fatorCorrecao) * ing.precoCompra).toFixed(2);
+            doc.text(ing.nome, 20, yPos);
+            doc.text(`${ing.qtdBruta}${ing.unidadeCompra}`, 100, yPos);
+            doc.text(ing.fatorCorrecao.toFixed(2), 130, yPos);
+            doc.text(`€${custoLiq}`, 160, yPos);
+            yPos += 5;
+            if (yPos > 270) {
+                doc.addPage();
+                yPos = 20;
+            }
+        });
+        yPos += 10;
+
+        // Modo de Preparo
+        if (ficha.modoPreparo && yPos < 250) {
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('MODO DE PREPARO', 15, yPos);
+            yPos += 8;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            const lines = doc.splitTextToSize(ficha.modoPreparo, 180);
+            lines.forEach(line => {
+                if (yPos > 280) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                doc.text(line, 20, yPos);
+                yPos += 5;
+            });
+            yPos += 10;
+        }
+
+        // Informações Operacionais
+        if (yPos < 250) {
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('INFORMAÇÕES OPERACIONAIS', 15, yPos);
+            yPos += 8;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Tempo Preparo: ${ficha.tempoPreparoTotal || 0} min`, 20, yPos);
+            yPos += 6;
+            doc.text(`Tempo Cocção: ${ficha.tempoCoccao || 0} min`, 20, yPos);
+            yPos += 6;
+            doc.text(`Validade: ${ficha.validade || 'N/A'}`, 20, yPos);
+            yPos += 6;
+            doc.text(`Louça: ${ficha.loucaRecomendada || 'Padrão'}`, 20, yPos);
+        }
+
+        // Footer em todas as páginas
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text(`Ficha Técnica • iaMenu Food Cost System • Página ${i}/${pageCount}`, 15, 290);
+        }
+
+        doc.save(`Ficha-Tecnica-${ficha.nomePrato.replace(/\s+/g, '-')}.pdf`);
     };
 
     return (
@@ -259,27 +406,101 @@ const FoodCostView = () => {
                         className="grid grid-cols-1 lg:grid-cols-4 gap-8"
                     >
                         {/* Navegação de Fichas */}
-                        <div className="lg:col-span-1 glass-panel p-4 rounded-[32px] border border-white/5 space-y-2 h-fit">
-                            <p className="px-4 py-2 text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2">As Tuas Receitas</p>
-                            {fichas.map(f => (
+                        <div className="lg:col-span-1 glass-panel p-4 rounded-[32px] border border-white/5 space-y-4 h-fit">
+                            <p className="px-4 py-2 text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">As Tuas Receitas</p>
+
+                            {/* Search Bar */}
+                            <div className="relative px-2">
+                                <Search size={16} className="absolute left-5 top-1/2 transform -translate-y-1/2 text-white/20" />
+                                <input
+                                    type="text"
+                                    placeholder="Pesquisar prato..."
+                                    value={searchQuery}
+                                    onChange={e => setSearchQuery(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/20 outline-none focus:border-primary/50 transition-all"
+                                />
+                            </div>
+
+                            {/* Filtros */}
+                            <div className="px-2 space-y-2">
+                                <select
+                                    value={filterCategoria}
+                                    onChange={e => setFilterCategoria(e.target.value)}
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs font-bold outline-none focus:border-primary/50 transition-all"
+                                >
+                                    <option value="all">Todas Categorias</option>
+                                    <option value="Peixe">Peixe</option>
+                                    <option value="Carne">Carne</option>
+                                    <option value="Entrada">Entrada</option>
+                                    <option value="Sobremesa">Sobremesa</option>
+                                </select>
+
+                                <select
+                                    value={filterMargem}
+                                    onChange={e => setFilterMargem(e.target.value)}
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs font-bold outline-none focus:border-primary/50 transition-all"
+                                >
+                                    <option value="all">Todas Margens</option>
+                                    <option value="alta">Alta Margem (≥65%)</option>
+                                    <option value="baixa">Baixa Margem (&lt;65%)</option>
+                                </select>
+                            </div>
+
+                            {/* Lista de Fichas Filtradas */}
+                            <div className="space-y-2">
+                                {fichasFiltradas.length > 0 ? fichasFiltradas.map(f => (
                                 <button
                                     key={f.id}
                                     onClick={() => setSelectedId(f.id)}
-                                    className={`w-full p-4 rounded-2xl text-left transition-all group flex items-center justify-between ${selectedId === f.id ? 'bg-primary/20 border border-primary/20' : 'hover:bg-white/5'}`}
+                                    className={`w-full p-4 rounded-2xl text-left transition-all group flex items-center gap-3 ${selectedId === f.id ? 'bg-primary/20 border border-primary/20' : 'hover:bg-white/5'}`}
                                 >
-                                    <div>
+                                    {/* Mini Preview da Foto */}
+                                    {f.foto ? (
+                                        <div className="w-12 h-12 rounded-xl overflow-hidden border border-white/10 shrink-0">
+                                            <img src={f.foto} alt={f.nomePrato} className="w-full h-full object-cover" />
+                                        </div>
+                                    ) : (
+                                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                                            <ChefHat size={20} className="text-white/20" />
+                                        </div>
+                                    )}
+
+                                    <div className="flex-1">
                                         <p className={`font-black text-sm ${selectedId === f.id ? 'text-white' : 'text-white/60 group-hover:text-white'}`}>{f.nomePrato}</p>
                                         <p className="text-[10px] text-white/20 uppercase font-bold tracking-tighter">{f.categoria}</p>
                                     </div>
                                     <ChevronRight size={14} className={selectedId === f.id ? 'text-primary' : 'text-white/10'} />
                                 </button>
-                            ))}
+                            )) : (
+                                <div className="p-8 text-center">
+                                    <Filter size={32} className="text-white/10 mx-auto mb-3" />
+                                    <p className="text-white/30 text-xs font-bold">Nenhuma ficha encontrada</p>
+                                    <button
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setFilterCategoria('all');
+                                            setFilterMargem('all');
+                                        }}
+                                        className="mt-3 text-primary text-xs font-black uppercase tracking-wider hover:underline"
+                                    >
+                                        Limpar Filtros
+                                    </button>
+                                </div>
+                            )}
+                            </div>
                         </div>
 
                         {/* Detalhe da Ficha */}
                         <div className="lg:col-span-3 space-y-8">
                             {selectedFicha ? (
                                 <div className="glass-panel p-10 rounded-[40px] border border-white/5 bg-white/[0.01] space-y-12">
+                                    {/* Foto do Prato (se existir) */}
+                                    {selectedFicha.foto && (
+                                        <div className="w-full h-64 rounded-[32px] overflow-hidden border border-white/10 shadow-2xl mb-8">
+                                            <img src={selectedFicha.foto} alt={selectedFicha.nomePrato} className="w-full h-full object-cover" />
+                                        </div>
+                                    )}
+
                                     {/* Header da Ficha */}
                                     <div className="flex justify-between items-start">
                                         <div className="space-y-2">
@@ -298,6 +519,13 @@ const FoodCostView = () => {
                                             </div>
                                         </div>
                                         <div className="flex gap-3">
+                                            <button
+                                                onClick={() => handleExportPDF(selectedFicha)}
+                                                className="px-6 py-4 bg-green-500/10 text-green-400 rounded-2xl border border-green-500/20 hover:bg-green-500/20 transition-all font-black uppercase text-xs tracking-tighter flex items-center gap-2"
+                                                title="Exportar Ficha em PDF"
+                                            >
+                                                <Download size={18} /> Exportar PDF
+                                            </button>
                                             <button
                                                 onClick={() => handleDelete(selectedFicha.id)}
                                                 className="p-4 bg-red-500/10 text-red-500 rounded-2xl border border-red-500/20 hover:bg-red-500/20 transition-all"
@@ -397,6 +625,41 @@ const FoodCostView = () => {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Modo de Preparo e Empratamento */}
+                                    {(selectedFicha.modoPreparo || selectedFicha.instrucoesEmpratamento) && (
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                            {/* Modo de Preparo */}
+                                            {selectedFicha.modoPreparo && (
+                                                <div className="glass-panel p-8 rounded-[32px] border border-white/5 space-y-4">
+                                                    <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] flex items-center gap-2">
+                                                        <ChefHat size={14} /> Modo de Preparo
+                                                    </h4>
+                                                    <div className="text-white/70 text-sm leading-relaxed whitespace-pre-line font-medium">
+                                                        {selectedFicha.modoPreparo}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Instruções de Empratamento */}
+                                            {selectedFicha.instrucoesEmpratamento && (
+                                                <div className="glass-panel p-8 rounded-[32px] border border-white/5 space-y-4">
+                                                    <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] flex items-center gap-2">
+                                                        <Utensils size={14} /> Empratamento
+                                                    </h4>
+                                                    <div className="text-white/70 text-sm leading-relaxed font-medium">
+                                                        {selectedFicha.instrucoesEmpratamento}
+                                                    </div>
+                                                    {selectedFicha.loucaRecomendada && (
+                                                        <div className="pt-4 border-t border-white/5">
+                                                            <p className="text-[9px] text-white/30 uppercase font-black mb-1">Louça Recomendada:</p>
+                                                            <p className="text-white/80 text-xs font-bold">{selectedFicha.loucaRecomendada}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="p-24 glass-panel rounded-[40px] border border-white/5 text-center space-y-6">
@@ -466,11 +729,23 @@ const EditorForm = ({ initialData, onSave, onCancel }) => {
         precoVendaAtual: initialData.precoVendaAtual || 0,
         tempoPreparoTotal: initialData.tempoPreparoTotal || 15,
         tempoCoccao: initialData.tempoCoccao || 10,
+        foto: initialData.foto || null,
         ingredientes: initialData.ingredientes || [
             { id: Date.now(), nome: '', qtdBruta: 0, fatorCorrecao: 1, precoCompra: 0, unidadeCompra: 'kg' }
         ],
         ...initialData
     });
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setForm({ ...form, foto: reader.result });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const addIngrediente = () => {
         setForm({
@@ -524,6 +799,52 @@ const EditorForm = ({ initialData, onSave, onCancel }) => {
                         className="editor-input"
                     />
                 </InputGroup>
+            </div>
+
+            {/* Bloco 1.5: Upload de Foto */}
+            <div className="glass-panel p-8 rounded-[32px] border border-white/5 bg-white/[0.01]">
+                <h3 className="text-xs font-black text-white/30 uppercase tracking-[0.4em] mb-6">Fotografia do Prato</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                            id="photo-upload"
+                        />
+                        <label
+                            htmlFor="photo-upload"
+                            className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-white/10 rounded-3xl cursor-pointer hover:border-primary/30 transition-all group"
+                        >
+                            {form.foto ? (
+                                <div className="relative w-full">
+                                    <img src={form.foto} className="w-full h-48 object-cover rounded-2xl" alt="Preview" />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl">
+                                        <p className="text-white font-black text-sm uppercase">Trocar Fotografia</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <ImageIcon size={40} className="text-white/20 mb-4" />
+                                    <p className="text-white/60 font-bold text-sm">Clique para adicionar uma foto</p>
+                                    <p className="text-white/20 text-xs mt-2">JPG, PNG, WEBP até 5MB</p>
+                                </>
+                            )}
+                        </label>
+                    </div>
+                    {form.foto && (
+                        <div className="flex items-center">
+                            <button
+                                type="button"
+                                onClick={() => setForm({ ...form, foto: null })}
+                                className="px-4 py-2 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-all font-bold text-xs uppercase flex items-center gap-2"
+                            >
+                                <X size={14} /> Remover Foto
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Bloco 2: Ingredientes */}
