@@ -17,7 +17,7 @@ import {
     Image as ImageIcon,
     Clock
 } from 'lucide-react';
-import { generateDishAnalysis, enhanceFoodImage } from '../utils/GeminiService';
+// GeminiService removido - agora usamos serverless function!
 
 const GastroLens = () => {
     // 1. ESTADOS
@@ -28,7 +28,6 @@ const GastroLens = () => {
     const [error, setError] = useState(null);
     const [dishName, setDishName] = useState('');
     const [ingredients, setIngredients] = useState('');
-    const [apiKey, setApiKey] = useState(localStorage.getItem('iaMenu_Gemini_Key') || '');
     const [savedScans, setSavedScans] = useState([]);
 
     const fileInputRef = useRef(null);
@@ -57,33 +56,49 @@ const GastroLens = () => {
     const handleProcess = async () => {
         if (!originalImage || !dishName) return;
 
-        if (!apiKey) {
-            setError("Por favor, insira a sua Gemini API Key.");
-            setStatus('ERROR');
-            return;
-        }
-
         setStatus('PROCESSING');
         setError(null);
-        localStorage.setItem('iaMenu_Gemini_Key', apiKey);
 
         try {
-            const base64Data = originalImage.split(',')[1];
-            const mimeType = originalImage.split(';')[0].split(':')[1];
+            // Chamar a serverless function (API key segura no servidor!)
+            const response = await fetch('/api/analyze-dish', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image: originalImage,
+                    dishName,
+                    ingredients
+                })
+            });
 
-            // Executar em paralelo
-            const [enhancedImg, result] = await Promise.all([
-                enhanceFoodImage(apiKey, base64Data, mimeType),
-                generateDishAnalysis(apiKey, base64Data, mimeType, dishName, ingredients)
-            ]);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Falha ao processar imagem');
+            }
 
-            setEnhancedImage(`data:${mimeType};base64,${enhancedImg}`);
-            setAnalysis(result);
+            const data = await response.json();
+
+            // Simular enhancement de imagem (por agora)
+            // TODO: Implementar enhancement real no backend
+            setEnhancedImage(originalImage);
+            setAnalysis(data.analysis);
             setStatus('SUCCESS');
+
+            toast.success('✅ Análise concluída com sucesso!', {
+                icon: '🎨',
+                duration: 3000
+            });
+
         } catch (err) {
-            console.error(err);
-            setError("Falha ao processar a imagem. Verifica a tua API Key e tenta de novo.");
+            console.error('Erro ao processar:', err);
+            setError(err.message || "Falha ao processar a imagem. Tenta novamente.");
             setStatus('ERROR');
+
+            toast.error('❌ Erro ao processar imagem', {
+                duration: 4000
+            });
         }
     };
 
@@ -202,14 +217,17 @@ const GastroLens = () => {
                                     />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-white/20 uppercase tracking-widest px-2">Gemini API Key</label>
-                                    <input
-                                        type="password"
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white/40 font-mono text-xs outline-none focus:border-primary/50 transition-all font-bold"
-                                        value={apiKey}
-                                        onChange={e => setApiKey(e.target.value)}
-                                    />
+                                {/* API Key removida - agora é serverless! ✨ */}
+                                <div className="p-4 bg-primary/5 border border-primary/10 rounded-2xl flex items-start gap-3">
+                                    <Sparkles className="text-primary shrink-0 mt-1" size={16} />
+                                    <div>
+                                        <p className="text-xs text-white/80 font-bold leading-relaxed">
+                                            🎉 <strong className="text-primary">100% Pronto a usar!</strong>
+                                        </p>
+                                        <p className="text-[10px] text-white/40 font-medium mt-1">
+                                            Não precisas de API key. A IA está sempre disponível para toda a comunidade iaMenu!
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
