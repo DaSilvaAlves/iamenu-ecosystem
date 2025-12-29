@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import toast, { Toaster } from 'react-hot-toast';
 import {
     Camera,
     Upload,
@@ -13,7 +14,8 @@ import {
     ArrowRight,
     Search,
     Brain,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Clock
 } from 'lucide-react';
 import { generateDishAnalysis, enhanceFoodImage } from '../utils/GeminiService';
 
@@ -27,8 +29,15 @@ const GastroLens = () => {
     const [dishName, setDishName] = useState('');
     const [ingredients, setIngredients] = useState('');
     const [apiKey, setApiKey] = useState(localStorage.getItem('iaMenu_Gemini_Key') || '');
+    const [savedScans, setSavedScans] = useState([]);
 
     const fileInputRef = useRef(null);
+
+    // Carregar scans salvos ao montar
+    useEffect(() => {
+        const scans = JSON.parse(localStorage.getItem('iaMenu_gastrolens_scans') || '[]');
+        setSavedScans(scans);
+    }, []);
 
     // 2. HANDLERS
     const handleImageChange = (e) => {
@@ -88,8 +97,54 @@ const GastroLens = () => {
         setError(null);
     };
 
+    const handleCopyDescription = () => {
+        if (analysis?.description) {
+            navigator.clipboard.writeText(analysis.description).then(() => {
+                toast.success('✅ Descrição copiada para a área de transferência!', {
+                    duration: 3000,
+                    icon: '📋',
+                });
+            }).catch(() => {
+                toast.error('❌ Erro ao copiar descrição');
+            });
+        }
+    };
+
+    const handleAddToMenu = () => {
+        // Guardar scan no localStorage para integração com Food Cost
+        const currentScans = JSON.parse(localStorage.getItem('iaMenu_gastrolens_scans') || '[]');
+        const newScan = {
+            id: `scan-${Date.now()}`,
+            dishName,
+            originalImage,
+            enhancedImage,
+            analysis,
+            timestamp: new Date().toISOString()
+        };
+        const updatedScans = [newScan, ...currentScans].slice(0, 10); // Manter apenas últimos 10
+        localStorage.setItem('iaMenu_gastrolens_scans', JSON.stringify(updatedScans));
+        setSavedScans(updatedScans);
+
+        toast.success('✅ Scan guardado! Agora podes adicionar ao Food Cost.', {
+            duration: 4000,
+            icon: '💾',
+        });
+    };
+
+    const loadPreviousScan = (scan) => {
+        setDishName(scan.dishName);
+        setOriginalImage(scan.originalImage);
+        setEnhancedImage(scan.enhancedImage);
+        setAnalysis(scan.analysis);
+        setStatus('SUCCESS');
+        toast.success('✅ Scan anterior carregado!', {
+            icon: '🔄',
+        });
+    };
+
     return (
         <div className="max-w-6xl mx-auto space-y-8 pb-20">
+            <Toaster position="top-right" />
             {/* Header Premium */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 glass-effect rounded-[32px] border border-white/10 shadow-2xl relative overflow-hidden bg-white/[0.02]">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 blur-[100px] -z-10" />
@@ -208,6 +263,47 @@ const GastroLens = () => {
                                 </div>
                             )}
                         </div>
+
+                        {/* Galeria de Scans Anteriores */}
+                        {savedScans.length > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="glass-panel p-8 rounded-[40px] border border-white/5"
+                            >
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-lg font-black text-white italic uppercase tracking-tighter flex items-center gap-2">
+                                        <Clock className="text-primary" size={20} /> Scans Recentes
+                                    </h3>
+                                    <span className="text-white/40 text-xs font-bold">{savedScans.length} scans salvos</span>
+                                </div>
+
+                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                    {savedScans.map((scan) => (
+                                        <button
+                                            key={scan.id}
+                                            onClick={() => loadPreviousScan(scan)}
+                                            className="group relative aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/30 transition-all"
+                                        >
+                                            <img
+                                                src={scan.enhancedImage || scan.originalImage}
+                                                alt={scan.dishName}
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="absolute bottom-0 left-0 right-0 p-3">
+                                                    <p className="text-white font-black text-xs truncate">{scan.dishName}</p>
+                                                    <p className="text-white/60 text-[9px] font-bold">
+                                                        {new Date(scan.timestamp).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
                     </motion.div>
                 ) : status === 'PROCESSING' ? (
                     <motion.div
@@ -275,36 +371,98 @@ const GastroLens = () => {
                                     "{analysis?.description}"
                                 </p>
                                 <div className="pt-6 flex gap-4 border-t border-white/5">
-                                    <button className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-                                        Copiar Descrição
+                                    <button
+                                        onClick={handleCopyDescription}
+                                        className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
+                                    >
+                                        <span>📋</span> Copiar Descrição
                                     </button>
-                                    <button className="px-6 py-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-                                        Adicionar ao Menu Digital
+                                    <button
+                                        onClick={handleAddToMenu}
+                                        className="px-6 py-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
+                                    >
+                                        <span>💾</span> Adicionar ao Menu Digital
                                     </button>
                                 </div>
                             </div>
 
                             {/* Alérgenos */}
-                            <div className="glass-panel p-10 rounded-[40px] border border-white/5 space-y-8 bg-primary/[0.02]">
+                            <div className="glass-panel p-10 rounded-[40px] border border-white/5 space-y-6 bg-primary/[0.02]">
                                 <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">Checkpoint Nutricional</h4>
 
-                                <div className="space-y-6">
+                                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                                     <AllergenIndicator
-                                        label="Contém Glúten"
+                                        label="Glúten"
                                         active={analysis?.hasGluten}
                                         severity="RED"
-                                        description={analysis?.hasGluten ? "Identificado rasto de cereais na base ou molho." : "Livre de rasto de cereais identificável."}
+                                        description={analysis?.hasGluten ? "Cereais identificados" : "Livre de cereais"}
                                     />
                                     <div className="w-full h-px bg-white/5" />
                                     <AllergenIndicator
-                                        label="Contém Lactose"
+                                        label="Lactose"
                                         active={analysis?.hasLactose}
                                         severity="BLUE"
-                                        description={analysis?.hasLactose ? "Presença de derivados de leite ou gordura animal." : "Ingredientes de base vegetal ou sem laticínios."}
+                                        description={analysis?.hasLactose ? "Derivados de leite" : "Sem laticínios"}
+                                    />
+                                    <div className="w-full h-px bg-white/5" />
+                                    <AllergenIndicator
+                                        label="Frutos Secos"
+                                        active={analysis?.hasNuts}
+                                        severity="RED"
+                                        description={analysis?.hasNuts ? "Traços de frutos secos" : "Sem frutos secos"}
+                                    />
+                                    <div className="w-full h-px bg-white/5" />
+                                    <AllergenIndicator
+                                        label="Peixe"
+                                        active={analysis?.hasFish}
+                                        severity="BLUE"
+                                        description={analysis?.hasFish ? "Contém peixe" : "Sem peixe"}
+                                    />
+                                    <div className="w-full h-px bg-white/5" />
+                                    <AllergenIndicator
+                                        label="Marisco"
+                                        active={analysis?.hasShellfish}
+                                        severity="RED"
+                                        description={analysis?.hasShellfish ? "Contém marisco" : "Sem marisco"}
+                                    />
+                                    <div className="w-full h-px bg-white/5" />
+                                    <AllergenIndicator
+                                        label="Ovos"
+                                        active={analysis?.hasEggs}
+                                        severity="BLUE"
+                                        description={analysis?.hasEggs ? "Contém ovos" : "Sem ovos"}
+                                    />
+                                    <div className="w-full h-px bg-white/5" />
+                                    <AllergenIndicator
+                                        label="Soja"
+                                        active={analysis?.hasSoy}
+                                        severity="BLUE"
+                                        description={analysis?.hasSoy ? "Contém soja" : "Sem soja"}
+                                    />
+                                    <div className="w-full h-px bg-white/5" />
+                                    <AllergenIndicator
+                                        label="Sésamo"
+                                        active={analysis?.hasSesame}
+                                        severity="RED"
+                                        description={analysis?.hasSesame ? "Contém sésamo" : "Sem sésamo"}
+                                    />
+                                    <div className="w-full h-px bg-white/5" />
+                                    <AllergenIndicator
+                                        label="Sulfitos"
+                                        active={analysis?.hasSulfites}
+                                        severity="BLUE"
+                                        description={analysis?.hasSulfites ? "Contém sulfitos" : "Sem sulfitos"}
+                                    />
+                                    <div className="w-full h-px bg-white/5" />
+                                    <AllergenIndicator
+                                        label="Aipo"
+                                        active={analysis?.hasCelery}
+                                        severity="BLUE"
+                                        description={analysis?.hasCelery ? "Contém aipo" : "Sem aipo"}
                                     />
                                 </div>
 
-                                <div className="p-4 bg-white/5 rounded-2xl flex items-start gap-3">
+                                <div className="p-4 bg-white/5 rounded-2xl flex items-start gap-3 mt-4">
                                     <Info className="text-white/20 shrink-0" size={16} />
                                     <p className="text-[9px] text-white/30 uppercase font-black leading-relaxed tracking-wider">
                                         Análise baseada em visão computacional. Recomenda-se validação técnica presencial.
@@ -312,6 +470,37 @@ const GastroLens = () => {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Sugestões de Melhoria da IA */}
+                        {analysis?.suggestions && analysis.suggestions.length > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="glass-panel p-10 rounded-[40px] border border-white/5 space-y-6"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Sparkles className="text-primary" size={24} />
+                                    <h4 className="text-xl font-black text-white uppercase italic tracking-tighter">Sugestões de Melhoria</h4>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {analysis.suggestions.map((suggestion, idx) => (
+                                        <div key={idx} className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl hover:border-primary/20 transition-all group">
+                                            <div className="flex items-start gap-4">
+                                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-all">
+                                                    <span className="text-lg">{suggestion.icon}</span>
+                                                </div>
+                                                <div>
+                                                    <h5 className="font-black text-white text-sm mb-2">{suggestion.title}</h5>
+                                                    <p className="text-white/60 text-xs leading-relaxed">{suggestion.description}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -336,5 +525,32 @@ const AllergenIndicator = ({ label, active, severity, description }) => (
         <p className="text-[11px] text-white/40 font-medium leading-relaxed">{description}</p>
     </div>
 );
+
+// CSS personalizado para scrollbar
+const styles = `
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(247, 168, 51, 0.3);
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(247, 168, 51, 0.5);
+}
+`;
+
+if (typeof document !== 'undefined') {
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = styles;
+    if (!document.head.querySelector('style[data-gastrolens]')) {
+        styleSheet.setAttribute('data-gastrolens', 'true');
+        document.head.appendChild(styleSheet);
+    }
+}
 
 export default GastroLens;
