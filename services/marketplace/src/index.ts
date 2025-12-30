@@ -4,12 +4,14 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import { PrismaClient } from '@prisma/client-marketplace';
 import { authenticateJWT } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
 
 const app: Application = express();
+const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3002;
 
 // Middleware
@@ -30,7 +32,51 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-// Public routes
+// --- Public Marketplace Routes ---
+
+// GET all suppliers
+app.get('/api/v1/marketplace/suppliers', async (req: Request, res: Response) => {
+  try {
+    const suppliers = await prisma.supplier.findMany({
+      // You can add ordering, filtering, pagination here later
+      orderBy: {
+        companyName: 'asc',
+      },
+    });
+    res.json(suppliers);
+  } catch (error) {
+    console.error('🔴 Failed to fetch suppliers:', error);
+    res.status(500).json({ error: 'Failed to fetch suppliers' });
+  }
+});
+
+// GET a single supplier by ID with its products
+app.get('/api/v1/marketplace/suppliers/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const supplier = await prisma.supplier.findUnique({
+      where: { id },
+      include: {
+        SupplierProducts: {
+          include: {
+            Product: true, // Include the full product details
+          },
+        },
+      },
+    });
+
+    if (!supplier) {
+      return res.status(404).json({ error: 'Supplier not found' });
+    }
+
+    res.json(supplier);
+  } catch (error) {
+    console.error(`🔴 Failed to fetch supplier with id ${id}:`, error);
+    res.status(500).json({ error: `Failed to fetch supplier with id ${id}` });
+  }
+});
+
+
 app.get('/api/v1/marketplace/public/stats', (req: Request, res: Response) => {
   res.json({
     totalSuppliers: 30,

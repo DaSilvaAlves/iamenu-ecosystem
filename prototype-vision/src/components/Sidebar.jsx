@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
     MessageSquare,
     ChevronDown,
@@ -24,31 +25,37 @@ import { CommunityAPI } from '../services/api';
 import NotificationBadge from './NotificationBadge';
 import NotificationsPanel from './NotificationsPanel';
 
-const NavItem = ({ icon: Icon, label, active, onClick, badge }) => (
-    <div
-        onClick={onClick}
-        className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 group ${active
-            ? 'bg-white/10 text-white'
-            : 'text-white/60 hover:text-white hover:bg-white/5'
-            }`}
-    >
-        <div className="flex items-center gap-3">
-            {Icon && <Icon size={18} className={active ? 'text-primary' : 'text-white/50 group-hover:text-primary'} />}
-            <span style={{ fontSize: '0.875rem' }}>{label}</span>
-        </div>
-        {badge && (
-            <span style={{
-                fontSize: '0.7rem',
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                color: 'var(--text-muted)'
-            }}>
-                {badge}
-            </span>
-        )}
-    </div>
-);
+const NavItem = ({ icon: Icon, label, to, badge }) => {
+    const location = useLocation();
+    const isActive = location.pathname === to;
+
+    return (
+        <Link
+            to={to}
+            className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 group ${isActive
+                    ? 'bg-white/10 text-white'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
+        >
+            <div className="flex items-center gap-3">
+                {Icon && <Icon size={18} className={isActive ? 'text-primary' : 'text-white/50 group-hover:text-primary'} />}
+                <span style={{ fontSize: '0.875rem' }}>{label}</span>
+            </div>
+            {badge && (
+                <span style={{
+                    fontSize: '0.7rem',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    color: 'var(--text-muted)'
+                }}>
+                    {badge}
+                </span>
+            )}
+        </Link>
+    );
+};
+
 
 const SidebarSection = ({ title, children, hasChevron = true }) => (
     <div style={{ marginBottom: '24px' }}>
@@ -72,10 +79,12 @@ const SidebarSection = ({ title, children, hasChevron = true }) => (
     </div>
 );
 
-const Sidebar = ({ currentView, setView, selectedGroup, setSelectedGroup }) => {
+const Sidebar = ({ selectedGroup, setSelectedGroup }) => {
     const [groups, setGroups] = useState([]);
     const [loadingGroups, setLoadingGroups] = useState(true);
     const [showNotifications, setShowNotifications] = useState(false);
+    const location = useLocation();
+    const isComunidadeActive = location.pathname === '/comunidade' || location.pathname === '/';
 
     useEffect(() => {
         loadGroups();
@@ -123,37 +132,37 @@ const Sidebar = ({ currentView, setView, selectedGroup, setSelectedGroup }) => {
             </div>
 
             <div style={{ marginBottom: '24px' }}>
-                <div
-                    onClick={() => setView('comunidade')}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all ${currentView === 'comunidade' ? 'bg-white/5 text-white' : 'text-text-muted hover:text-white'
+                <Link
+                    to="/comunidade"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all ${isComunidadeActive ? 'bg-white/5 text-white' : 'text-text-muted hover:text-white'
                         }`}
-                    style={{ backgroundColor: currentView === 'comunidade' ? 'rgba(255,255,255,0.08)' : 'transparent' }}
+                    style={{ backgroundColor: isComunidadeActive ? 'rgba(255,255,255,0.08)' : 'transparent' }}
                 >
                     <div style={{
                         padding: '6px',
                         borderRadius: '6px',
-                        backgroundColor: currentView === 'comunidade' ? 'var(--primary)' : 'rgba(255,255,255,0.05)'
+                        backgroundColor: isComunidadeActive ? 'var(--primary)' : 'rgba(255,255,255,0.05)'
                     }}>
-                        <MessageSquare size={16} color={currentView === 'comunidade' ? 'white' : 'inherit'} />
+                        <MessageSquare size={16} color={isComunidadeActive ? 'white' : 'inherit'} />
                     </div>
                     <span style={{ fontSize: '0.875rem', fontWeight: '500' }}>Feed</span>
-                </div>
+                </Link>
             </div>
 
             <SidebarSection title="Comece por aqui">
-                <NavItem label="Onboarding iaMenu" icon={Zap} active={currentView === 'onboarding'} onClick={() => setView('onboarding')} />
-                <NavItem label="Visão do Ecossistema" icon={Brain} active={currentView === 'visao'} onClick={() => setView('visao')} />
+                <NavItem label="Onboarding iaMenu" icon={Zap} to="/onboarding" />
+                <NavItem label="Visão do Ecossistema" icon={Brain} to="/visao" />
             </SidebarSection>
 
             <SidebarSection title="Academia e Gestão">
-                <NavItem label="Audit de Reputação Online" icon={Star} active={currentView === 'reputacao'} onClick={() => setView('reputacao')} />
-                <NavItem label="iaMenu PRO - Upgrade" icon={Zap} active={currentView === 'upgrade'} onClick={() => setView('upgrade')} badge="PRO" />
-                <NavItem label="Food Cost & Fichas Técnicas" icon={Calculator} active={currentView === 'foodcost'} onClick={() => setView('foodcost')} />
-                <NavItem label="Marketing Planner AI" icon={Target} active={currentView === 'marketing'} onClick={() => setView('marketing')} />
-                <NavItem label="GastroLens AI" icon={Camera} active={currentView === 'gastrolens'} onClick={() => setView('gastrolens')} badge="NOVO" />
-                <NavItem label="Dashboard Business Intel" icon={LayoutDashboard} active={currentView === 'dashboard'} onClick={() => setView('dashboard')} />
-                <NavItem label="Escalas de Staff AI" icon={Users} active={currentView === 'equipas'} onClick={() => setView('equipas')} />
-                <NavItem label="Aulas ao VIVO" icon={Video} active={currentView === 'aulas'} onClick={() => setView('aulas')} />
+                <NavItem label="Audit de Reputação Online" icon={Star} to="/reputacao" />
+                <NavItem label="iaMenu PRO - Upgrade" icon={Zap} to="/upgrade" badge="PRO" />
+                <NavItem label="Food Cost & Fichas Técnicas" icon={Calculator} to="/foodcost" />
+                <NavItem label="Marketing Planner AI" icon={Target} to="/marketing" />
+                <NavItem label="GastroLens AI" icon={Camera} to="/gastrolens" badge="NOVO" />
+                <NavItem label="Dashboard Business Intel" icon={LayoutDashboard} to="/dashboard" />
+                <NavItem label="Escalas de Staff AI" icon={Users} to="/equipas" />
+                <NavItem label="Aulas ao VIVO" icon={Video} to="/aulas" />
             </SidebarSection>
 
             <SidebarSection title="Grupos da Comunidade">
@@ -161,22 +170,19 @@ const Sidebar = ({ currentView, setView, selectedGroup, setSelectedGroup }) => {
                     <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', padding: '0 12px' }}>A carregar...</p>
                 ) : (
                     groups.slice(0, 5).map((group) => (
-                        <NavItem
-                            key={group.id}
-                            label={group.name}
-                            icon={getGroupIcon(group.category)}
-                            badge={group.memberCount > 0 ? group.memberCount.toString() : null}
-                            active={selectedGroup?.id === group.id}
-                            onClick={() => {
-                                setSelectedGroup(group);
-                                setView('comunidade');
-                            }}
-                        />
+                        <div key={group.id} onClick={() => setSelectedGroup(group)}>
+                             <NavItem
+                                label={group.name}
+                                icon={getGroupIcon(group.category)}
+                                badge={group.memberCount > 0 ? group.memberCount.toString() : null}
+                                to="/comunidade" // All group clicks go to the community feed
+                            />
+                        </div>
                     ))
                 )}
                 <div style={{ padding: '8px 12px', marginTop: '8px' }}>
-                    <button
-                        onClick={() => setView('grupos')}
+                     <Link
+                        to="/grupos"
                         style={{
                             fontSize: '0.75rem',
                             color: 'var(--primary)',
@@ -189,14 +195,14 @@ const Sidebar = ({ currentView, setView, selectedGroup, setSelectedGroup }) => {
                         }}
                     >
                         Ver todos os {groups.length} grupos →
-                    </button>
+                    </Link>
                 </div>
             </SidebarSection>
 
             <SidebarSection title="Hub de Negócios">
-                <NavItem label="Marketplace Fornecedores" icon={ShoppingCart} active={currentView === 'marketplace'} onClick={() => setView('marketplace')} />
-                <NavItem label="Hubs Regionais (Algarve)" icon={MapPin} active={currentView === 'hubs'} onClick={() => setView('hubs')} badge="5" />
-                <NavItem label="Chat Comunidade" icon={MessageSquare} active={currentView === 'lab'} onClick={() => setView('lab')} badge="99+" />
+                <NavItem label="Marketplace Fornecedores" icon={ShoppingCart} to="/marketplace" />
+                <NavItem label="Hubs Regionais (Algarve)" icon={MapPin} to="/hubs" badge="5" />
+                <NavItem label="Chat Comunidade" icon={MessageSquare} to="/lab" badge="99+" />
             </SidebarSection>
 
             <div style={{

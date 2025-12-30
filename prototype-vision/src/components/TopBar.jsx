@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Search, Bell, MessageSquare, Bookmark, User, X } from 'lucide-react';
 import { CommunityAPI } from '../services/api';
 
-const TopBar = ({ setView }) => {
+const TopBar = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef(null);
+    const location = useLocation();
 
     useEffect(() => {
         loadNotifications();
-        // Poll for new notifications every 30 seconds
         const interval = setInterval(loadNotifications, 30000);
         return () => clearInterval(interval);
     }, []);
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -45,7 +45,7 @@ const TopBar = ({ setView }) => {
     const handleMarkAsRead = async (id) => {
         try {
             await CommunityAPI.markNotificationAsRead(id);
-            loadNotifications(); // Reload to update counts
+            loadNotifications();
         } catch (err) {
             console.error('Error marking notification as read:', err);
         }
@@ -71,6 +71,13 @@ const TopBar = ({ setView }) => {
         return `há ${Math.floor(seconds / 86400)} dias`;
     };
 
+    const navLinks = [
+        { to: '/comunidade', label: 'Home' },
+        { to: '/aulas', label: 'Cursos' },
+        { to: '/hubs', label: 'Hubs' },
+        { to: '/leaderboard', label: 'Leaderboard' }
+    ];
+
     return (
         <div style={{
             height: '64px',
@@ -85,7 +92,7 @@ const TopBar = ({ setView }) => {
             zIndex: 100
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{
                         width: '28px',
                         height: '28px',
@@ -99,27 +106,26 @@ const TopBar = ({ setView }) => {
                         fontSize: '0.8rem'
                     }}>ia</div>
                     <span style={{ fontWeight: '600', fontSize: '1.1rem' }}>iaMenu Ecosystem [PT]</span>
-                </div>
+                </Link>
 
                 <nav style={{ display: 'flex', gap: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                    {['Home', 'Cursos', 'Hubs', 'Leaderboard'].map(item => (
-                        <span key={item} style={{
+                    {navLinks.map(link => (
+                        <Link key={link.to} to={link.to} style={{
                             cursor: 'pointer',
                             padding: '6px 12px',
                             borderRadius: '20px',
-                            backgroundColor: item === 'Home' ? 'rgba(255,255,255,0.05)' : 'transparent',
-                            color: item === 'Home' ? 'white' : 'inherit',
+                            backgroundColor: location.pathname === link.to ? 'rgba(255,255,255,0.05)' : 'transparent',
+                            color: location.pathname === link.to ? 'white' : 'inherit',
                             transition: 'all 0.2s'
                         }} className="hover:text-white">
-                            {item}
-                        </span>
+                            {link.label}
+                        </Link>
                     ))}
                 </nav>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <div
-                    onClick={() => setView && setView('pesquisa')}
+                <Link to="/pesquisa"
                     style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -140,12 +146,12 @@ const TopBar = ({ setView }) => {
                         style={{ backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', outline: 'none', width: '100%', cursor: 'pointer' }}
                         readOnly
                     />
-                </div>
+                </Link>
 
                 <div style={{ display: 'flex', gap: '16px', color: 'var(--text-muted)' }}>
-                    {/* Notifications */}
+                    {/* Notifications Dropdown - Code remains the same */}
                     <div ref={dropdownRef} style={{ position: 'relative' }}>
-                        <div
+                         <div
                             onClick={() => setShowNotifications(!showNotifications)}
                             style={{ position: 'relative', cursor: 'pointer' }}
                             className="hover:text-white"
@@ -171,7 +177,6 @@ const TopBar = ({ setView }) => {
                             )}
                         </div>
 
-                        {/* Notifications Dropdown */}
                         {showNotifications && (
                             <div style={{
                                 position: 'absolute',
@@ -186,83 +191,22 @@ const TopBar = ({ setView }) => {
                                 overflow: 'hidden',
                                 zIndex: 1000
                             }}>
-                                {/* Header */}
-                                <div style={{
-                                    padding: '16px',
-                                    borderBottom: '1px solid var(--border)',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center'
-                                }}>
+                                <div style={{ padding: '16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <h3 style={{ fontWeight: '600', fontSize: '1rem' }}>Notificações</h3>
-                                    {unreadCount > 0 && (
-                                        <button
-                                            onClick={handleMarkAllAsRead}
-                                            style={{
-                                                fontSize: '0.75rem',
-                                                color: 'var(--primary)',
-                                                cursor: 'pointer',
-                                                background: 'none',
-                                                border: 'none'
-                                            }}
-                                        >
-                                            Marcar todas como lidas
-                                        </button>
-                                    )}
+                                    {unreadCount > 0 && ( <button onClick={handleMarkAllAsRead} style={{ fontSize: '0.75rem', color: 'var(--primary)', cursor: 'pointer', background: 'none', border: 'none' }}> Marcar todas como lidas </button> )}
                                 </div>
-
-                                {/* Notifications List */}
                                 <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                                     {notifications.length === 0 ? (
-                                        <div style={{
-                                            padding: '40px 20px',
-                                            textAlign: 'center',
-                                            color: 'var(--text-muted)',
-                                            fontSize: '0.9rem'
-                                        }}>
-                                            Sem notificações
-                                        </div>
+                                        <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}> Sem notificações </div>
                                     ) : (
                                         notifications.map(notif => (
-                                            <div
-                                                key={notif.id}
-                                                onClick={() => !notif.read && handleMarkAsRead(notif.id)}
-                                                style={{
-                                                    padding: '12px 16px',
-                                                    borderBottom: '1px solid var(--border)',
-                                                    cursor: 'pointer',
-                                                    backgroundColor: notif.read ? 'transparent' : 'rgba(255,255,255,0.03)',
-                                                    transition: 'background-color 0.2s'
-                                                }}
-                                                className="hover:bg-white/5"
-                                            >
+                                            <div key={notif.id} onClick={() => !notif.read && handleMarkAsRead(notif.id)} style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', cursor: 'pointer', backgroundColor: notif.read ? 'transparent' : 'rgba(255,255,255,0.03)', transition: 'background-color 0.2s' }} className="hover:bg-white/5" >
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '4px' }}>
-                                                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: notif.read ? 'var(--text-muted)' : 'white' }}>
-                                                        {notif.title}
-                                                    </span>
-                                                    {!notif.read && (
-                                                        <div style={{
-                                                            width: '8px',
-                                                            height: '8px',
-                                                            backgroundColor: 'var(--primary)',
-                                                            borderRadius: '50%',
-                                                            marginTop: '4px'
-                                                        }}></div>
-                                                    )}
+                                                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: notif.read ? 'var(--text-muted)' : 'white' }}> {notif.title} </span>
+                                                    {!notif.read && ( <div style={{ width: '8px', height: '8px', backgroundColor: 'var(--primary)', borderRadius: '50%', marginTop: '4px' }}></div> )}
                                                 </div>
-                                                {notif.body && (
-                                                    <p style={{
-                                                        fontSize: '0.8rem',
-                                                        color: 'var(--text-muted)',
-                                                        marginBottom: '6px',
-                                                        lineHeight: '1.4'
-                                                    }}>
-                                                        {notif.body}
-                                                    </p>
-                                                )}
-                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                                                    {formatTimeAgo(notif.createdAt)}
-                                                </span>
+                                                {notif.body && ( <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px', lineHeight: '1.4' }}> {notif.body} </p> )}
+                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}> {formatTimeAgo(notif.createdAt)} </span>
                                             </div>
                                         ))
                                     )}
@@ -270,16 +214,16 @@ const TopBar = ({ setView }) => {
                             </div>
                         )}
                     </div>
+                    {/* End Notifications */}
 
                     <MessageSquare size={20} className="cursor-pointer hover:text-white" />
                     <Bookmark size={20} className="cursor-pointer hover:text-white" />
-                    <div
-                        onClick={() => setView && setView('perfil')}
+                    <Link to="/perfil"
                         style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }}
                         className="hover:bg-primary"
                     >
                         <User size={20} />
-                    </div>
+                    </Link>
                 </div>
             </div>
         </div>

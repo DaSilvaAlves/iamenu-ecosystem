@@ -17,6 +17,7 @@ import ChatView from './views/ChatView';
 import UpgradePROView from './views/UpgradePROView';
 import TourRapidoView from './views/TourRapidoView';
 import OnboardingView from './views/OnboardingView';
+import Marketplace from './views/Marketplace';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -40,50 +41,32 @@ const StandardPlaceholder = ({ title, icon: Icon }) => (
     </motion.div>
 );
 
+import { Routes, Route, useLocation } from 'react-router-dom';
+import SupplierDetail from './views/SupplierDetail';
+
 const App = () => {
-    const [currentView, setView] = useState('comunidade');
+    // State for features not yet migrated to router state
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [selectedGroupId, setSelectedGroupId] = useState(null);
     const [showOnboarding, setShowOnboarding] = useState(false);
+    const location = useLocation();
 
     useEffect(() => {
-        // Check if onboarding was completed
         const onboardingCompleted = localStorage.getItem('iaMenu_onboarding_completed');
         if (!onboardingCompleted) {
             setShowOnboarding(true);
         }
     }, []);
 
+    // These functions will be refactored later to use navigate()
     const navigateToGroupDetail = (groupId) => {
         setSelectedGroupId(groupId);
-        setView('grupo-detalhe');
+        // In a future step, this would be: navigate(`/grupos/${groupId}`);
     };
 
-    const renderContent = () => {
-        switch (currentView) {
-            case 'comunidade': return <CommunityView selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />;
-            case 'grupos': return <GroupsView onViewGroup={navigateToGroupDetail} />;
-            case 'grupo-detalhe': return <GroupDetailView groupId={selectedGroupId} onBack={() => setView('grupos')} />;
-            case 'pesquisa': return <SearchView onNavigateToGroup={navigateToGroupDetail} />;
-            case 'perfil': return <ProfileView />;
-            case 'dashboard': return <DashboardBI setView={setView} />;
-            case 'alerts': return <AlertsView setView={setView} />;
-            case 'foodcost': return <FoodCostView />;
-            case 'marketing': return <MarketingPlanner />;
-            case 'gastrolens': return <GastroLens />;
-            case 'upgrade': return <UpgradePROView />;
-            case 'pagamentos': return <PaymentsAutomationView />;
-            case 'aulas': return <Academy />;
-            case 'onboarding': return <OnboardingView onComplete={() => setView('dashboard')} />;
-            case 'visao': return <StandardPlaceholder title="Visão do Ecossistema" />;
-            case 'reputacao': return <StandardPlaceholder title="Audit de Reputação" />;
-            case 'equipas': return <StandardPlaceholder title="Escalas de Staff AI" />;
-            case 'marketplace': return <StandardPlaceholder title="Marketplace" />;
-            case 'hubs': return <StandardPlaceholder title="Hubs Regionais" />;
-            case 'lab': return <ChatView />;
-            default: return <CommunityView selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />;
-        }
-    };
+    const handleBackToGroups = () => {
+        // In a future step, this would be: navigate('/grupos');
+    }
 
     return (
         <>
@@ -94,14 +77,37 @@ const App = () => {
                 />
             )}
             <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--bg-dark)' }}>
-                <TopBar setView={setView} />
+                <TopBar />
                 <div style={{ display: 'flex', flex: 1 }}>
-                    <Sidebar currentView={currentView} setView={setView} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
+                    <Sidebar selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
                     <main style={{ flex: 1, padding: '32px', overflowY: 'auto', backgroundColor: '#0c0c0c' }}>
                         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                             <AnimatePresence mode="wait">
-                                <div key={currentView}>
-                                    {renderContent()}
+                                <div key={location.pathname}>
+                                    <Routes location={location}>
+                                        <Route path="/" element={<CommunityView selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />} />
+                                        <Route path="/comunidade" element={<CommunityView selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />} />
+                                        <Route path="/grupos" element={<GroupsView onViewGroup={navigateToGroupDetail} />} />
+                                        <Route path="/grupo-detalhe" element={<GroupDetailView groupId={selectedGroupId} onBack={handleBackToGroups} />} />
+                                        <Route path="/pesquisa" element={<SearchView onNavigateToGroup={navigateToGroupDetail} />} />
+                                        <Route path="/perfil" element={<ProfileView />} />
+                                        <Route path="/dashboard" element={<DashboardBI />} />
+                                        <Route path="/alerts" element={<AlertsView />} />
+                                        <Route path="/foodcost" element={<FoodCostView />} />
+                                        <Route path="/marketing" element={<MarketingPlanner />} />
+                                        <Route path="/gastrolens" element={<GastroLens />} />
+                                        <Route path="/upgrade" element={<UpgradePROView />} />
+                                        <Route path="/pagamentos" element={<PaymentsAutomationView />} />
+                                        <Route path="/aulas" element={<Academy />} />
+                                        <Route path="/onboarding" element={<OnboardingView onComplete={() => { /* navigate to dashboard */ }} />} />
+                                        <Route path="/visao" element={<StandardPlaceholder title="Visão do Ecossistema" />} />
+                                        <Route path="/reputacao" element={<StandardPlaceholder title="Audit de Reputação" />} />
+                                        <Route path="/equipas" element={<StandardPlaceholder title="Escalas de Staff AI" />} />
+                                        <Route path="/marketplace" element={<Marketplace />} />
+                                        <Route path="/marketplace/suppliers/:id" element={<SupplierDetail />} />
+                                        <Route path="/hubs" element={<StandardPlaceholder title="Hubs Regionais" />} />
+                                        <Route path="/lab" element={<ChatView />} />
+                                    </Routes>
                                 </div>
                             </AnimatePresence>
                         </div>

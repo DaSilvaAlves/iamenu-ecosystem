@@ -4,7 +4,7 @@
   "description": "iaMenu Academy API - Suppliers, Reviews, Price Comparison",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "dotenv -e .env tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "jest",
