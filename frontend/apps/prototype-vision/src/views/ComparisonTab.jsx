@@ -35,17 +35,38 @@ const SupplierCard = ({ offer, product, isBest }) => {
     const price = formatPrice(offer.price);
     const [integerPart, decimalPart] = price.split(','); // Use this for split price display
 
-    // History chart placeholder - simplified for now
-    const renderHistoryChart = () => {
-        // This is a static representation from the HTML mockup, it needs actual data to be dynamic
+    // History chart - now dynamic
+    const renderHistoryChart = (priceHistory) => {
+        if (!priceHistory || priceHistory.length === 0) {
+            return (
+                <div className="text-text-muted text-xs text-center py-2">
+                    Sem histórico de preços
+                </div>
+            );
+        }
+
+        const prices = priceHistory.map(entry => entry.price);
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+
+        // Avoid division by zero if all prices are the same
+        const priceRange = maxPrice - minPrice === 0 ? 1 : maxPrice - minPrice;
+
         return (
             <div className="h-8 w-full flex items-end justify-between gap-1 opacity-80">
-                <div className="w-1/6 bg-brand-orange/20 h-[40%] rounded-sm"></div>
-                <div className="w-1/6 bg-brand-orange/20 h-[40%] rounded-sm"></div>
-                <div className="w-1/6 bg-brand-orange/20 h-[60%] rounded-sm"></div>
-                <div className="w-1/6 bg-brand-orange/20 h-[50%] rounded-sm"></div>
-                <div className="w-1/6 bg-brand-orange/20 h-[40%] rounded-sm"></div>
-                <div className="w-1/6 bg-brand-orange h-[35%] rounded-sm"></div>
+                {priceHistory.map((entry, index) => {
+                    const normalizedHeight = ((entry.price - minPrice) / priceRange) * 90 + 10; // Scale to 10-100%
+                    const barColor = index === priceHistory.length - 1 ? 'bg-brand-orange' : 'bg-brand-orange/20'; // Highlight latest price
+
+                    return (
+                        <div
+                            key={index}
+                            className={`w-1/6 rounded-sm ${barColor} transition-all duration-300`}
+                            style={{ height: `${normalizedHeight}%` }}
+                            title={`Data: ${new Date(entry.date).toLocaleDateString()}, Preço: €${entry.price.toFixed(2)}`}
+                        ></div>
+                    );
+                })}
             </div>
         );
     };
@@ -70,9 +91,15 @@ const SupplierCard = ({ offer, product, isBest }) => {
                         <h4 className="font-bold text-lg leading-tight text-white">{offer.supplierName}</h4>
                         <div className="flex items-center gap-1 mt-1">
                             <div className="h-1.5 w-16 bg-[#333] rounded-full overflow-hidden">
-                                <div className="h-full bg-yellow-500 w-[90%]"></div> {/* Static rating for now */}
+                                {offer.Supplier?.ratingAvg !== undefined ? ( // Check if ratingAvg exists
+                                    <div className="h-full bg-yellow-500" style={{ width: `${(offer.Supplier.ratingAvg / 5) * 100}%` }}></div>
+                                ) : (
+                                    <div className="h-full bg-gray-500" style={{ width: `0%` }}></div> // Fallback or empty state
+                                )}
                             </div>
-                            <span className="text-xs text-text-muted ml-1">4.5</span> {/* Static rating for now */}
+                            <span className="text-xs text-text-muted ml-1" title={`${offer.Supplier?.reviewCount || 0} avaliações`}>
+                                {offer.Supplier?.ratingAvg !== undefined ? offer.Supplier.ratingAvg.toFixed(1) : 'N/A'}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -93,7 +120,7 @@ const SupplierCard = ({ offer, product, isBest }) => {
                     </div>
                     <div className="flex flex-col gap-1">
                         <span className="text-xs text-text-muted flex items-center gap-1"><span className="material-symbols-outlined text-sm">payments</span> Pagamento</span>
-                        <span className="text-sm font-semibold text-white">Pronto</span> {/* Static for now */}
+                        <span className="text-sm font-semibold text-white">{offer.Supplier?.paymentTerms || 'N/A'}</span>
                     </div>
                     <div className="flex flex-col gap-1">
                         <span className="text-xs text-text-muted flex items-center gap-1"><span className="material-symbols-outlined text-sm">local_shipping</span> Entrega</span>
@@ -101,7 +128,7 @@ const SupplierCard = ({ offer, product, isBest }) => {
                     </div>
                     <div className="flex flex-col gap-1">
                         <span className="text-xs text-text-muted flex items-center gap-1"><span className="material-symbols-outlined text-sm">calendar_clock</span> Prazo</span>
-                        <span className="text-sm font-semibold text-white">24h-48h</span> {/* Static for now */}
+                        <span className="text-sm font-semibold text-white">{offer.Supplier?.deliveryFrequency || (offer.deliveryIncluded ? 'Incluída' : 'A combinar')}</span>
                     </div>
                 </div>
                  <div className="mt-2 pt-4 border-t border-border">
@@ -109,7 +136,7 @@ const SupplierCard = ({ offer, product, isBest }) => {
                         <span className="text-xs font-bold text-text-muted uppercase">Histórico 30D</span>
                         <span className="text-xs text-green-500 font-bold">Estável</span> {/* Static for now */}
                     </div>
-                    {renderHistoryChart()} {/* Render the static history chart */}
+                    {renderHistoryChart(offer.priceHistory)} {/* Render the dynamic history chart */}
                 </div>
                 <button className={`w-full mt-auto py-3 ${isBest ? 'bg-brand-orange hover:bg-orange-600' : 'bg-[#2A2A2A] hover:bg-[#333] border border-border'} text-white font-bold rounded-lg shadow-lg ${isBest ? 'shadow-brand-orange/20' : ''} transition-all flex items-center justify-center gap-2`}>
                     <span>Adicionar</span>
