@@ -466,8 +466,13 @@ const ComparisonTab = () => {
             )}
 
             {activeTab === 'favoritos' && (
-                <div className="bg-surface-card rounded-b-xl rounded-tr-xl border border-border p-5 flex flex-col gap-4 -mt-px text-text-muted">
-                    <p>Conteúdo para Favoritos (em desenvolvimento)...</p>
+                <div className="bg-surface-card rounded-b-xl rounded-tr-xl border border-border p-5 flex flex-col gap-4 -mt-px text-text-muted text-center">
+                    <p className="text-white text-lg font-bold">Funcionalidade de Favoritos</p>
+                    <p>Para aceder aos seus produtos favoritos, é necessário iniciar sessão.</p>
+                    <p className="text-sm">Esta funcionalidade será implementada juntamente com o sistema de autenticação de utilizadores.</p>
+                    <button className="mt-4 py-2 px-4 bg-brand-orange hover:bg-orange-600 text-white font-bold rounded-lg shadow-lg shadow-brand-orange/20 transition-colors">
+                        Iniciar Sessão
+                    </button>
                     {/* Implement favorites listing here */}
                 </div>
             )}
