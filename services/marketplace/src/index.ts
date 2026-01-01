@@ -161,7 +161,7 @@ function calculatePriceTrend(priceHistory: { date: Date; price: number }[]): str
 
 // GET products with comparative prices from various suppliers
 app.get('/api/v1/marketplace/products/compare', async (req: Request, res: Response) => {
-  const { search, filters } = req.query; // Destructure filters from query
+  const { search, filters, minPrice, maxPrice, minMOQ, deliveryIncluded, paymentTerms } = req.query; // Destructure all filters
 
   if (!search || typeof search !== 'string' || search.trim().length < 3) {
     return res.status(400).json({ error: 'Search term is required and must be at least 3 characters long.' });
@@ -172,6 +172,14 @@ app.get('/api/v1/marketplace/products/compare', async (req: Request, res: Respon
     ? filters.split(',').map(f => f.trim())
     : [];
 
+  // Parse advanced filters
+  const parsedMinPrice = minPrice ? parseFloat(minPrice as string) : undefined;
+  const parsedMaxPrice = maxPrice ? parseFloat(maxPrice as string) : undefined;
+  const parsedMinMOQ = minMOQ ? parseInt(minMOQ as string) : undefined;
+  const parsedDeliveryIncluded = deliveryIncluded ? (deliveryIncluded as string).toLowerCase() === 'true' : undefined;
+  const parsedPaymentTerms = paymentTerms ? paymentTerms as string : undefined;
+
+
   try {
     const products = await prisma.product.findMany({
       where: {
@@ -180,14 +188,34 @@ app.get('/api/v1/marketplace/products/compare', async (req: Request, res: Respon
           mode: 'insensitive',
         },
         // Apply filtering by categories/subcategories
-        AND: filtersArray.length > 0 ? [
-          {
+        AND: [ // Use AND to combine category/subcategory filters with advanced filters
+          ...(filtersArray.length > 0 ? [{
             OR: [
               { category: { in: filtersArray, mode: 'insensitive' } },
               { subcategory: { in: filtersArray, mode: 'insensitive' } },
             ],
-          },
-        ] : undefined, // Only apply if filters are present
+          }] : []),
+          {
+            // Apply advanced filters to SupplierProducts
+            SupplierProducts: {
+              some: { // At least one SupplierProduct must match these criteria
+                // Price range filter
+                ...(parsedMinPrice !== undefined && { price: { gte: parsedMinPrice } }),
+                ...(parsedMaxPrice !== undefined && { price: { lte: parsedMaxPrice } }),
+                // Minimum Quantity filter
+                ...(parsedMinMOQ !== undefined && { minQuantity: { gte: parsedMinMOQ } }),
+                // Delivery Included filter
+                ...(parsedDeliveryIncluded !== undefined && { deliveryIncluded: parsedDeliveryIncluded }),
+                // Payment Terms filter (on Supplier)
+                ...(parsedPaymentTerms && {
+                  Supplier: {
+                    paymentTerms: { contains: parsedPaymentTerms, mode: 'insensitive' }
+                  }
+                })
+              }
+            }
+          }
+        ],
       },
       include: {
         SupplierProducts: {

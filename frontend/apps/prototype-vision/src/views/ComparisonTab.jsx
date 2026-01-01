@@ -167,9 +167,17 @@ const ComparisonTab = () => {
     const [error, setError] = useState(null);
     const [availableFilters, setAvailableFilters] = useState([]); // New state for available filters
     const [selectedFilters, setSelectedFilters] = useState([]);
-    const [selectedOffers, setSelectedOffers] = useState([]); // New state for selected offers   // New state for selected filters
+    const [selectedOffers, setSelectedOffers] = useState([]);
+    const [activeTab, setActiveTab] = useState('pesquisa'); // New state for active tab, default to 'pesquisa'
+    
+    // New states for advanced filters
+    const [minPriceFilter, setMinPriceFilter] = useState('');
+    const [maxPriceFilter, setMaxPriceFilter] = useState('');
+    const [minMOQFilter, setMinMOQFilter] = useState('');
+    const [deliveryIncludedFilter, setDeliveryIncludedFilter] = useState(false);
+    const [paymentTermsFilter, setPaymentTermsFilter] = useState('');
 
-    const handleSearch = async () => {
+    const handleSearch = async (advancedFilters = {}) => { // Accept advanced filters as an object
         if (!searchTerm || searchTerm.trim().length < 3) {
             setError('O termo de pesquisa deve ter pelo menos 3 caracteres.');
             setProducts([]);
@@ -179,7 +187,16 @@ const ComparisonTab = () => {
         setError(null);
         try {
             const filtersQueryParam = selectedFilters.length > 0 ? `&filters=${selectedFilters.map(f => encodeURIComponent(f)).join(',')}` : '';
-            const response = await fetch(`http://localhost:3002/api/v1/marketplace/products/compare?search=${encodeURIComponent(searchTerm.trim())}${filtersQueryParam}`);
+            
+            // Add advanced filters to query parameters
+            let advancedFiltersQuery = '';
+            if (advancedFilters.minPrice) advancedFiltersQuery += `&minPrice=${advancedFilters.minPrice}`;
+            if (advancedFilters.maxPrice) advancedFiltersQuery += `&maxPrice=${advancedFilters.maxPrice}`;
+            if (advancedFilters.minMOQ) advancedFiltersQuery += `&minMOQ=${advancedFilters.minMOQ}`;
+            if (advancedFilters.deliveryIncluded) advancedFiltersQuery += `&deliveryIncluded=true`;
+            if (advancedFilters.paymentTerms) advancedFiltersQuery += `&paymentTerms=${encodeURIComponent(advancedFilters.paymentTerms)}`;
+
+            const response = await fetch(`http://localhost:3002/api/v1/marketplace/products/compare?search=${encodeURIComponent(searchTerm.trim())}${filtersQueryParam}${advancedFiltersQuery}`);
             if (!response.ok) {
                 const errData = await response.json();
                 throw new Error(errData.error || `HTTP error! status: ${response.status}`);
@@ -256,6 +273,18 @@ const ComparisonTab = () => {
         });
     };
 
+    const handleApplyAdvancedFilters = () => {
+        const filtersToApply = {
+            minPrice: minPriceFilter,
+            maxPrice: maxPriceFilter,
+            minMOQ: minMOQFilter,
+            deliveryIncluded: deliveryIncludedFilter,
+            paymentTerms: paymentTermsFilter,
+        };
+        handleSearch(filtersToApply);
+        setActiveTab('pesquisa'); // Switch back to search tab after applying filters
+    };
+
 
     return (
         <div className="max-w-7xl mx-auto flex flex-col gap-8 pb-20">
@@ -287,82 +316,174 @@ const ComparisonTab = () => {
             
             <div className="border-b border-border"> {/* Use border-b on this container */}
                 <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar -mb-px"> {/* remove pb-2, add -mb-px to overlap border */}
-                    <button className="flex items-center gap-2 px-4 py-3 bg-brand-orange text-white text-sm font-bold rounded-t-lg border-b-2 border-brand-orange"> {/* Active tab styling */}
+                    <button
+                        onClick={() => setActiveTab('pesquisa')}
+                        className={`flex items-center gap-2 px-4 py-3 text-sm font-bold rounded-t-lg border-b-2 transition-colors ${activeTab === 'pesquisa' ? 'bg-brand-orange text-white border-brand-orange' : 'text-text-muted hover:text-white hover:bg-white/5 border-transparent hover:border-white/20'}`}
+                    >
                         <span className="material-symbols-outlined text-lg">search</span>
                         Pesquisa
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 text-sm font-medium rounded-t-lg transition-colors border-b-2 border-transparent hover:border-white/20"> {/* Inactive tab styling */}
+                    <button
+                        onClick={() => setActiveTab('filtrosAvancados')}
+                        className={`flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-t-lg border-b-2 transition-colors ${activeTab === 'filtrosAvancados' ? 'bg-brand-orange text-white border-brand-orange' : 'text-text-muted hover:text-white hover:bg-white/5 border-transparent hover:border-white/20'}`}
+                    >
                         <span className="material-symbols-outlined text-lg">tune</span>
                         Filtros Avançados
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 text-sm font-medium rounded-t-lg transition-colors border-b-2 border-transparent hover:border-white/20"> {/* Inactive tab styling */}
+                    <button
+                        onClick={() => setActiveTab('favoritos')}
+                        className={`flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-t-lg border-b-2 transition-colors ${activeTab === 'favoritos' ? 'bg-brand-orange text-white border-brand-orange' : 'text-text-muted hover:text-white hover:bg-white/5 border-transparent hover:border-white/20'}`}
+                    >
                         <span className="material-symbols-outlined text-lg">favorite</span>
                         Favoritos
                     </button>
                 </div>
             </div>
-            <div className="bg-surface-card rounded-b-xl rounded-tr-xl border border-border p-5 flex flex-col gap-4 -mt-px"> {/* Adjusted border-radius and margin-top */}
-                <div className="relative flex-1 w-full">
-                    <div className="flex w-full items-center rounded-lg bg-[#0E0E0E] border border-border h-12 px-4 focus-within:ring-1 focus-within:ring-brand-orange transition-shadow">
-                        <span className="material-symbols-outlined text-text-muted text-2xl">search</span>
-                        <input
-                            className="flex-1 bg-transparent border-none text-white placeholder:text-text-muted focus:ring-0 text-base font-medium ml-2 min-w-[100px]" // flex-1 and min-w to give tags space
-                            placeholder="Buscar produto..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                        />
-                        {searchTerm && (
-                            <button onClick={() => setSearchTerm('')} className="flex-shrink-0 text-text-muted hover:text-brand-orange transition-colors">
-                                <span className="material-symbols-outlined text-xl">cancel</span>
-                            </button>
-                        )}
-                        {/* Dynamic filter tags */}
-                        {availableFilters.length > 0 && (
-                            <div className="flex flex-shrink-0 items-center gap-2 ml-2 max-w-full overflow-x-auto hide-scrollbar">
-                                {availableFilters.map(filter => {
-                                    const isSelected = selectedFilters.includes(filter);
-                                    const bgColor = isSelected ? 'bg-brand-orange' : 'bg-[#2A2A2A]';
-                                    const textColor = isSelected ? 'text-white' : 'text-text-muted';
-                                    const borderColor = isSelected ? 'border-brand-orange' : 'border-border';
+            {activeTab === 'pesquisa' && (
+                <div className="bg-surface-card rounded-b-xl rounded-tr-xl border border-border p-5 flex flex-col gap-4 -mt-px">
+                    <div className="relative flex-1 w-full">
+                        <div className="flex w-full items-center rounded-lg bg-[#0E0E0E] border border-border h-12 px-4 focus-within:ring-1 focus-within:ring-brand-orange transition-shadow">
+                            <span className="material-symbols-outlined text-text-muted text-2xl">search</span>
+                            <input
+                                className="flex-1 bg-transparent border-none text-white placeholder:text-text-muted focus:ring-0 text-base font-medium ml-2 min-w-[100px]"
+                                placeholder="Buscar produto..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                            />
+                            {searchTerm && (
+                                <button onClick={() => setSearchTerm('')} className="flex-shrink-0 text-text-muted hover:text-brand-orange transition-colors">
+                                    <span className="material-symbols-outlined text-xl">cancel</span>
+                                </button>
+                            )}
+                            {/* Dynamic filter tags */}
+                            {availableFilters.length > 0 && (
+                                <div className="flex flex-shrink-0 items-center gap-2 ml-2 max-w-full overflow-x-auto hide-scrollbar">
+                                    {availableFilters.map(filter => {
+                                        const isSelected = selectedFilters.includes(filter);
+                                        const bgColor = isSelected ? 'bg-brand-orange' : 'bg-[#2A2A2A]';
+                                        const textColor = isSelected ? 'text-white' : 'text-text-muted';
+                                        const borderColor = isSelected ? 'border-brand-orange' : 'border-border';
 
-                                    const handleTagClick = () => {
-                                        setSelectedFilters(prev =>
-                                            isSelected ? prev.filter(f => f !== filter) : [...prev, filter]
+                                        const handleTagClick = () => {
+                                            setSelectedFilters(prev =>
+                                                isSelected ? prev.filter(f => f !== filter) : [...prev, filter]
+                                            );
+                                        };
+
+                                        return (
+                                            <button
+                                                key={filter}
+                                                onClick={handleTagClick}
+                                                className={`flex-shrink-0 flex h-7 items-center justify-center gap-x-1 rounded-full ${bgColor} border ${borderColor} ${textColor} pl-2 pr-1 text-xs font-medium transition-colors whitespace-nowrap`}
+                                            >
+                                                {filter}
+                                                {isSelected && (
+                                                    <span className="material-symbols-outlined text-base">close</span>
+                                                )}
+                                            </button>
                                         );
-                                    };
-
-                                    return (
-                                        <button
-                                            key={filter}
-                                            onClick={handleTagClick}
-                                            className={`flex-shrink-0 flex h-7 items-center justify-center gap-x-1 rounded-full ${bgColor} border ${borderColor} ${textColor} pl-2 pr-1 text-xs font-medium transition-colors whitespace-nowrap`}
-                                        >
-                                            {filter}
-                                            {isSelected && (
-                                                <span className="material-symbols-outlined text-base">close</span>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
+                                    })}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
+
+            {activeTab === 'filtrosAvancados' && (
+                <div className="bg-surface-card rounded-b-xl rounded-tr-xl border border-border p-5 flex flex-col gap-4 -mt-px">
+                    <h3 className="text-lg font-bold text-white">Filtros de Preço</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="minPrice" className="text-text-muted text-sm">Preço Mínimo (€)</label>
+                            <input
+                                type="number"
+                                id="minPrice"
+                                className="w-full bg-[#0E0E0E] border border-border rounded-lg h-10 px-3 text-white focus:outline-none focus:ring-1 focus:ring-brand-orange"
+                                value={minPriceFilter}
+                                onChange={(e) => setMinPriceFilter(e.target.value)}
+                                placeholder="Ex: 5.00"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="maxPrice" className="text-text-muted text-sm">Preço Máximo (€)</label>
+                            <input
+                                type="number"
+                                id="maxPrice"
+                                className="w-full bg-[#0E0E0E] border border-border rounded-lg h-10 px-3 text-white focus:outline-none focus:ring-1 focus:ring-brand-orange"
+                                value={maxPriceFilter}
+                                onChange={(e) => setMaxPriceFilter(e.target.value)}
+                                placeholder="Ex: 50.00"
+                            />
+                        </div>
+                    </div>
+
+                    <h3 className="text-lg font-bold text-white mt-4">Outros Filtros</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="minMOQ" className="text-text-muted text-sm">Quantidade Mínima (MOQ)</label>
+                            <input
+                                type="number"
+                                id="minMOQ"
+                                className="w-full bg-[#0E0E0E] border border-border rounded-lg h-10 px-3 text-white focus:outline-none focus:ring-1 focus:ring-brand-orange"
+                                value={minMOQFilter}
+                                onChange={(e) => setMinMOQFilter(e.target.value)}
+                                placeholder="Ex: 10"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="paymentTerms" className="text-text-muted text-sm">Termos de Pagamento</label>
+                            <input
+                                type="text"
+                                id="paymentTerms"
+                                className="w-full bg-[#0E0E0E] border border-border rounded-lg h-10 px-3 text-white focus:outline-none focus:ring-1 focus:ring-brand-orange"
+                                value={paymentTermsFilter}
+                                onChange={(e) => setPaymentTermsFilter(e.target.value)}
+                                placeholder="Ex: 30 dias"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mt-4">
+                        <input
+                            type="checkbox"
+                            id="deliveryIncluded"
+                            className="size-4 rounded border-border bg-[#0E0E0E] text-brand-orange focus:ring-brand-orange"
+                            checked={deliveryIncludedFilter}
+                            onChange={(e) => setDeliveryIncludedFilter(e.target.checked)}
+                        />
+                        <label htmlFor="deliveryIncluded" className="text-white text-sm">Entrega Incluída</label>
+                    </div>
+
+                    <button
+                        onClick={handleApplyAdvancedFilters} // Will implement this function next
+                        className="mt-6 w-full py-3 bg-brand-orange hover:bg-orange-600 text-white font-bold rounded-lg shadow-lg shadow-brand-orange/20 transition-colors"
+                    >
+                        Aplicar Filtros Avançados
+                    </button>
+                </div>
+            )}
+
+            {activeTab === 'favoritos' && (
+                <div className="bg-surface-card rounded-b-xl rounded-tr-xl border border-border p-5 flex flex-col gap-4 -mt-px text-text-muted">
+                    <p>Conteúdo para Favoritos (em desenvolvimento)...</p>
+                    {/* Implement favorites listing here */}
+                </div>
+            )}
             
             {loading && <LoadingSpinner />}
             
             {error && <div className="text-center p-8 bg-surface-card rounded-xl border border-red-500/50"><p className="text-red-400">{error}</p></div>}
 
-            {!loading && !error && !mainProduct && (
+            {!loading && !error && !mainProduct && activeTab === 'pesquisa' && ( // Only show if on 'pesquisa' tab
                 <div className="text-center p-8 bg-surface-card rounded-xl border border-border">
                     <p className="text-text-muted">Nenhum produto encontrado para "{searchTerm}".</p>
                     <p className="text-text-muted text-xs mt-1">Tente um termo de pesquisa diferente.</p>
                 </div>
             )}
             
-            {!loading && !error && mainProduct && (
+            {!loading && !error && mainProduct && activeTab === 'pesquisa' && ( // Only show if on 'pesquisa' tab
                 <>
                     {/* Stats Cards section */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
