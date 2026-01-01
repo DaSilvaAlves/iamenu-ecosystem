@@ -26,7 +26,7 @@ const StatsCard = ({ icon, label, value, trend, trend_label }) => (
     </div>
 );
 
-const SupplierCard = ({ offer, product, isBest }) => {
+const SupplierCard = ({ offer, product, isBest, isSelected, onToggleOfferSelection }) => {
     const formatPrice = (price) => {
         if (!price || isNaN(parseFloat(price))) return 'N/A';
         return parseFloat(price).toFixed(2).replace('.', ',');
@@ -79,6 +79,15 @@ const SupplierCard = ({ offer, product, isBest }) => {
                     Melhor Opção #1
                 </div>
             )}
+            {/* Selection Checkbox */}
+            <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={onToggleOfferSelection}
+                className="absolute top-3 left-3 size-5 appearance-none rounded-md border border-border-dark checked:bg-brand-orange checked:border-brand-orange focus:outline-none focus:ring-2 focus:ring-brand-orange focus:ring-offset-2 focus:ring-offset-surface-card cursor-pointer"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")`, backgroundSize: '70% 70%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
+                title="Selecionar para comparação"
+            />
             <div className={`p-6 border-b border-border ${isBest ? 'bg-[#1A1A1A]' : ''}`}>
                 <div className="flex items-center gap-4 mb-5">
                     <div className="size-12 rounded-lg bg-[#2A2A2A] flex items-center justify-center p-2 border border-border">
@@ -157,7 +166,8 @@ const ComparisonTab = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [availableFilters, setAvailableFilters] = useState([]); // New state for available filters
-    const [selectedFilters, setSelectedFilters] = useState([]);   // New state for selected filters
+    const [selectedFilters, setSelectedFilters] = useState([]);
+    const [selectedOffers, setSelectedOffers] = useState([]); // New state for selected offers   // New state for selected filters
 
     const handleSearch = async () => {
         if (!searchTerm || searchTerm.trim().length < 3) {
@@ -219,6 +229,32 @@ const ComparisonTab = () => {
 
     const mainProduct = products.length > 0 ? products[0] : null;
     const bestOffer = mainProduct ? mainProduct.offers.reduce((best, current) => (parseFloat(current.price) < parseFloat(best.price) ? current : best), mainProduct.offers[0]) : null;
+
+    const handleToggleOfferSelection = (offerToToggle, productForOffer) => {
+        // Create a unique identifier for the offer (supplierId + productId)
+        const offerUniqueId = `${offerToToggle.supplierId}-${productForOffer.id}`;
+
+        setSelectedOffers(prevSelectedOffers => {
+            const isAlreadySelected = prevSelectedOffers.some(
+                o => `${o.supplierId}-${o.productId}` === offerUniqueId
+            );
+
+            if (isAlreadySelected) {
+                // Remove from selection
+                return prevSelectedOffers.filter(
+                    o => `${o.supplierId}-${o.productId}` !== offerUniqueId
+                );
+            } else {
+                // Add to selection
+                // Store the full offer object or just necessary parts
+                return [...prevSelectedOffers, {
+                    ...offerToToggle,
+                    productId: productForOffer.id, // Ensure productId is on the offer object
+                    productName: productForOffer.name // Add product name for context
+                }];
+            }
+        });
+    };
 
 
     return (
@@ -347,17 +383,29 @@ const ComparisonTab = () => {
                     {/* Dynamic Supplier Cards */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                         {mainProduct.offers.sort((a, b) => parseFloat(a.price) - parseFloat(b.price)).map(offer => (
-                            <SupplierCard key={offer.supplierId} offer={offer} product={mainProduct} isBest={offer.supplierId === bestOffer?.supplierId} />
+                            <SupplierCard
+                                key={offer.supplierId}
+                                offer={offer}
+                                product={mainProduct}
+                                isBest={offer.supplierId === bestOffer?.supplierId}
+                                isSelected={selectedOffers.some(o => o.supplierId === offer.supplierId && o.productId === mainProduct.id)}
+                                onToggleOfferSelection={() => handleToggleOfferSelection(offer, mainProduct)}
+                            />
                         ))}
                     </div>
                 </>
             )}
             {/* Floating button for detailed comparison */}
-            {mainProduct && mainProduct.offers.length > 0 && (
+            {selectedOffers.length > 0 && ( // Only show button if offers are selected
                 <div className="fixed bottom-6 left-1/2 md:left-[calc(50%+8rem)] -translate-x-1/2 bg-[#1E1E1E] border border-brand-orange text-white px-6 py-3 rounded-xl shadow-2xl z-40 flex items-center gap-4">
-                    <span className="font-medium text-sm text-brand-orange">{mainProduct.offers.length} {mainProduct.offers.length === 1 ? 'item' : 'itens'} selecionado{mainProduct.offers.length === 1 ? '' : 's'}</span> {/* Dynamically show selected items */}
+                    <span className="font-medium text-sm text-brand-orange">{selectedOffers.length} {selectedOffers.length === 1 ? 'item' : 'itens'} selecionado{selectedOffers.length === 1 ? '' : 's'}</span>
                     <div className="h-4 w-px bg-gray-700"></div>
-                    <button className="text-sm font-bold text-white hover:text-brand-orange transition-colors">Comparar Detalhado</button>
+                    <button
+                        onClick={() => console.log('Comparar Detalhado para:', selectedOffers)} // Log selected offers for now
+                        className="text-sm font-bold text-white hover:text-brand-orange transition-colors"
+                    >
+                        Comparar Detalhado
+                    </button>
                 </div>
             )}
         </div>
