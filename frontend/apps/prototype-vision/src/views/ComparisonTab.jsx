@@ -156,6 +156,8 @@ const ComparisonTab = () => {
     const [stats, setStats] = useState({ avgPrice: 0, bestPrice: 0, potentialSaving: 0 });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [availableFilters, setAvailableFilters] = useState([]); // New state for available filters
+    const [selectedFilters, setSelectedFilters] = useState([]);   // New state for selected filters
 
     const handleSearch = async () => {
         if (!searchTerm || searchTerm.trim().length < 3) {
@@ -166,7 +168,8 @@ const ComparisonTab = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`http://localhost:3002/api/v1/marketplace/products/compare?search=${encodeURIComponent(searchTerm.trim())}`);
+            const filtersQueryParam = selectedFilters.length > 0 ? `&filters=${selectedFilters.map(f => encodeURIComponent(f)).join(',')}` : '';
+            const response = await fetch(`http://localhost:3002/api/v1/marketplace/products/compare?search=${encodeURIComponent(searchTerm.trim())}${filtersQueryParam}`);
             if (!response.ok) {
                 const errData = await response.json();
                 throw new Error(errData.error || `HTTP error! status: ${response.status}`);
@@ -188,9 +191,17 @@ const ComparisonTab = () => {
                     bestPrice,
                     potentialSaving: avgPrice > 0 && bestPrice > 0 ? avgPrice - bestPrice : 0,
                 });
+
+                // Extract unique filters from all products
+                const uniqueCategories = new Set(data.map(p => p.category).filter(Boolean));
+                const uniqueSubcategories = new Set(data.map(p => p.subcategory).filter(Boolean));
+                const allUniqueFilters = [...uniqueCategories, ...uniqueSubcategories];
+                setAvailableFilters(Array.from(new Set(allUniqueFilters))); // Ensure unique and convert to array
+
             } else {
                 setProducts([]);
                 setStats({ avgPrice: 0, bestPrice: 0, potentialSaving: 0 });
+                setAvailableFilters([]); // Clear filters if no products
             }
 
         } catch (e) {
@@ -204,7 +215,7 @@ const ComparisonTab = () => {
     
     useEffect(() => {
         handleSearch();
-    }, []);
+    }, [selectedFilters]); // Re-run search when selected filters change
 
     const mainProduct = products.length > 0 ? products[0] : null;
     const bestOffer = mainProduct ? mainProduct.offers.reduce((best, current) => (parseFloat(current.price) < parseFloat(best.price) ? current : best), mainProduct.offers[0]) : null;
@@ -259,32 +270,45 @@ const ComparisonTab = () => {
                     <div className="flex w-full items-center rounded-lg bg-[#0E0E0E] border border-border h-12 px-4 focus-within:ring-1 focus-within:ring-brand-orange transition-shadow">
                         <span className="material-symbols-outlined text-text-muted text-2xl">search</span>
                         <input
-                            className="w-full bg-transparent border-none text-white placeholder:text-text-muted focus:ring-0 text-base font-medium ml-2"
+                            className="flex-1 bg-transparent border-none text-white placeholder:text-text-muted focus:ring-0 text-base font-medium ml-2 min-w-[100px]" // flex-1 and min-w to give tags space
                             placeholder="Buscar produto..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                         />
                         {searchTerm && (
-                            <button onClick={() => setSearchTerm('')} className="text-text-muted hover:text-brand-orange transition-colors">
+                            <button onClick={() => setSearchTerm('')} className="flex-shrink-0 text-text-muted hover:text-brand-orange transition-colors">
                                 <span className="material-symbols-outlined text-xl">cancel</span>
                             </button>
                         )}
-                        {/* Integrated filter tags - Placeholder for dynamic filters */}
-                        {searchTerm && ( // Show filter tags if searchTerm is present
-                            <div className="flex items-center gap-2 ml-2">
-                                <span className="flex h-7 items-center justify-center gap-x-2 rounded-full bg-brand-orange/10 border border-brand-orange text-brand-orange pl-2 pr-1 text-xs font-medium">
-                                    Congelado
-                                    <button className="text-text-muted hover:text-brand-orange transition-colors ml-1">
-                                        <span className="material-symbols-outlined text-base">close</span>
-                                    </button>
-                                </span>
-                                <span className="flex h-7 items-center justify-center gap-x-2 rounded-full bg-brand-orange/10 border border-brand-orange text-brand-orange pl-2 pr-1 text-xs font-medium">
-                                    Nacional
-                                    <button className="text-text-muted hover:text-brand-orange transition-colors ml-1">
-                                        <span className="material-symbols-outlined text-base">close</span>
-                                    </button>
-                                </span>
+                        {/* Dynamic filter tags */}
+                        {availableFilters.length > 0 && (
+                            <div className="flex flex-shrink-0 items-center gap-2 ml-2 max-w-full overflow-x-auto hide-scrollbar">
+                                {availableFilters.map(filter => {
+                                    const isSelected = selectedFilters.includes(filter);
+                                    const bgColor = isSelected ? 'bg-brand-orange' : 'bg-[#2A2A2A]';
+                                    const textColor = isSelected ? 'text-white' : 'text-text-muted';
+                                    const borderColor = isSelected ? 'border-brand-orange' : 'border-border';
+
+                                    const handleTagClick = () => {
+                                        setSelectedFilters(prev =>
+                                            isSelected ? prev.filter(f => f !== filter) : [...prev, filter]
+                                        );
+                                    };
+
+                                    return (
+                                        <button
+                                            key={filter}
+                                            onClick={handleTagClick}
+                                            className={`flex-shrink-0 flex h-7 items-center justify-center gap-x-1 rounded-full ${bgColor} border ${borderColor} ${textColor} pl-2 pr-1 text-xs font-medium transition-colors whitespace-nowrap`}
+                                        >
+                                            {filter}
+                                            {isSelected && (
+                                                <span className="material-symbols-outlined text-base">close</span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

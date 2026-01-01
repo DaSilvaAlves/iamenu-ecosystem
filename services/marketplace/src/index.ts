@@ -161,11 +161,16 @@ function calculatePriceTrend(priceHistory: { date: Date; price: number }[]): str
 
 // GET products with comparative prices from various suppliers
 app.get('/api/v1/marketplace/products/compare', async (req: Request, res: Response) => {
-  const { search } = req.query;
+  const { search, filters } = req.query; // Destructure filters from query
 
   if (!search || typeof search !== 'string' || search.trim().length < 3) {
     return res.status(400).json({ error: 'Search term is required and must be at least 3 characters long.' });
   }
+
+  // Parse filters: "Peixe,Carne" -> ["Peixe", "Carne"]
+  const filtersArray = typeof filters === 'string' && filters.length > 0
+    ? filters.split(',').map(f => f.trim())
+    : [];
 
   try {
     const products = await prisma.product.findMany({
@@ -174,6 +179,15 @@ app.get('/api/v1/marketplace/products/compare', async (req: Request, res: Respon
           contains: search.trim(),
           mode: 'insensitive',
         },
+        // Apply filtering by categories/subcategories
+        AND: filtersArray.length > 0 ? [
+          {
+            OR: [
+              { category: { in: filtersArray, mode: 'insensitive' } },
+              { subcategory: { in: filtersArray, mode: 'insensitive' } },
+            ],
+          },
+        ] : undefined, // Only apply if filters are present
       },
       include: {
         SupplierProducts: {
