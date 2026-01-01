@@ -134,7 +134,9 @@ const SupplierCard = ({ offer, product, isBest }) => {
                  <div className="mt-2 pt-4 border-t border-border">
                     <div className="flex justify-between items-end mb-2">
                         <span className="text-xs font-bold text-text-muted uppercase">Histórico 30D</span>
-                        <span className="text-xs text-green-500 font-bold">Estável</span> {/* Static for now */}
+                        <span className={`text-xs font-bold ${offer.priceTrend === 'Increasing' ? 'text-red-500' : offer.priceTrend === 'Decreasing' ? 'text-green-500' : 'text-text-muted'}`}>
+                            {offer.priceTrend}
+                        </span>
                     </div>
                     {renderHistoryChart(offer.priceHistory)} {/* Render the dynamic history chart */}
                 </div>

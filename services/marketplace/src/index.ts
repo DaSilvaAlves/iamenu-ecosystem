@@ -126,6 +126,39 @@ app.get('/api/v1/marketplace/collective-bargains', async (req: Request, res: Res
   }
 });
 
+// Helper function to calculate price trend
+function calculatePriceTrend(priceHistory: { date: Date; price: number }[]): string {
+  if (!priceHistory || priceHistory.length < 2) {
+    return 'No Data'; // Not enough data points to determine a trend
+  }
+
+  // Sort by date to ensure correct order
+  const sortedHistory = [...priceHistory].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  // Filter to last 30 days
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const recentHistory = sortedHistory.filter(entry => new Date(entry.date) >= thirtyDaysAgo);
+
+  if (recentHistory.length < 2) {
+    return 'No Data'; // Not enough recent data
+  }
+
+  const firstPrice = recentHistory[0].price;
+  const lastPrice = recentHistory[recentHistory.length - 1].price;
+
+  // Define a threshold for "significant" change (e.g., 1%)
+  const trendThreshold = 0.01; // 1%
+
+  if (lastPrice > firstPrice * (1 + trendThreshold)) {
+    return 'Increasing';
+  } else if (lastPrice < firstPrice * (1 - trendThreshold)) {
+    return 'Decreasing';
+  } else {
+    return 'Stable';
+  }
+}
+
 // GET products with comparative prices from various suppliers
 app.get('/api/v1/marketplace/products/compare', async (req: Request, res: Response) => {
   const { search } = req.query;
@@ -148,22 +181,37 @@ app.get('/api/v1/marketplace/products/compare', async (req: Request, res: Respon
             Supplier: true, // Include supplier details for each offer
           },
         },
+        PriceHistory: { // Include PriceHistory
+          orderBy: {
+            date: 'asc', // Order by date ascending
+          },
+        },
       },
       take: 20, // Limit results to avoid overwhelming responses
     });
 
     // Transform data to a more comparative friendly format
     const comparativeProducts = products.map(product => {
-      const offers = product.SupplierProducts.map(sp => ({
-        supplierId: sp.supplierId,
-        supplierName: sp.Supplier.companyName,
-        supplierLogo: sp.Supplier.logoUrl,
-        price: sp.price,
-        unit: sp.unit || product.unit,
-        minQuantity: sp.minQuantity,
-        deliveryIncluded: sp.deliveryIncluded,
-        // Add other relevant supplier product details here
-      }));
+      const offers = product.SupplierProducts.map(sp => {
+        const priceHistoryForOffer = product.PriceHistory
+          .filter(ph => ph.supplierId === sp.supplierId)
+          .map(ph => ({ date: ph.date, price: ph.price.toNumber() }));
+
+        const priceTrend = calculatePriceTrend(priceHistoryForOffer); // Calculate trend
+
+        return {
+          supplierId: sp.supplierId,
+          supplierName: sp.Supplier.companyName,
+          supplierLogo: sp.Supplier.logoUrl,
+          price: sp.price,
+          unit: sp.unit || product.unit,
+          minQuantity: sp.minQuantity,
+          deliveryIncluded: sp.deliveryIncluded,
+          priceHistory: priceHistoryForOffer,
+          priceTrend: priceTrend, // Add priceTrend to the offer
+          // Add other relevant supplier product details here
+        };
+      });
 
       // Calculate average price if needed
       const validPrices = offers.map(o => o.price.toNumber()).filter(p => p > 0);
