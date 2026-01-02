@@ -194,6 +194,10 @@ mock-data/
 # Scripts output
 scripts/output/
 
+# Embedded Repositories (ignored)
+take-away-express-order-github/
+take-away-express-order/
+
 # ===================================
 # Keep These Files
 # ===================================
