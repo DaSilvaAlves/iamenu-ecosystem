@@ -1,0 +1,107 @@
+import { PrismaClient } from '@prisma/client-marketplace';
+
+const prisma = new PrismaClient();
+
+interface QuoteRequestData {
+  restaurantId: string; // Will come from auth token in a real app
+  suppliers: string[];
+  items: any[]; // JSON field
+  deliveryFrequency?: string;
+  deliveryAddress?: string;
+  notes?: string;
+  preferredStartDate?: Date;
+}
+
+export const createQuoteRequest = async (data: QuoteRequestData) => {
+  const { restaurantId, suppliers, items, ...rest } = data;
+
+  if (!restaurantId || !suppliers || !items) {
+    throw new Error('restaurantId, suppliers, and items are required');
+  }
+  
+  const quoteRequest = await prisma.quoteRequest.create({
+    data: {
+      restaurantId,
+      suppliers,
+      items,
+      ...rest,
+    },
+  });
+
+  // Here you would typically trigger notifications to suppliers
+  // e.g., via email, push notification, etc.
+
+  return quoteRequest;
+};
+
+export const getMyQuoteRequests = async (restaurantId: string) => {
+  return prisma.quoteRequest.findMany({
+    where: {
+      restaurantId,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      quotes: true, // Include responses from suppliers
+    },
+  });
+};
+
+export const getIncomingQuoteRequests = async (supplierId: string) => {
+  return prisma.quoteRequest.findMany({
+    where: {
+      suppliers: {
+        has: supplierId, // Check if the supplierId is in the 'suppliers' array
+      },
+      status: {
+        in: ['pending', 'quoted'], // Only show pending or already quoted requests
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      quotes: {
+        where: {
+          supplierId, // Only include quotes from this specific supplier
+        },
+      },
+    },
+  });
+};
+
+export const respondToQuoteRequest = async (data: RespondToQuoteRequestData) => {
+  const { quoteRequestId, supplierId, items, ...rest } = data;
+
+  // Validate that the supplier is actually requested for this quote
+  const request = await prisma.quoteRequest.findUnique({
+    where: { id: quoteRequestId },
+  });
+
+  if (!request || !request.suppliers.includes(supplierId)) {
+    throw new Error('Quote request not found or supplier not authorized to respond');
+  }
+
+  const quote = await prisma.quote.create({
+    data: {
+      quoteRequestId,
+      supplierId,
+      items,
+      ...rest,
+      status: 'sent',
+    },
+  });
+
+  // Update the status of the original QuoteRequest to 'quoted' if it was pending
+  await prisma.quoteRequest.update({
+    where: { id: quoteRequestId },
+    data: {
+      status: 'quoted',
+    },
+  });
+
+  // Here you would typically notify the restaurant that a quote has been received.
+
+  return quote;
+};
