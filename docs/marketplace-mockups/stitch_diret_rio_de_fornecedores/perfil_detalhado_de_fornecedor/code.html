@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Perfil de Fornecedor - iaMenu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#f97316", // Orange-500 from reference
+              "primary-hover": "#ea580c", // Orange-600
+              "background-page": "#0a0a0a", // Very dark background
+              "background-card": "#121212", // Slightly lighter for cards
+              "background-input": "#1e1e1e", // Input background
+              "surface-dark": "#121212",
+              "text-main": "#ffffff",
+              "text-muted": "#a3a3a3", // Neutral-400
+              "border-color": "#262626", // Neutral-800
+              "sidebar-bg": "#0a0a0a",
+            },
+            fontFamily: {
+              "display": ["Work Sans", "sans-serif"],
+              "body": ["Work Sans", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "0.5rem", 
+              "lg": "0.75rem", 
+              "xl": "1rem", 
+              "2xl": "1.5rem",
+              "full": "9999px"
+            },
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+        }
+        .icon-filled {
+            font-variation-settings:
+            'FILL' 1,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #0a0a0a; 
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #333; 
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #444; 
+        }
+    </style>
+</head>
+<body class="bg-background-page font-display text-text-main antialiased min-h-screen flex overflow-hidden">
+<aside class="w-64 bg-sidebar-bg border-r border-border-color flex-shrink-0 hidden lg:flex flex-col h-screen fixed left-0 top-0 z-50">
+<div class="p-5 flex items-center gap-3">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">ia</div>
+<h1 class="text-xl font-bold tracking-tight text-white">iaMenu Ecosystem</h1>
+</div>
+<div class="px-3 pb-4 overflow-y-auto flex-1 space-y-6">
+<div>
+<div class="px-3 py-2 text-xs font-semibold text-text-muted uppercase tracking-wider">Comece por aqui</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+                    Onboarding iaMenu
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">explore</span>
+                    Visão do Ecossistema
+                </a>
+</nav>
+</div>
+<div>
+<div class="px-3 py-2 text-xs font-semibold text-text-muted uppercase tracking-wider">Academia e Gestão</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">star</span>
+                    Audit de Reputação Online
+                </a>
+<a class="flex items-center justify-between px-3 py-2 text-sm font-medium text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">flash_on</span>
+                        iaMenu PRO - Upgrade
+                    </div>
+<span class="text-[10px] bg-[#333] text-text-muted px-1.5 py-0.5 rounded border border-border-color">PRO</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">calculate</span>
+                    Food Cost &amp; Fichas Técnicas
+                </a>
+</nav>
+</div>
+<div>
+<div class="px-3 py-2 text-xs font-semibold text-text-muted uppercase tracking-wider">Hub de Negócios</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-white bg-white/10 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px] text-primary">storefront</span>
+                    Marketplace Fornecedores
+                </a>
+<a class="flex items-center justify-between px-3 py-2 text-sm font-medium text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">location_on</span>
+                        Hubs Regionais
+                    </div>
+<span class="text-[10px] bg-[#333] text-text-muted px-1.5 py-0.5 rounded border border-border-color">5</span>
+</a>
+</nav>
+</div>
+</div>
+<div class="p-4 border-t border-border-color">
+<a class="text-primary text-xs font-medium hover:underline flex items-center gap-1" href="#">
+            Ver todos os grupos <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+</aside>
+<div class="flex-1 lg:ml-64 flex flex-col min-h-screen bg-background-page">
+<header class="sticky top-0 z-40 w-full bg-background-page/90 backdrop-blur-md border-b border-border-color px-6 py-4">
+<div class="flex items-center justify-between gap-4">
+<div class="hidden md:flex items-center gap-6">
+<nav class="flex items-center gap-2">
+<a class="px-4 py-1.5 rounded-full bg-white/5 text-sm font-medium text-text-main hover:bg-white/10 transition-colors" href="#">Home</a>
+<a class="px-4 py-1.5 rounded-full text-sm font-medium text-text-muted hover:text-text-main hover:bg-white/5 transition-colors" href="#">Cursos</a>
+<a class="px-4 py-1.5 rounded-full text-sm font-medium text-text-muted hover:text-text-main hover:bg-white/5 transition-colors" href="#">Hubs</a>
+<a class="px-4 py-1.5 rounded-full text-sm font-medium text-text-muted hover:text-text-main hover:bg-white/5 transition-colors" href="#">Leaderboard</a>
+</nav>
+</div>
+<button class="md:hidden p-2 text-text-main">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="flex items-center gap-4 flex-1 md:flex-none justify-end">
+<div class="relative hidden sm:block w-64">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-text-muted text-[20px]">search</span>
+</span>
+<input class="block w-full pl-10 pr-3 py-2 border border-border-color rounded-lg bg-background-input text-text-main placeholder-text-muted focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm" placeholder="Pesquisar..." type="text"/>
+</div>
+<div class="flex items-center gap-3 text-text-muted">
+<button class="hover:text-white transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="hover:text-white transition-colors"><span class="material-symbols-outlined">chat_bubble</span></button>
+<button class="hover:text-white transition-colors"><span class="material-symbols-outlined">bookmark</span></button>
+<div class="size-8 rounded-full bg-cover bg-center border border-border-color ml-2 cursor-pointer" data-alt="User profile picture placeholder" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAzFBhTcxGnETrti5Dv48SvinyuFyeS17QYRMbzuAS9U8TU6KAk-wGyeV_SwwTA1QYN0aY-7q1hDFuc4SN7w39e8inFkwyXa0dzPI8crUrQw5XaYi7MclNm3WmekLMy3u0_jfNtuBw1oqeObT70bStuZcyr01mC1UF2hSeM7QNU-YNf_XCnm5J9iT5drfRFwKFl8dzRucuSElbrh57CqQVIFoSia9T-SSNaQ7a1GO5QwshR5ZVeLwI3yE9gtuo7y_53eaKm7lKNiA');"></div>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-grow p-6 lg:p-8 max-w-7xl mx-auto w-full">
+<nav aria-label="Breadcrumb" class="flex mb-6">
+<ol class="flex items-center space-x-2">
+<li><a class="text-text-muted hover:text-primary text-sm" href="#">Mercado</a></li>
+<li><span class="text-text-muted">/</span></li>
+<li><a class="text-text-muted hover:text-primary text-sm" href="#">Frescos</a></li>
+<li><span class="text-text-muted">/</span></li>
+<li aria-current="page" class="text-primary text-sm font-medium">Distribuidora Lisboa Central</li>
+</ol>
+</nav>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+<div class="xl:col-span-8 flex flex-col gap-6">
+<section class="bg-background-card rounded-xl border border-border-color overflow-hidden relative group">
+<div class="h-56 bg-cover bg-center relative" data-alt="Fresh vegetables warehouse background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAaitveJWLd3H9MNPShAzL7KaQPSz35bx5KiIbKS6HeTYdSfqlMOzfjEe_JecFOAz7hVOfjQGnSaHoOo8t6kF47M5FBOjwnemhd12PQQk2G42TaFkcbvvgay0LJxok4A7KeO9IwJtpQnTtN5Tkg-7j507PW57_2urgo_AF_DeAf7sAf5XvHQQcErLgjIgemtSMCU_ipw1F3SmksQI21Z8izgZoPPimS38SsPf5nCB8hTtQxHuOjsMM32Rx0VIKVeixgrUzu_zjaSA');">
+<div class="absolute inset-0 bg-gradient-to-t from-background-card via-background-card/80 to-transparent"></div>
+<div class="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row items-end sm:items-end gap-6">
+<div class="size-28 rounded-xl bg-background-card p-3 shadow-2xl border border-border-color flex items-center justify-center shrink-0">
+<div class="w-full h-full bg-contain bg-center bg-no-repeat rounded-lg" data-alt="Distribuidora Lisboa Central Logo" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAfu-pieyIOnDBMuEUbC1TfCLyriUgnq7ghePyClmVMnsK9e6EywDvSAfU4UChQHpSQzIfp-lNMPb-hGzGWESbXg341RifKsAs1lS-NeWMSsgGJTGSi5O5QWRWq8YHRm_u6Cj2UULwut2Z5zPBiUk_87hBrEcbZbF8gK8rEbCSMgNebxwBzrzdJqAG2t9Ln2ppI-OAJKv43fsabdvuW2hbXs3SPCKBIeOc0kh2uYiophV5kfMicsYXi_8wETaYOm1l_T58fm-xTEA');"></div>
+</div>
+<div class="mb-1 flex-1">
+<div class="flex items-center gap-3 mb-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide bg-primary/20 text-primary border border-primary/30">Fornecedor Premium</span>
+<span class="flex items-center gap-1 text-yellow-500 text-sm">
+<span class="material-symbols-outlined icon-filled text-[16px]">star</span>
+<span class="font-bold">4.8</span>
+<span class="text-text-muted font-normal">(124 avaliações)</span>
+</span>
+</div>
+<h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">Distribuidora Lisboa Central</h1>
+<div class="flex flex-wrap items-center gap-4 text-sm text-text-muted">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+                                        Lisboa, Portugal
+                                    </span>
+<span class="w-1 h-1 rounded-full bg-text-muted/30"></span>
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                                        Frescos &amp; Laticínios
+                                    </span>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-border-color border-t border-border-color bg-white/5 backdrop-blur-sm">
+<div class="p-4 flex flex-col items-center justify-center text-center">
+<span class="text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1">Mínimo Enc.</span>
+<span class="text-xl font-bold text-white">150,00 €</span>
+</div>
+<div class="p-4 flex flex-col items-center justify-center text-center">
+<span class="text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1">Lead Time</span>
+<span class="text-xl font-bold text-white">24h</span>
+</div>
+<div class="p-4 flex flex-col items-center justify-center text-center">
+<span class="text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1">Entrega</span>
+<span class="text-xl font-bold text-primary">Grátis &gt; 300€</span>
+</div>
+<div class="p-4 flex flex-col items-center justify-center text-center">
+<span class="text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1">Taxa de Resposta</span>
+<span class="text-xl font-bold text-primary">98%</span>
+</div>
+</div>
+</section>
+<div class="border-b border-border-color">
+<div class="flex gap-8">
+<button class="pb-3 text-sm font-bold text-primary border-b-2 border-primary">Visão Geral</button>
+<button class="pb-3 text-sm font-medium text-text-muted hover:text-white border-b-2 border-transparent transition-colors">Catálogo <span class="text-xs bg-white/10 px-1.5 py-0.5 rounded ml-1">840</span></button>
+<button class="pb-3 text-sm font-medium text-text-muted hover:text-white border-b-2 border-transparent transition-colors">Avaliações</button>
+<button class="pb-3 text-sm font-medium text-text-muted hover:text-white border-b-2 border-transparent transition-colors">Políticas</button>
+</div>
+</div>
+<div class="space-y-6">
+<div class="grid md:grid-cols-1 gap-6">
+<div class="bg-background-card p-6 rounded-xl border border-border-color">
+<h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">info</span>
+                                Sobre o Fornecedor
+                            </h3>
+<p class="text-text-muted leading-relaxed text-sm">
+                                Líder na distribuição de produtos frescos e laticínios na região da Grande Lisboa há mais de 15 anos. Somos o parceiro de confiança para mais de 500 restaurantes, hotéis e cafés. Trabalhamos diretamente com produtores locais para garantir a máxima frescura, com entregas diárias antes das 10h da manhã. A nossa frota refrigerada garante a cadeia de frio desde o armazém até à sua porta.
+                            </p>
+</div>
+<div class="bg-background-card p-6 rounded-xl border border-border-color">
+<h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">loyalty</span>
+                                Marcas em Distribuição
+                            </h3>
+<div class="flex flex-wrap gap-4">
+<div class="h-14 w-20 bg-white/5 border border-border-color rounded-lg flex items-center justify-center p-2 hover:bg-white/10 transition-colors">
+<img alt="Compal" class="max-h-full max-w-full object-contain filter grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMIjwweTc10eBGpsqv3bVOpPeDL8Ip374Ij8aQpKrMRm0dnpAydc_8aYPqJjrl23gI1nQP1hE9Kplv9SM-aNrGE2vKbVr-YDbdn_Wh8II1o4MEyj1DhJ-w8k8PSt0-S1Cg-UnuQq63ZvkGFxBbAu0ULIcofsCHlfgZ-Q6K65BX6m0B30ddAN07-26CIzpCa_GnG0bcFlm-sirgnfqgxPyvb-NV3z9Y-LR9d_8lEMsvQtc1DxQOaSN4H4Yf6XyIkc7_bRGYruteqA"/>
+</div>
+<div class="h-14 w-20 bg-white/5 border border-border-color rounded-lg flex items-center justify-center p-2 hover:bg-white/10 transition-colors">
+<img alt="Delta" class="max-h-full max-w-full object-contain filter grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAd1_0DuFAiaF_us8QIzmkP4XN40c2tV17aAgiu5nA1DjYIa4t_ZPniwkC92hxUqagXwR3CTc-b6uQJqpkPVv-TsYYOdrINKBgLne_gUSxKZL4J9DGAWTaKDuUuRKdooJ9X8OOVJymalgI0XG83Cch0V4gP8MjE8__eILMoNcgVJSVZtaZSZYZ9sN05VO_f9hP2D1HW2zebpAr9AlhBhUVkbbLSBi03BfCpw6WSQzYtDaWxwPC7pL-LCxjLXcNUjlJkL-GcGgZsMw"/>
+</div>
+<div class="h-14 w-20 bg-white/5 border border-border-color rounded-lg flex items-center justify-center p-2 hover:bg-white/10 transition-colors">
+<img alt="Mimosa" class="max-h-full max-w-full object-contain filter grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRtr4nI0oJNLaPJze091Jix15qc_Ylnu6xHV4QqDyihAoix5B9zA5Um7Gb0Kgc7QHXdJujHTQNOX_Zw4rriAat5QCtL6GPD2SE0goP_mWyGG1a4UPvHwr7j8UTmJEU36ww0g9xFKMTOHhHpwqO9bEb6gH1I5c48hh6cF7eCS6ZIuB8L1SrvuuhINN6DZBxSmV-W_sqWS7di4FcfgeF93i9DaeTTEG33pMDUYzcfY5FzBPrz42kq37RrJexsA6AP1n4Z0aQZcH2rQ"/>
+</div>
+<div class="h-14 w-20 bg-white/5 border border-border-color rounded-lg flex items-center justify-center p-2 hover:bg-white/10 transition-colors">
+<img alt="Danone" class="max-h-full max-w-full object-contain filter grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5PDuiAgiJm__k1QK3BOfuAE3F8NJ56KN1IUg0Ir1RYTMIwQr-PLDWr6D9BXu_cjOdqnfg_LwPRgWChViWGbcfd2n01qIqBXVLd2z2QAvIVVAPYhag_uv1vVSlJZzWblb1IXbvqkUZj2UuJ0aKbQldtgITcB95IIEDz2cBugfGulGk4YtMrvV_J1NSdKqBBWT01Jf4IVnEOK95RifjWwwMDTSly-KlergYZkSWAcJPeQsdWTREonXFE1SweVyk5KhMBHVCq2dTbw"/>
+</div>
+<div class="h-14 w-20 bg-white/5 border border-border-color rounded-lg flex items-center justify-center p-2 hover:bg-white/10 transition-colors cursor-pointer group">
+<span class="text-[10px] text-center font-bold text-text-muted group-hover:text-white transition-colors">+ 25 Marcas</span>
+</div>
+</div>
+</div>
+</div>
+<div class="grid md:grid-cols-2 gap-6">
+<div class="bg-background-card p-6 rounded-xl border border-border-color">
+<div class="flex items-center gap-3 mb-4">
+<div class="bg-blue-500/10 text-blue-500 p-2 rounded-lg border border-blue-500/20">
+<span class="material-symbols-outlined">local_shipping</span>
+</div>
+<h3 class="text-lg font-bold text-white">Entrega e Logística</h3>
+</div>
+<ul class="space-y-3 text-sm">
+<li class="flex items-start gap-3 text-text-muted">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+<span>Entregas de Seg a Sáb (06:00 - 14:00)</span>
+</li>
+<li class="flex items-start gap-3 text-text-muted">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+<span>Cut-off para dia seguinte: 16:00</span>
+</li>
+<li class="flex items-start gap-3 text-text-muted">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+<span>Área: Grande Lisboa, Sintra, Cascais</span>
+</li>
+<li class="flex items-start gap-3 text-text-muted">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+<span>Custo fixo de 15€ para encomendas &lt; 300€</span>
+</li>
+</ul>
+</div>
+<div class="bg-background-card p-6 rounded-xl border border-border-color">
+<div class="flex items-center gap-3 mb-4">
+<div class="bg-orange-500/10 text-orange-500 p-2 rounded-lg border border-orange-500/20">
+<span class="material-symbols-outlined">assignment_return</span>
+</div>
+<h3 class="text-lg font-bold text-white">Devoluções e Qualidade</h3>
+</div>
+<ul class="space-y-3 text-sm">
+<li class="flex items-start gap-3 text-text-muted">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+<span>Devolução no ato da entrega aceite</span>
+</li>
+<li class="flex items-start gap-3 text-text-muted">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+<span>Reclamações até 24h para perecíveis</span>
+</li>
+<li class="flex items-start gap-3 text-text-muted">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+<span>Certificação HACCP em toda a frota</span>
+</li>
+</ul>
+</div>
+</div>
+<section class="bg-background-card rounded-xl border border-border-color p-6">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h3 class="text-lg font-bold text-white">Destaques da Semana</h3>
+<p class="text-sm text-text-muted">Produtos com maior procura nesta época</p>
+</div>
+<button class="px-4 py-1.5 rounded bg-white/5 hover:bg-white/10 text-white text-xs font-bold border border-border-color transition-colors">
+                                Ver Todos
+                            </button>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="group cursor-pointer bg-background-page rounded-lg p-3 border border-border-color hover:border-primary/50 transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.1)]">
+<div class="aspect-square bg-background-input rounded-md mb-3 relative overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500" data-alt="Batata Doce Nacional" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCX9oWx8LoU8D-PgE06XrZdvEaxFbaEo3MCieGAniY21Jj0QJgLaU8v3GBfdlV0Xdn90Dde11f96GUqugD9t10EdAv8SLbywT_Rg8D1uM0p6pqCaNboZw72lOtThdDX2xFRKwFDyzTZT5xkYCSATEUvBzqrgoz2_c9NiW_bgUR9buulSyK5d53XLY1cWqw90pLsCANVvtSNw1U7C40ZXChKFR524Vnbxwc4ulnGu_pb-jeoKQJmDTTCVUt7r5bZ-lDcuv1hMj0pUg');"></div>
+</div>
+<h4 class="font-bold text-sm text-white line-clamp-2 group-hover:text-primary transition-colors">Batata Doce Nacional - Saco 5kg</h4>
+<p class="text-[10px] text-text-muted mt-1 uppercase tracking-wide">Ref: 20491 • Kg</p>
+<div class="mt-2 flex items-baseline justify-between">
+<p class="font-bold text-white">1,25 € <span class="text-xs font-normal text-text-muted">/ kg</span></p>
+<button class="size-6 rounded bg-primary text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+<div class="group cursor-pointer bg-background-page rounded-lg p-3 border border-border-color hover:border-primary/50 transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.1)]">
+<div class="aspect-square bg-background-input rounded-md mb-3 relative overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500" data-alt="Tomate Cherry Ramo" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBckBpOfjV91LxpHix_XiR1J78By2aeQmYPBQqtCQ5xB5YVaueSKfqx-5fa9_CIlgDZzW0XeXXDPB2K0z_qCJq7p1Kyq2YgN7hwIeKR9w-1HA03k4M1kG6ldDrhoxG85Pg-y7w4XWW-ZEhyViIeIWsqPz2ZhlAKE38KU-zQnxWji8CjIz-v5GUnovUiOAy5wNMbQGUk_AAxji9YMtzlpPCpcYxLImvTzQxT2jstqksT2DU-VfG3XTx0zngclniAAL9pu40or3BATQ');"></div>
+</div>
+<h4 class="font-bold text-sm text-white line-clamp-2 group-hover:text-primary transition-colors">Tomate Cherry Rama Premium</h4>
+<p class="text-[10px] text-text-muted mt-1 uppercase tracking-wide">Ref: 10234 • Cx 3kg</p>
+<div class="mt-2 flex items-baseline justify-between">
+<p class="font-bold text-white">3,45 € <span class="text-xs font-normal text-text-muted">/ kg</span></p>
+<button class="size-6 rounded bg-primary text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+<div class="group cursor-pointer bg-background-page rounded-lg p-3 border border-border-color hover:border-primary/50 transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.1)]">
+<div class="aspect-square bg-background-input rounded-md mb-3 relative overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500" data-alt="Alface Iceberg" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDLqQ3Qs2slWkwFK7mR-DQ7xYyMMRx3ZWy0hWyXdLHmkNhBr-j0MLjMy9nReROLo9x4cwkbAsNa0aLFY8NunWoC-GdjJ3D2T-lV6d8exIq3MNFBpn0uArQU9G5tncZ6Ab_1yZi_qNgFZpcDbnfi6wlbuCg55o_ptDyqq4-UH1rHzlm7a_kNmNjh_aajJjQRBt0FAmCaqBO4NhwqRP0D7_uk-2OoNqeWKSLrEyMXy_JM3uz3m0rabrmSiBzk2GPWb9GjKxTC8boQcg');"></div>
+</div>
+<h4 class="font-bold text-sm text-white line-clamp-2 group-hover:text-primary transition-colors">Alface Iceberg Fresca</h4>
+<p class="text-[10px] text-text-muted mt-1 uppercase tracking-wide">Ref: 30112 • Unid</p>
+<div class="mt-2 flex items-baseline justify-between">
+<p class="font-bold text-white">0,89 € <span class="text-xs font-normal text-text-muted">/ un</span></p>
+<button class="size-6 rounded bg-primary text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+<div class="group cursor-pointer bg-background-page rounded-lg p-3 border border-border-color hover:border-primary/50 transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.1)]">
+<div class="aspect-square bg-background-input rounded-md mb-3 relative overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500" data-alt="Queijo Flamengo Bola" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDiqthhrioq_zdNOzHQsypklNsWEIi7OmW-WY6cFGvXVmFf94WmVdkBaj3kFO8VI8XCzBXA00PiWv4C17dkuSaDAeKmZHFYxJtvrJXyU-lEeLRTTNMQUKebEza5U1Rcrbx5bQZgjX0rgsNd7-owBszyALhhIKW9ck11Kkz_xkUXzlByJ95cbSn1I6VZbvoXFoaykfpqJdK5hSd4qtyhz1h1Q20hc3AoklOHCD7TXOImC_TEO7ZNQiL9lLvvhTkoVYi2a9fsdjT96Q');"></div>
+</div>
+<h4 class="font-bold text-sm text-white line-clamp-2 group-hover:text-primary transition-colors">Queijo Flamengo Bola Inteira</h4>
+<p class="text-[10px] text-text-muted mt-1 uppercase tracking-wide">Ref: 55019 • Un ~2kg</p>
+<div class="mt-2 flex items-baseline justify-between">
+<p class="font-bold text-white">7,90 € <span class="text-xs font-normal text-text-muted">/ kg</span></p>
+<button class="size-6 rounded bg-primary text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<div class="xl:col-span-4 space-y-6 sticky top-24">
+<div class="bg-background-card p-6 rounded-xl border border-border-color relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-[150px] text-white">store</span>
+</div>
+<div class="flex items-center justify-between mb-6 relative z-10">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">
+<span class="block size-2 rounded-full bg-green-500 animate-pulse"></span>
+                            Aberto Agora
+                        </span>
+<span class="text-xs text-text-muted font-medium bg-white/5 px-2 py-1 rounded">Fecha às 18:00</span>
+</div>
+<div class="space-y-3 mb-6 relative z-10">
+<button class="w-full flex items-center justify-center gap-2 h-12 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]">
+<span class="material-symbols-outlined">menu_book</span>
+                            Ver Catálogo
+                        </button>
+<button class="w-full flex items-center justify-center gap-2 h-12 bg-transparent hover:bg-white/5 border border-primary text-primary font-bold rounded-lg transition-colors">
+<span class="material-symbols-outlined">request_quote</span>
+                            Enviar RFQ
+                        </button>
+</div>
+<div class="pt-4 border-t border-border-color flex items-center justify-center relative z-10">
+<button class="flex items-center gap-2 text-text-muted hover:text-red-500 transition-colors text-sm font-medium group">
+<span class="material-symbols-outlined group-hover:icon-filled transition-all">favorite</span>
+                            Adicionar aos Meus Fornecedores
+                        </button>
+</div>
+</div>
+<div class="bg-background-card p-6 rounded-xl border border-border-color">
+<h3 class="text-xs font-bold text-text-muted uppercase tracking-wider mb-4">Certificações &amp; Selos</h3>
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-3 p-3 rounded-lg bg-background-page border border-border-color hover:border-primary/30 transition-colors group">
+<div class="size-10 rounded bg-green-900/30 text-green-400 flex items-center justify-center border border-green-800/50 group-hover:text-green-300 transition-colors">
+<span class="material-symbols-outlined">verified</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-white">Fornecedor Verificado</h4>
+<p class="text-xs text-text-muted">Validado pela iaMenu em 2023</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-background-page border border-border-color hover:border-primary/30 transition-colors group">
+<div class="size-10 rounded bg-blue-900/30 text-blue-400 flex items-center justify-center border border-blue-800/50 group-hover:text-blue-300 transition-colors">
+<span class="material-symbols-outlined">safety_check</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-white">HACCP Certificado</h4>
+<p class="text-xs text-text-muted">Segurança alimentar garantida</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-background-page border border-border-color hover:border-primary/30 transition-colors group">
+<div class="size-10 rounded bg-emerald-900/30 text-emerald-400 flex items-center justify-center border border-emerald-800/50 group-hover:text-emerald-300 transition-colors">
+<span class="material-symbols-outlined">eco</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-white">Produtor Local</h4>
+<p class="text-xs text-text-muted">Apoio à economia regional</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-background-card p-6 rounded-xl border border-border-color">
+<h3 class="text-xs font-bold text-text-muted uppercase tracking-wider mb-4">Contacto Comercial</h3>
+<div class="flex items-center gap-3 mb-4">
+<div class="size-12 rounded-full bg-cover bg-center border-2 border-border-color" data-alt="Representative Portrait" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAHz0RJMJyWVODgIynM4h_kTAgaa5ob6QQGg6m9ZO79BKX7ISVesHhSDO00ZZ94xJt0qEmlnc2o8coTriIal94T8gJ6mz1Y5o00i6leXI-uug-8VJ2TbCpbFQm1LRGKHjQ0jSHg7WybGyxtHI2Ldche_gI4iP8PycPDrrguuldp5_MgZI7REzS0YrvjajTNqAop9L-4RS5NKJnQTR147g0xf5hqwnf5gLV0IXOlXt1m09d7r9MnoNW9-XvKxx1rM8Oy0UEU4Ier9g');"></div>
+<div>
+<p class="text-sm font-bold text-white">Carlos Silva</p>
+<p class="text-xs text-text-muted">Gestor de Conta</p>
+<p class="text-xs text-primary mt-0.5">Disponível</p>
+</div>
+</div>
+<button class="w-full text-sm text-text-muted hover:text-white border border-border-color rounded-lg py-2 hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+                        Enviar Mensagem
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<footer class="bg-background-card border-t border-border-color py-8 mt-auto">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-2 text-text-muted">
+<span class="material-symbols-outlined text-primary">storefront</span>
+<span class="text-sm font-semibold">iaMenu Ecosystem © 2024</span>
+</div>
+<div class="flex gap-6">
+<a class="text-sm text-text-muted hover:text-primary transition-colors" href="#">Termos</a>
+<a class="text-sm text-text-muted hover:text-primary transition-colors" href="#">Privacidade</a>
+<a class="text-sm text-text-muted hover:text-primary transition-colors" href="#">Ajuda</a>
+</div>
+</div>
+</footer>
+</div>
+
+</body></html>

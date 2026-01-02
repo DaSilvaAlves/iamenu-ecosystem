@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>iaMenu - Comparador de Preços</title>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "brand-orange": "#F2542D", // Orange from reference
+                        "background-dark": "#0E0E0E", // Deep dark background
+                        "surface-dark": "#161616", // Slightly lighter surface
+                        "surface-card": "#1E1E1E", // Card background
+                        "text-primary": "#FFFFFF",
+                        "text-secondary": "#A1A1A1",
+                        "sidebar-bg": "#0B0B0B",
+                        "border-dark": "#2E2E2E",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "Noto Sans", "sans-serif"],
+                        "body": ["Work Sans", "Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem", 
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background-color: #0E0E0E;}
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }.sidebar-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: #0B0B0B;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: #333; 
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-text-primary min-h-screen flex font-display overflow-hidden">
+<aside class="w-64 bg-sidebar-bg border-r border-border-dark flex-col hidden lg:flex h-screen sticky top-0">
+<div class="h-16 flex items-center px-6 border-b border-border-dark">
+<div class="flex items-center gap-2">
+<div class="size-8 bg-brand-orange rounded-md flex items-center justify-center text-white font-bold">ia</div>
+<h1 class="text-white font-bold text-lg tracking-tight">iaMenu Ecosystem</h1>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto sidebar-scroll py-6 px-3 space-y-6">
+<div>
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">notifications</span>
+<span class="text-sm font-medium">Notificações</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors mt-1" href="#">
+<span class="material-symbols-outlined text-xl">feed</span>
+<span class="text-sm font-medium">Feed</span>
+</a>
+</div>
+<div>
+<h3 class="px-3 text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">Comece por aqui</h3>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">bolt</span>
+<span class="text-sm font-medium">Onboarding iaMenu</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">public</span>
+<span class="text-sm font-medium">Visão do Ecossistema</span>
+</a>
+</div>
+</div>
+<div>
+<h3 class="px-3 text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">Academia e Gestão</h3>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">star</span>
+<span class="text-sm font-medium">Reputação Online</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">calculate</span>
+<span class="text-sm font-medium">Food Cost &amp; Fichas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-brand-orange/10 text-brand-orange rounded-lg transition-colors border-l-2 border-brand-orange" href="#">
+<span class="material-symbols-outlined text-xl">dashboard</span>
+<span class="text-sm font-medium">Business Intelligence</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">groups</span>
+<span class="text-sm font-medium">Escalas de Staff AI</span>
+</a>
+</div>
+</div>
+<div>
+<h3 class="px-3 text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">Hub de Negócios</h3>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-white bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-xl text-brand-orange">storefront</span>
+<span class="text-sm font-medium">Marketplace</span>
+</a>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-border-dark">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 ring-1 ring-border-dark" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC6UKIIS2ByfPQHA5cxoGy4eQa9CBfLLpmYQIex6OY96Iq3vS_NjZMA5WKQFWUUWe3g0a_3X375FzO0hFZXRlF9rRjOsKKHeWhHkMk73bOrtIA90fh_Ue2qLREpmgB-6u-Jvc46DOegBq4ngFTkuloMVYPgxNhyw9dvyLeFobRA-DHHgJtkP9LZBTyFeimN8cnu8e0a2OiyMu2Lukxt16hJwPFBstj3e7wg9-mhYyeUHLXn47yO2oEEjPSme03oUW3lR8M_1bhmfw");'></div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white">Restaurante Demo</span>
+<span class="text-xs text-text-secondary">Plano Pro</span>
+</div>
+</div>
+</div>
+</aside>
+<div class="flex-1 flex flex-col h-screen overflow-hidden bg-background-dark">
+<header class="h-16 border-b border-border-dark bg-background-dark flex items-center justify-between px-6 shrink-0 z-20">
+<div class="hidden md:flex items-center gap-6">
+<a class="px-3 py-1.5 rounded-full bg-white/10 text-white text-sm font-medium" href="#">Home</a>
+<a class="text-text-secondary hover:text-white text-sm font-medium transition-colors" href="#">Cursos</a>
+<a class="text-text-secondary hover:text-white text-sm font-medium transition-colors" href="#">Hubs</a>
+<a class="text-text-secondary hover:text-white text-sm font-medium transition-colors" href="#">Leaderboard</a>
+</div>
+<div class="md:hidden flex items-center gap-2">
+<button class="text-white"><span class="material-symbols-outlined">menu</span></button>
+<span class="font-bold">iaMenu</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-lg">search</span>
+<input class="bg-[#1E1E1E] border border-border-dark rounded-lg pl-10 pr-4 py-1.5 text-sm text-white placeholder-gray-500 focus:ring-1 focus:ring-brand-orange focus:border-brand-orange w-64" placeholder="Pesquisar..." type="text"/>
+</div>
+<div class="flex items-center gap-3 text-text-secondary border-l border-border-dark pl-4 ml-2">
+<button class="hover:text-white transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 size-2 bg-brand-orange rounded-full border-2 border-background-dark"></span>
+</button>
+<button class="hover:text-white transition-colors"><span class="material-symbols-outlined">chat_bubble</span></button>
+<button class="hover:text-white transition-colors"><span class="material-symbols-outlined">bookmark</span></button>
+<button class="flex items-center justify-center size-8 rounded-full bg-brand-orange text-white text-sm font-bold shadow-lg shadow-brand-orange/20">
+<span class="material-symbols-outlined text-lg">shopping_cart</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-6 md:p-8 relative">
+<div class="max-w-7xl mx-auto flex flex-col gap-8 pb-20">
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+<div class="flex flex-col gap-1">
+<h1 class="text-white text-3xl md:text-4xl font-bold uppercase italic tracking-wide">
+                            COMPARADOR <span class="text-brand-orange">DE PREÇOS</span>
+</h1>
+<p class="text-text-secondary text-sm font-medium uppercase tracking-wider">Analise e compare ofertas para o seu inventário.</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative inline-block text-left">
+<button class="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-[#1E1E1E] border border-border-dark rounded-md hover:bg-[#2a2a2a] focus:outline-none">
+                                Esta Semana
+                                <span class="material-symbols-outlined ml-2 -mr-1 text-lg">expand_more</span>
+</button>
+</div>
+<button class="flex items-center justify-center rounded-md h-9 px-4 bg-[#1E1E1E] border border-border-dark text-white text-sm font-medium hover:bg-[#2a2a2a] transition-colors">
+<span class="material-symbols-outlined mr-2 text-lg">refresh</span>
+                            Atualizar
+                        </button>
+<button class="flex items-center justify-center rounded-md h-9 px-4 bg-brand-orange text-white text-sm font-bold shadow-lg shadow-brand-orange/20 hover:bg-orange-600 transition-colors">
+<span class="material-symbols-outlined mr-2 text-lg">history</span>
+                            Histórico
+                        </button>
+</div>
+</div>
+<div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-2 border-b border-border-dark">
+<button class="flex items-center gap-2 px-4 py-2 bg-brand-orange text-white text-sm font-bold rounded-t-lg">
+<span class="material-symbols-outlined text-lg">search</span>
+                        Pesquisa
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 text-text-secondary hover:text-white hover:bg-white/5 text-sm font-medium rounded-t-lg transition-colors">
+<span class="material-symbols-outlined text-lg">tune</span>
+                        Filtros Avançados
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 text-text-secondary hover:text-white hover:bg-white/5 text-sm font-medium rounded-t-lg transition-colors">
+<span class="material-symbols-outlined text-lg">favorite</span>
+                        Favoritos
+                    </button>
+</div>
+<div class="bg-surface-card rounded-b-xl rounded-tr-xl border border-border-dark p-5 flex flex-col md:flex-row gap-4 items-start md:items-center -mt-2">
+<div class="relative flex-1 w-full">
+<div class="flex w-full items-center rounded-lg bg-[#0E0E0E] border border-border-dark h-12 px-4 focus-within:ring-1 focus-within:ring-brand-orange transition-shadow">
+<span class="material-symbols-outlined text-text-secondary text-2xl">search</span>
+<input class="w-full bg-transparent border-none text-white placeholder:text-text-secondary focus:ring-0 text-base font-medium ml-2" placeholder="Buscar produto..." value="Peito de Frango 2.5kg"/>
+<button class="text-text-secondary hover:text-brand-orange transition-colors">
+<span class="material-symbols-outlined text-xl">cancel</span>
+</button>
+</div>
+</div>
+<div class="flex gap-2 overflow-x-auto hide-scrollbar w-full md:w-auto pb-2 md:pb-0">
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-[#0E0E0E] border border-border-dark text-text-secondary pl-3 pr-3 hover:border-brand-orange hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg">ac_unit</span>
+<span class="text-sm font-medium">Congelado</span>
+</button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-[#0E0E0E] border border-border-dark text-text-secondary pl-3 pr-3 hover:border-brand-orange hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg">location_on</span>
+<span class="text-sm font-medium">Nacional</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-card rounded-xl p-6 border border-border-dark relative overflow-hidden group hover:border-brand-orange/30 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-lg bg-[#2A2A2A] flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-2xl">analytics</span>
+</div>
+<span class="text-green-500 bg-green-500/10 px-2 py-1 rounded text-xs font-bold flex items-center">
+<span class="material-symbols-outlined text-xs mr-0.5">trending_up</span> +1.2%
+                            </span>
+</div>
+<p class="text-white text-3xl font-bold mb-1">€5.48</p>
+<p class="text-text-secondary text-xs font-bold uppercase tracking-wider">Média de Mercado (/kg)</p>
+</div>
+<div class="bg-surface-card rounded-xl p-6 border border-border-dark relative overflow-hidden group hover:border-brand-orange/30 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-lg bg-[#2A2A2A] flex items-center justify-center text-brand-orange">
+<span class="material-symbols-outlined text-2xl">savings</span>
+</div>
+<span class="text-brand-orange bg-brand-orange/10 px-2 py-1 rounded text-xs font-bold flex items-center">
+                                Fornecedor A
+                            </span>
+</div>
+<p class="text-white text-3xl font-bold mb-1">€5.35</p>
+<p class="text-text-secondary text-xs font-bold uppercase tracking-wider">Melhor Preço (/kg)</p>
+</div>
+<div class="bg-surface-card rounded-xl p-6 border border-border-dark relative overflow-hidden group hover:border-brand-orange/30 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-lg bg-[#2A2A2A] flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-2xl">trending_down</span>
+</div>
+<span class="text-text-secondary text-xs font-bold flex items-center">
+                                Sem dados anteriores
+                            </span>
+</div>
+<p class="text-white text-3xl font-bold mb-1">€0.25</p>
+<p class="text-text-secondary text-xs font-bold uppercase tracking-wider">Poupança Potencial (/kg)</p>
+</div>
+</div>
+<div class="flex items-center justify-between mt-4">
+<div class="flex items-center gap-3">
+<span class="size-2 rounded-full bg-brand-orange"></span>
+<h3 class="text-xl font-bold text-white uppercase tracking-wide">Comparação de Fornecedores</h3>
+</div>
+<span class="bg-[#2A2A2A] text-text-secondary text-xs font-bold px-3 py-1 rounded-full border border-border-dark">3 Opções Encontradas</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+<div class="bg-surface-card rounded-xl border border-brand-orange shadow-lg shadow-brand-orange/5 overflow-hidden flex flex-col relative transform hover:-translate-y-1 transition-transform duration-300">
+<div class="bg-brand-orange text-white text-[10px] font-bold py-1 px-3 absolute top-0 right-0 rounded-bl-lg uppercase tracking-wider z-10">
+                            Melhor Opção #1
+                        </div>
+<div class="p-6 border-b border-border-dark bg-[#1A1A1A]">
+<div class="flex items-center gap-4 mb-5">
+<div class="size-12 rounded-lg bg-[#2A2A2A] flex items-center justify-center p-2 border border-border-dark" data-alt="Logotipo Fornecedor Recheio">
+<span class="material-symbols-outlined text-text-secondary">storefront</span>
+</div>
+<div>
+<h4 class="font-bold text-lg leading-tight text-white">Recheio Cash</h4>
+<div class="flex items-center gap-1 mt-1">
+<div class="h-1.5 w-16 bg-[#333] rounded-full overflow-hidden">
+<div class="h-full bg-yellow-500 w-[90%]"></div>
+</div>
+<span class="text-xs text-text-secondary ml-1">4.5</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1 mb-2">
+<span class="text-xs text-text-secondary font-bold uppercase tracking-wider">Preço Normalizado</span>
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-black text-brand-orange tracking-tight">€5.35</span>
+<span class="text-sm font-medium text-text-secondary">/ kg</span>
+</div>
+</div>
+<p class="text-xs text-text-secondary">Emb. 10kg • Total: €53.50</p>
+</div>
+<div class="p-6 flex-1 flex flex-col gap-5 bg-surface-card">
+<div class="grid grid-cols-2 gap-y-4 gap-x-2">
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">inventory_2</span> MOQ</span>
+<span class="text-sm font-semibold text-white">50 kg</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">payments</span> Pagamento</span>
+<span class="text-sm font-semibold text-white">Pronto</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">local_shipping</span> Entrega</span>
+<span class="text-sm font-bold text-green-500">Grátis</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_clock</span> Prazo</span>
+<span class="text-sm font-semibold text-white">24h-48h</span>
+</div>
+</div>
+<div class="mt-2 pt-4 border-t border-border-dark">
+<div class="flex justify-between items-end mb-2">
+<span class="text-xs font-bold text-text-secondary uppercase">Histórico 30D</span>
+<span class="text-xs text-green-500 font-bold">Estável</span>
+</div>
+<div class="h-8 w-full flex items-end justify-between gap-1 opacity-80">
+<div class="w-1/6 bg-brand-orange/20 h-[40%] rounded-sm"></div>
+<div class="w-1/6 bg-brand-orange/20 h-[40%] rounded-sm"></div>
+<div class="w-1/6 bg-brand-orange/20 h-[60%] rounded-sm"></div>
+<div class="w-1/6 bg-brand-orange/20 h-[50%] rounded-sm"></div>
+<div class="w-1/6 bg-brand-orange/20 h-[40%] rounded-sm"></div>
+<div class="w-1/6 bg-brand-orange h-[35%] rounded-sm"></div>
+</div>
+</div>
+<button class="w-full mt-auto py-3 bg-brand-orange hover:bg-orange-600 text-white font-bold rounded-lg shadow-lg shadow-brand-orange/20 transition-all flex items-center justify-center gap-2">
+<span>Adicionar</span>
+<span class="material-symbols-outlined text-lg">add_shopping_cart</span>
+</button>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl border border-border-dark overflow-hidden flex flex-col relative hover:border-text-secondary/30 transition-colors">
+<div class="p-6 border-b border-border-dark">
+<div class="flex items-center gap-4 mb-5">
+<div class="size-12 rounded-lg bg-[#2A2A2A] flex items-center justify-center p-2 border border-border-dark" data-alt="Logotipo Makro">
+<span class="material-symbols-outlined text-blue-400">business</span>
+</div>
+<div>
+<h4 class="font-bold text-lg leading-tight text-white">Makro Food</h4>
+<div class="flex items-center gap-1 mt-1">
+<div class="h-1.5 w-16 bg-[#333] rounded-full overflow-hidden">
+<div class="h-full bg-yellow-500 w-[80%]"></div>
+</div>
+<span class="text-xs text-text-secondary ml-1">4.0</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1 mb-2">
+<span class="text-xs text-text-secondary font-bold uppercase tracking-wider">Preço Normalizado</span>
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-bold text-white tracking-tight">€5.50</span>
+<span class="text-sm font-medium text-text-secondary">/ kg</span>
+</div>
+</div>
+<p class="text-xs text-text-secondary">Emb. 2.5kg • Total: €13.75</p>
+</div>
+<div class="p-6 flex-1 flex flex-col gap-5 bg-surface-card">
+<div class="grid grid-cols-2 gap-y-4 gap-x-2">
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">inventory_2</span> MOQ</span>
+<span class="text-sm font-semibold text-white">10 kg</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">payments</span> Pagamento</span>
+<span class="text-sm font-semibold text-white">30 dias</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">local_shipping</span> Entrega</span>
+<span class="text-sm font-semibold text-white">€15.00</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_clock</span> Prazo</span>
+<span class="text-sm font-semibold text-white">24h</span>
+</div>
+</div>
+<div class="mt-2 pt-4 border-t border-border-dark">
+<div class="flex justify-between items-end mb-2">
+<span class="text-xs font-bold text-text-secondary uppercase">Histórico 30D</span>
+<span class="text-xs text-green-500 font-bold">-2.0%</span>
+</div>
+<div class="h-8 w-full flex items-end justify-between gap-1 opacity-50">
+<div class="w-1/6 bg-gray-500 h-[60%] rounded-sm"></div>
+<div class="w-1/6 bg-gray-500 h-[60%] rounded-sm"></div>
+<div class="w-1/6 bg-gray-500 h-[60%] rounded-sm"></div>
+<div class="w-1/6 bg-gray-500 h-[60%] rounded-sm"></div>
+<div class="w-1/6 bg-gray-500 h-[55%] rounded-sm"></div>
+<div class="w-1/6 bg-gray-400 h-[50%] rounded-sm"></div>
+</div>
+</div>
+<button class="w-full mt-auto py-3 bg-[#2A2A2A] hover:bg-[#333] border border-border-dark text-white font-bold rounded-lg transition-all flex items-center justify-center gap-2">
+<span>Adicionar</span>
+</button>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl border border-border-dark overflow-hidden flex flex-col relative hover:border-text-secondary/30 transition-colors">
+<div class="p-6 border-b border-border-dark">
+<div class="flex items-center gap-4 mb-5">
+<div class="size-12 rounded-lg bg-[#2A2A2A] flex items-center justify-center p-2 border border-border-dark" data-alt="Logotipo Avipronto">
+<span class="material-symbols-outlined text-orange-400">factory</span>
+</div>
+<div>
+<h4 class="font-bold text-lg leading-tight text-white">Avipronto Local</h4>
+<div class="flex items-center gap-1 mt-1">
+<div class="h-1.5 w-16 bg-[#333] rounded-full overflow-hidden">
+<div class="h-full bg-yellow-500 w-[64%]"></div>
+</div>
+<span class="text-xs text-text-secondary ml-1">3.2</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1 mb-2">
+<span class="text-xs text-text-secondary font-bold uppercase tracking-wider">Preço Normalizado</span>
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-bold text-white tracking-tight">€5.60</span>
+<span class="text-sm font-medium text-text-secondary">/ kg</span>
+</div>
+</div>
+<p class="text-xs text-text-secondary">Emb. 5kg • Total: €28.00</p>
+</div>
+<div class="p-6 flex-1 flex flex-col gap-5 bg-surface-card">
+<div class="grid grid-cols-2 gap-y-4 gap-x-2">
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">inventory_2</span> MOQ</span>
+<span class="text-sm font-semibold text-white">5 kg</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">payments</span> Pagamento</span>
+<span class="text-sm font-semibold text-white">Pronto</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">local_shipping</span> Entrega</span>
+<span class="text-sm font-semibold text-white">€5.00</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_clock</span> Prazo</span>
+<span class="text-sm font-semibold text-white">Hoje</span>
+</div>
+</div>
+<div class="mt-2 pt-4 border-t border-border-dark">
+<div class="flex justify-between items-end mb-2">
+<span class="text-xs font-bold text-text-secondary uppercase">Histórico 30D</span>
+<span class="text-xs text-brand-orange font-bold">+3.5%</span>
+</div>
+<div class="h-8 w-full flex items-end justify-between gap-1 opacity-60">
+<div class="w-1/6 bg-gray-500 h-[50%] rounded-sm"></div>
+<div class="w-1/6 bg-gray-500 h-[50%] rounded-sm"></div>
+<div class="w-1/6 bg-gray-500 h-[55%] rounded-sm"></div>
+<div class="w-1/6 bg-gray-500 h-[60%] rounded-sm"></div>
+<div class="w-1/6 bg-gray-500 h-[65%] rounded-sm"></div>
+<div class="w-1/6 bg-brand-orange h-[70%] rounded-sm"></div>
+</div>
+</div>
+<button class="w-full mt-auto py-3 bg-[#2A2A2A] hover:bg-[#333] border border-border-dark text-white font-bold rounded-lg transition-all flex items-center justify-center gap-2">
+<span>Adicionar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-6 left-1/2 md:left-[calc(50%+8rem)] -translate-x-1/2 bg-[#1E1E1E] border border-brand-orange text-white px-6 py-3 rounded-xl shadow-2xl z-40 flex items-center gap-4">
+<span class="font-medium text-sm text-brand-orange">1 item selecionado</span>
+<div class="h-4 w-px bg-gray-700"></div>
+<button class="text-sm font-bold text-white hover:text-brand-orange transition-colors">Comparar Detalhado</button>
+</div>
+</main>
+</div>
+
+</body></html>

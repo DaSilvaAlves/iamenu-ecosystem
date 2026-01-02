@@ -1,13 +1,15 @@
 // Prisma Schema - Business Intelligence API - SQLite (Local Development)
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../../../node_modules/@prisma/client-business"
+  provider        = "prisma-client-js"
+  output          = "../../../node_modules/@prisma/client-business"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["business"]
 }
 
 // Restaurant (1 por user)
@@ -40,6 +42,7 @@ model Restaurant {
   settings       RestaurantSettings?
 
   @@map("restaurants")
+  @@schema("business")
 }
 
 // Configurações e Metas (Step 4)
@@ -59,6 +62,7 @@ model RestaurantSettings {
   restaurant       Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 
   @@map("restaurant_settings")
+  @@schema("business")
 }
 
 // Produtos/Pratos do Menu
@@ -90,6 +94,7 @@ model Product {
   orderItems     OrderItem[]
 
   @@map("products")
+  @@schema("business")
 }
 
 // Vendas/Pedidos
@@ -111,6 +116,7 @@ model Order {
   items          OrderItem[]
 
   @@map("orders")
+  @@schema("business")
 }
 
 // Itens de cada pedido
@@ -127,6 +133,7 @@ model OrderItem {
   product        Product  @relation(fields: [productId], references: [id])
 
   @@map("order_items")
+  @@schema("business")
 }
 
 // Analytics Cache (Opcional - para performance)
@@ -144,4 +151,5 @@ model DailyStats {
 
   @@unique([restaurantId, date])
   @@map("daily_stats")
+  @@schema("business")
 }

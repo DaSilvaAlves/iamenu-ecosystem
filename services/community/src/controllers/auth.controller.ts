@@ -16,8 +16,10 @@ export class AuthController {
   async generateTestToken(req: Request, res: Response) {
     try {
       const JWT_SECRET = process.env.JWT_SECRET;
+      console.log('DEBUG: JWT_SECRET from env:', JWT_SECRET); // New debug log
 
       if (!JWT_SECRET) {
+        console.error('DEBUG: JWT_SECRET is undefined, returning 500'); // New debug log
         return res.status(500).json({
           success: false,
           error: 'JWT_SECRET not configured in environment variables'
@@ -59,6 +61,7 @@ export class AuthController {
       });
     } catch (error) {
       console.error('Error generating test token:', error);
+      console.error('DEBUG Error details in generateTestToken:', error); // New debug log
       res.status(500).json({
         success: false,
         error: 'Failed to generate test token'

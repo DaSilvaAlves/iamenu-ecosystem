@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Diretório de Fornecedores - iaMenu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff5722", // Updated to orange based on reference
+                        "primary-hover": "#f4511e",
+                        "primary-light": "#fff3e0",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#0d0d0d", // Darker background
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a1a1a", // Slightly lighter dark for cards
+                        "surface-darker": "#141414", // Sidebar dark
+                        "text-main": "#0d1b12",
+                        "text-secondary": "#9ca3af",
+                        "border-color": "#2a2a2a",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: "Work Sans", sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1; }::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #141414; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444; 
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-white font-display antialiased selection:bg-primary selection:text-white">
+<div class="flex min-h-screen">
+<aside class="w-64 bg-surface-darker border-r border-border-color shrink-0 hidden lg:flex flex-col h-screen sticky top-0">
+<div class="h-16 flex items-center gap-3 px-6 border-b border-border-color">
+<div class="size-8 bg-primary rounded flex items-center justify-center text-white font-bold text-lg">ia</div>
+<h1 class="text-lg font-bold tracking-tight text-white">iaMenu Ecosystem</h1>
+</div>
+<nav class="flex-1 overflow-y-auto py-6 px-4 space-y-6">
+<div>
+<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">Comece Por Aqui</div>
+<ul class="space-y-1">
+<li>
+<a class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+<span class="text-sm">Onboarding iaMenu</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="text-sm">Visão do Ecossistema</span>
+</a>
+</li>
+</ul>
+</div>
+<div>
+<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">Academia e Gestão</div>
+<ul class="space-y-1">
+<li>
+<a class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">star_rate</span>
+<span class="text-sm">Audit de Reputação</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">calculate</span>
+<span class="text-sm">Food Cost &amp; Fichas</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">campaign</span>
+<span class="text-sm">Marketing Planner AI</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-2 py-2 rounded-lg bg-primary/10 text-primary transition-colors border-l-2 border-primary" href="#">
+<span class="material-symbols-outlined text-[20px]">storefront</span>
+<span class="text-sm font-medium">Marketplace</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">bar_chart</span>
+<span class="text-sm">Dashboard BI</span>
+</a>
+</li>
+</ul>
+</div>
+<div>
+<div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">Hub de Negócios</div>
+<ul class="space-y-1">
+<li>
+<a class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">groups</span>
+<span class="text-sm">Hubs Regionais</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<div class="p-4 border-t border-border-color">
+<a class="flex items-center gap-3 hover:bg-white/5 p-2 rounded-lg transition-colors" href="#">
+<div class="size-8 rounded-full bg-gray-600 bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCNeYDcozUvrRrrmQhSgVO7E5GYnY-zXSdKwhEXApkpmUnRJj447YBogo4JPu-rlpttpcGb58onVSZkxUCEpRhQAM9yRecPqrR2L746OxwG4w0ooeeDgK_nPEDdeUDYsYwXHJ9nc2xOk4Zpxywbkk_s4BGJE0Ed1BX8OwNuib-D0MwsshpBbljg0h2nuB83h9DHFLXdWuIt6aMjj2bwqfl349zjqNIT_rfyqNqxNXt6HN7PzMnaQMGJdaUmwehFzwclfrPEtC-sMA");'></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-white truncate">Ricardo Silva</p>
+<p class="text-xs text-gray-500 truncate">Gerente</p>
+</div>
+</a>
+</div>
+</aside>
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-background-dark">
+<header class="h-16 bg-surface-darker border-b border-border-color flex items-center justify-between px-6 shrink-0 z-20">
+<div class="flex items-center gap-4">
+<button class="lg:hidden text-gray-400 hover:text-white">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<nav class="hidden md:flex items-center gap-2 text-sm text-gray-400">
+<a class="hover:text-white transition-colors" href="#">Home</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-white font-medium">Marketplace Fornecedores</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-[18px]">search</span>
+<input class="bg-[#2a2a2a] border-none rounded-full h-9 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:ring-1 focus:ring-primary w-64" placeholder="Pesquisar..." type="text"/>
+</div>
+<button class="text-gray-400 hover:text-white relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 size-2 bg-primary rounded-full"></span>
+</button>
+<button class="text-gray-400 hover:text-white">
+<span class="material-symbols-outlined">chat_bubble_outline</span>
+</button>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-6 lg:p-8">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+<div>
+<h2 class="text-3xl font-bold text-white mb-2 tracking-tight">Diretório de Fornecedores</h2>
+<p class="text-gray-400 max-w-2xl">
+                            Encontre os melhores parceiros para o seu restaurante em Portugal. Filtrados por região, qualidade e preço.
+                        </p>
+</div>
+<button class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition-colors shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[20px]">add_business</span>
+                         Sugerir Fornecedor
+                    </button>
+</div>
+<div class="flex flex-col lg:flex-row gap-8">
+<aside class="w-full lg:w-64 shrink-0 space-y-6">
+<div class="lg:hidden relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">search</span>
+<input class="w-full bg-[#1a1a1a] border border-[#333] rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Procurar fornecedores..." type="text"/>
+</div>
+<div class="bg-[#1a1a1a] rounded-xl border border-[#333] p-5">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-bold text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">filter_list</span>
+                                    Filtros
+                                </h3>
+<button class="text-xs text-primary hover:text-primary-hover font-medium">Limpar</button>
+</div>
+<div class="mb-6">
+<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Categoria</h4>
+<div class="space-y-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="rounded border-[#444] bg-[#2a2a2a] text-primary focus:ring-primary/50 focus:ring-offset-0" type="checkbox"/>
+<span class="text-sm text-gray-300 group-hover:text-white transition-colors">Frescos &amp; Vegetais</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="rounded border-[#444] bg-[#2a2a2a] text-primary focus:ring-primary/50 focus:ring-offset-0" type="checkbox"/>
+<span class="text-sm text-gray-300 group-hover:text-white transition-colors">Carnes e Charcutaria</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="rounded border-[#444] bg-[#2a2a2a] text-primary focus:ring-primary/50 focus:ring-offset-0" type="checkbox"/>
+<span class="text-sm text-gray-300 group-hover:text-white transition-colors">Peixe e Marisco</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="rounded border-[#444] bg-[#2a2a2a] text-primary focus:ring-primary/50 focus:ring-offset-0" type="checkbox"/>
+<span class="text-sm text-gray-300 group-hover:text-white transition-colors">Bebidas e Vinhos</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="rounded border-[#444] bg-[#2a2a2a] text-primary focus:ring-primary/50 focus:ring-offset-0" type="checkbox"/>
+<span class="text-sm text-gray-300 group-hover:text-white transition-colors">Embalagens</span>
+</label>
+</div>
+</div>
+<div class="mb-6">
+<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Região</h4>
+<div class="relative">
+<select class="w-full bg-[#2a2a2a] border border-[#444] text-gray-300 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5">
+<option>Todo o país</option>
+<option>Grande Lisboa</option>
+<option>Grande Porto</option>
+<option>Algarve</option>
+</select>
+</div>
+</div>
+<div class="mb-6">
+<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Preço</h4>
+<div class="flex bg-[#2a2a2a] rounded-lg p-1 border border-[#444]">
+<button class="flex-1 py-1 text-sm font-medium rounded text-gray-400 hover:text-white hover:bg-[#333] transition-all">€</button>
+<button class="flex-1 py-1 text-sm font-medium rounded bg-[#444] text-white shadow-sm">€€</button>
+<button class="flex-1 py-1 text-sm font-medium rounded text-gray-400 hover:text-white hover:bg-[#333] transition-all">€€€</button>
+</div>
+</div>
+</div>
+</aside>
+<div class="flex-1">
+<div class="bg-[#1a1a1a] p-4 rounded-xl border border-[#333] mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+<div class="relative w-full sm:max-w-md hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">search</span>
+<input class="w-full bg-[#2a2a2a] border-none rounded-lg py-2 pl-10 pr-4 text-white placeholder-gray-500 focus:ring-1 focus:ring-primary" placeholder="Procurar por nome, produto ou NIF..." type="text"/>
+</div>
+<div class="w-full sm:w-auto flex items-center gap-3 ml-auto">
+<span class="text-sm text-gray-400 whitespace-nowrap">Ordenar por:</span>
+<select class="bg-[#2a2a2a] border-none text-white text-sm rounded-lg focus:ring-primary block p-2 pl-3 pr-8 cursor-pointer font-medium">
+<option>Relevância</option>
+<option>Melhor Avaliação</option>
+<option>Preço (Baixo)</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+<div class="group bg-[#1a1a1a] border border-[#333] rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col h-full hover:shadow-lg hover:shadow-black/40">
+<div class="relative h-40 bg-[#141414] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 ease-out" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuASC2fzL1au7bZBo9EkcwrCe2KRTCF35MspYrF3E6njrs4wHBrp0ZrGFpp-1N5tJ7oEHT1ndzfpbBRHJxgP_-eeATgUmiJl3R2lsHJc1PFrjeOFDO0SMtBige84mtSrGf8WifMP7TxCRWX19ehZeGf5K0O8rMUQuNPtyLdY_U1eGp-1Zp2FXSvou7O6tTHONi5ETJnr0An2_Lp-a88xcf2hqSzovvp0ZhrIrrLR6bMs2mraio4ALhM8jzD0IquIWNVis_pS3pPjZw');">
+<div class="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent opacity-80"></div>
+</div>
+<div class="absolute top-3 right-3 bg-[#1a1a1a]/90 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-1 border border-[#333]">
+<span class="material-symbols-outlined text-yellow-500 text-[16px] filled">star</span>
+<span class="text-xs font-bold text-white">4.9</span>
+</div>
+<div class="absolute -bottom-6 left-5 size-14 rounded-lg bg-[#2a2a2a] p-1 border border-[#333] shadow-lg z-10">
+<div class="w-full h-full bg-contain bg-no-repeat bg-center rounded bg-white" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDY8tlzHYF8U5LGgFkUvdAsXNw2Po4KFgKJ9fvBvnmpG1hXtqbS-gHIT6DILVaeGbsq9kby_JyVAVDLX3nNwWf2Sr48idyx2qL6BQnIt8K5xQuOEcI8W8F4FuT8jmjUwNDRNh95onP0YOkDfFOa5jpj2wda9RU957ea5W1nk6wTPl0g62sU8kmjguY1BHv-X8uobSnphMa3OWVwoghoWQSv39im8PaF1VgRIEv9kxdWu2cxpt3IyFHvKJRc_ju1DqiRKyPGWhHdHQ');"></div>
+</div>
+</div>
+<div class="p-5 pt-9 flex flex-col flex-1">
+<div class="mb-3">
+<h3 class="font-bold text-lg text-white flex items-center gap-2">
+                                            FrescoMar Lda.
+                                            <span class="material-symbols-outlined text-primary text-[18px]" title="Verificado">verified</span>
+</h3>
+<p class="text-sm text-gray-400 line-clamp-1">Especialistas em peixe fresco de Sesimbra.</p>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-900/30 text-blue-300 border border-blue-900/50">Peixe</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#333] text-gray-300 border border-[#444]">Marisco</span>
+</div>
+<div class="space-y-2 mb-6 text-sm text-gray-300">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">location_on</span>
+<span>Lisboa &amp; Setúbal</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">inventory_2</span>
+<span>Min. 20kg / encomenda</span>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-[#333] flex gap-3">
+<button class="flex-1 h-9 bg-primary hover:bg-primary-hover text-white font-medium text-sm rounded transition-colors flex items-center justify-center">
+                                            Ver Catálogo
+                                        </button>
+<button class="size-9 flex items-center justify-center rounded border border-[#333] hover:bg-[#333] text-gray-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">bookmark_border</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-[#1a1a1a] border border-[#333] rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col h-full hover:shadow-lg hover:shadow-black/40">
+<div class="relative h-40 bg-[#141414] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 ease-out" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCy7XfZTI9rs-wO8QGmy4TehLKK-6hV8SnEMrQxyvmp8RxMC61VujkDxRJk0q0Ru0NzO2YnYWuq9XghNkBV_k9g4f5-TnfjaAhZBcB2FK3Hcms7jHZ9KwE2Kze3h2xv6_lpO8geyKnacksrv3PvEKrVJB0JwdYDkfuBT6gOSCHygJph1d2rW5hE6xhZX1JI5QzPeLMXNA7ufpaT2zk3wIsnoIByQjlmHBVgd1PH9JDQGC_bxNBuRG0rjMp7P3KEomKBqgzZK3MJKQ');">
+<div class="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent opacity-80"></div>
+</div>
+<div class="absolute top-3 right-3 bg-[#1a1a1a]/90 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-1 border border-[#333]">
+<span class="material-symbols-outlined text-yellow-500 text-[16px] filled">star</span>
+<span class="text-xs font-bold text-white">4.7</span>
+</div>
+<div class="absolute -bottom-6 left-5 size-14 rounded-lg bg-[#2a2a2a] p-1 border border-[#333] shadow-lg z-10">
+<div class="w-full h-full bg-contain bg-no-repeat bg-center rounded bg-white" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAnORd3KcwEu48tQeiQqFzr9ppxWgQS3lqK9G4ZG65jeFEqUGjeFThY3UDHJKTKSQHM7GyyucWX8EsDd_GlhkVqiTDnm75Hp33vG0XjwJ7zOoS-q9kVCaLYo2lCj4Au9IGa07iyFCYmptlUPvso5aPTaFTt_VqhoDFfpZq6jWv37KtzwoJV0nZBu7M6Xq_l1fq8fzLPSpW5Np3UJy3QO6bhFA4P5N4Iyaqx_7GB28qyDrRCKCnDMXyHQUnfoXFhY-lhSeedsSu0BQ');"></div>
+</div>
+</div>
+<div class="p-5 pt-9 flex flex-col flex-1">
+<div class="mb-3">
+<h3 class="font-bold text-lg text-white flex items-center gap-2">
+                                            Horta Bio Nacional
+                                            <span class="material-symbols-outlined text-primary text-[18px]" title="Verificado">verified</span>
+</h3>
+<p class="text-sm text-gray-400 line-clamp-1">Agricultura biológica certificada.</p>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-green-900/30 text-green-300 border border-green-900/50">Legumes</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-green-900/30 text-green-300 border border-green-900/50">Fruta</span>
+</div>
+<div class="space-y-2 mb-6 text-sm text-gray-300">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">location_on</span>
+<span>Nacional</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">eco</span>
+<span>Certificação Bio</span>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-[#333] flex gap-3">
+<button class="flex-1 h-9 bg-primary hover:bg-primary-hover text-white font-medium text-sm rounded transition-colors flex items-center justify-center">
+                                            Ver Catálogo
+                                        </button>
+<button class="size-9 flex items-center justify-center rounded border border-[#333] hover:bg-[#333] text-gray-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">bookmark_border</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-[#1a1a1a] border border-[#333] rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col h-full hover:shadow-lg hover:shadow-black/40">
+<div class="relative h-40 bg-[#141414] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 ease-out" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCFRKoiSAYRhf6dMJDHKi6L38GsqHtst__rOXTB4c9uAetsug-CEDDmlT4lW2W2ohB1flP6BrOaoiCpHYWdwXmsfmDvvAOZnAS6qUHwbk35lvmTqi8HpLrQstbsUMqBcNT9DvVw-U088BJh46CJoZ-FEKKEsFzmEDuliM0lUC1tffvQ6zUiHead7kU1qV588VJHjAB3aBsTe7CeQJlxRhv0qKh3zDEQ2MWkBPdF8ukDw7ihLBy1hiBTtolpu4XO2ZHjagBMMD1hjA');">
+<div class="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent opacity-80"></div>
+</div>
+<div class="absolute top-3 right-3 bg-[#1a1a1a]/90 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-1 border border-[#333]">
+<span class="material-symbols-outlined text-yellow-500 text-[16px] filled">star</span>
+<span class="text-xs font-bold text-white">4.5</span>
+</div>
+<div class="absolute -bottom-6 left-5 size-14 rounded-lg bg-[#2a2a2a] p-1 border border-[#333] shadow-lg z-10">
+<div class="w-full h-full bg-contain bg-no-repeat bg-center rounded bg-white" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAbALL5F16pjk0tCnX8or_LKRIO8b6rW1Hy5qESZNrO5_fzqFfa7bEz8YMfM_UzfM5ziETTLvqT9h1JZSsXaGDVwvSxE95Ln-bH8tSn_uClshFyIUCs8e9SXNnbyz2OaVLU8TAzu6iJ0h7uDeH7hNeQ7aanK9TLJDOEDKkP9w8_LOF0n8h5Q6TMwFu6KzUZg3NTYxuEHlTEcRa5ijyfmoP9dWF5KGKsYbcEHCiB9nQjeGUDGqBejn3k5xehKKuhlXSPeB4Ug1fpig');"></div>
+</div>
+</div>
+<div class="p-5 pt-9 flex flex-col flex-1">
+<div class="mb-3">
+<h3 class="font-bold text-lg text-white flex items-center gap-2">
+                                            LusaPack
+                                        </h3>
+<p class="text-sm text-gray-400 line-clamp-1">Soluções de embalagens sustentáveis.</p>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-900/30 text-amber-300 border border-amber-900/50">Embalagens</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#333] text-gray-300 border border-[#444]">Take-away</span>
+</div>
+<div class="space-y-2 mb-6 text-sm text-gray-300">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">location_on</span>
+<span>Todo o País</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">local_shipping</span>
+<span>Entrega 24h</span>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-[#333] flex gap-3">
+<button class="flex-1 h-9 bg-primary hover:bg-primary-hover text-white font-medium text-sm rounded transition-colors flex items-center justify-center">
+                                            Ver Catálogo
+                                        </button>
+<button class="size-9 flex items-center justify-center rounded border border-[#333] hover:bg-[#333] text-gray-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">bookmark_border</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-[#1a1a1a] border border-[#333] rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col h-full hover:shadow-lg hover:shadow-black/40">
+<div class="relative h-40 bg-[#141414] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 ease-out" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAt32u0H_4TEe8M1pf7Mmy151vDwSbyM6bd02DxKsqskZPNF0-hMyjvJQM4BO5sjhm8O1rk-f85Dt70z58RprmpApX2aVQ6CQt3AUnbXcMKOgPFScsNASWoPpQfOx1bOTKamA-Uu4NM8iHm9zvaKL5-aw9wkKFUf-3BhhEhP4DDGAHANxB0ccayXCHiflCJY0_RSizvXa6SPsi_YjhHExAsrc02JdIwjYHdNO-jNDN07kPU_jvvBtNWWH2t4bm00w_YMHAP66kW6A');">
+<div class="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent opacity-80"></div>
+</div>
+<div class="absolute top-3 right-3 bg-[#1a1a1a]/90 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-1 border border-[#333]">
+<span class="material-symbols-outlined text-yellow-500 text-[16px] filled">star</span>
+<span class="text-xs font-bold text-white">4.8</span>
+</div>
+<div class="absolute -bottom-6 left-5 size-14 rounded-lg bg-[#2a2a2a] p-1 border border-[#333] shadow-lg z-10">
+<div class="w-full h-full bg-contain bg-no-repeat bg-center rounded bg-white" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAujt-0OTMlQMnwPENbO215e1puFOi_WfMktx3Dm9XiEJ0dzp-ogjBsA800Bn0TwMmGejrOa6SeBvxc3_oa18wdcd3LnBtq9d850OeJelYunbM6GCpNs1G42zmjWcoHS2llLKwsB_KocU_K6HI7dIcBShxsn9qdbVMclqkBAZOwXdvmLyGfU5BEEveIyqmy97oGonSO2YJAk3wea0jFx1TqupQa9zqqhHIV-02ztzMW2KJkcXI3oQAtu_jS8lAwCy6LHj9jeyWBJg');"></div>
+</div>
+</div>
+<div class="p-5 pt-9 flex flex-col flex-1">
+<div class="mb-3">
+<h3 class="font-bold text-lg text-white flex items-center gap-2">
+                                            Carne do Monte
+                                            <span class="material-symbols-outlined text-primary text-[18px]" title="Verificado">verified</span>
+</h3>
+<p class="text-sm text-gray-400 line-clamp-1">Carnes maturadas e enchidos regionais.</p>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-red-900/30 text-red-300 border border-red-900/50">Carne</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-red-900/30 text-red-300 border border-red-900/50">Charcutaria</span>
+</div>
+<div class="space-y-2 mb-6 text-sm text-gray-300">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">location_on</span>
+<span>Norte e Centro</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">verified_user</span>
+<span>Origem DOP</span>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-[#333] flex gap-3">
+<button class="flex-1 h-9 bg-primary hover:bg-primary-hover text-white font-medium text-sm rounded transition-colors flex items-center justify-center">
+                                            Ver Catálogo
+                                        </button>
+<button class="size-9 flex items-center justify-center rounded border border-[#333] hover:bg-[#333] text-gray-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">bookmark_border</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-[#1a1a1a] border border-[#333] rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col h-full hover:shadow-lg hover:shadow-black/40">
+<div class="relative h-40 bg-[#141414] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 ease-out" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB6u0LRc8zDhncNKiIUZi4TQL2LsPQfA3N0bHyP76e11G79hZItvbkl7ceWcofwKhUa-vf0M-a8kn3fx2HY8ufPl78ofQY3n1L5kP2QlKdALZPDVeZALSVdM0JVmyE4mDBmIlaPIlaj-WuVVB9wn_OInWSFjV6M5gLtAykyU5qh_SEAWhJMLSnV7Q21Ui8iyVkXp-Fc6IGTIuuv9x6t9Q1J3W0BRhmpyJsUqSxx_A3ELZwIhAFhKdnblw9mNKtiN8I9w1PWvLByLw');">
+<div class="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent opacity-80"></div>
+</div>
+<div class="absolute top-3 right-3 bg-[#1a1a1a]/90 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-1 border border-[#333]">
+<span class="material-symbols-outlined text-yellow-500 text-[16px] filled">star</span>
+<span class="text-xs font-bold text-white">4.2</span>
+</div>
+<div class="absolute -bottom-6 left-5 size-14 rounded-lg bg-[#2a2a2a] p-1 border border-[#333] shadow-lg z-10">
+<div class="w-full h-full bg-contain bg-no-repeat bg-center rounded bg-white" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBaABLSJDzjhne7fZOfX5gW31YKRCNrW7CTfpPPM8qKapzrkzEze8yDNYrsvIVlNeS9shfyz6OLGVzLAB00qYFIcXn5lCQ9fkOmZtrDUD0al9DFWY363YWSpj_VskSjp7dKPwMzQajxyDsO3cgW6STPXdP9rsJMnbHywlZRcPV0i2_owL7UuRX2jaDYvz7TRVA0utojU51jQvASChW9yonNehuXy5YgrALAt9HoRJARk74fVrf6yElZ80wn5Cj717ij_fPXulAsHQ');"></div>
+</div>
+</div>
+<div class="p-5 pt-9 flex flex-col flex-1">
+<div class="mb-3">
+<h3 class="font-bold text-lg text-white flex items-center gap-2">
+                                            Adega Distribuição
+                                        </h3>
+<p class="text-sm text-gray-400 line-clamp-1">Vinhos de mesa e premium para restauração.</p>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-purple-900/30 text-purple-300 border border-purple-900/50">Vinhos</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#333] text-gray-300 border border-[#444]">Espirituosas</span>
+</div>
+<div class="space-y-2 mb-6 text-sm text-gray-300">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">location_on</span>
+<span>Lisboa, Porto, Algarve</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">monetization_on</span>
+<span>Preços Competitivos</span>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-[#333] flex gap-3">
+<button class="flex-1 h-9 bg-primary hover:bg-primary-hover text-white font-medium text-sm rounded transition-colors flex items-center justify-center">
+                                            Ver Catálogo
+                                        </button>
+<button class="size-9 flex items-center justify-center rounded border border-[#333] hover:bg-[#333] text-gray-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">bookmark_border</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-[#1a1a1a] border border-[#333] rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col h-full hover:shadow-lg hover:shadow-black/40">
+<div class="relative h-40 bg-[#141414] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 ease-out" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB2Jy3iv7CAE2zeUQwe02uBk8tlP4mQaB3U77YV_DmHmMoNbSFKuCPTfbZ-1fFykTz7hNS2ch1c4bc2trfLNMk740UlYjfhd3VwX4sauWml2y66e28EmmkBPjsaSC0HmgDcJ-8DU5BbMJL1rXKxMEk2Vj-XkV5HKZS1h7uBL3LYG16Se--uhwrnz2oF1TheX0GIwYm6j72TXH_pxQqTBYxqO32SOmkTfSJMKQTE8O5yfzokC-NdChikpPezmUnehYiCw_nlPnhlCQ');">
+<div class="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent opacity-80"></div>
+</div>
+<div class="absolute top-3 right-3 bg-[#1a1a1a]/90 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-1 border border-[#333]">
+<span class="material-symbols-outlined text-yellow-500 text-[16px] filled">star</span>
+<span class="text-xs font-bold text-white">4.9</span>
+</div>
+<div class="absolute -bottom-6 left-5 size-14 rounded-lg bg-[#2a2a2a] p-1 border border-[#333] shadow-lg z-10">
+<div class="w-full h-full bg-contain bg-no-repeat bg-center rounded bg-white" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDGZv-h_ZE_dwwq59Z6xtzD_X9Zfpx3-MEkdYk3us2JExfBJ5oM2PYAc5Sv5wGFP-KAiNrLplZq7eMwnkP0Tn-wFGdKKOY45_5q1wRiHt0Bfom4dIEJ9zYrHOkSRNuJd7XQxxldQDOvRhRV-RsCMq_XCTOiLQr4NB90APCt-oEjr_wwtmTwvAcTGh1S1X5cMKMQcwI6xLcbkDTMaA6-3ywwg37RCtYLpW5x5Yly3xDwrT-10KiSL71C0GzcDGG28QtJJUyEMPolg');"></div>
+</div>
+</div>
+<div class="p-5 pt-9 flex flex-col flex-1">
+<div class="mb-3">
+<h3 class="font-bold text-lg text-white flex items-center gap-2">
+                                            Café Elite
+                                            <span class="material-symbols-outlined text-primary text-[18px]" title="Verificado">verified</span>
+</h3>
+<p class="text-sm text-gray-400 line-clamp-1">Torrefação própria e blends exclusivos.</p>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-900/30 text-amber-200 border border-amber-900/50">Café</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#333] text-gray-300 border border-[#444]">Barista</span>
+</div>
+<div class="space-y-2 mb-6 text-sm text-gray-300">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">location_on</span>
+<span>Grande Lisboa</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">build</span>
+<span>Inclui Manutenção</span>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-[#333] flex gap-3">
+<button class="flex-1 h-9 bg-primary hover:bg-primary-hover text-white font-medium text-sm rounded transition-colors flex items-center justify-center">
+                                            Ver Catálogo
+                                        </button>
+<button class="size-9 flex items-center justify-center rounded border border-[#333] hover:bg-[#333] text-gray-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">bookmark_border</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-center items-center gap-2 mb-10">
+<button class="size-9 flex items-center justify-center rounded bg-[#1a1a1a] border border-[#333] hover:bg-[#2a2a2a] text-gray-400 transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="size-9 flex items-center justify-center rounded bg-primary text-white font-bold shadow-md shadow-primary/20">
+                                1
+                            </button>
+<button class="size-9 flex items-center justify-center rounded bg-[#1a1a1a] border border-[#333] hover:bg-[#2a2a2a] text-white transition-colors">
+                                2
+                            </button>
+<span class="text-gray-500 px-2">...</span>
+<button class="size-9 flex items-center justify-center rounded bg-[#1a1a1a] border border-[#333] hover:bg-[#2a2a2a] text-gray-400 transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+</body></html>

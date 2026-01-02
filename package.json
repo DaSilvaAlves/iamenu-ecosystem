@@ -9,10 +9,11 @@
     "frontend/packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:community\" \"npm run dev:marketplace\" \"npm run dev:academy\"",
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 concurrently \"npm run dev:community\" \"npm run dev:marketplace\" \"npm run dev:academy\" \"npm run dev:frontend\"",
     "dev:community": "npm run dev --workspace=@iamenu/community-api",
     "dev:marketplace": "npm run dev --workspace=@iamenu/marketplace-api",
     "dev:academy": "npm run dev --workspace=@iamenu/academy-api",
+    "dev:frontend": "npm run dev --workspace=prototype-vision",
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
     "prisma:generate": "npm run prisma:generate --workspaces",
@@ -35,7 +36,8 @@
   "author": "Eurico Alves <euricojsalves@gmail.com>",
   "license": "UNLICENSED",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0"
   },
   "engines": {
     "node": ">=18.0.0",

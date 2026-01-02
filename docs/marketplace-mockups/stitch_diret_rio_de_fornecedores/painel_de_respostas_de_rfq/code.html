@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-PT"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Painel de Respostas de RFQ - iaMenu</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f2541b", // Orange from reference
+                        "primary-hover": "#d9420d",
+                        "background-dark": "#0f0f0f", // Deep dark bg
+                        "background-card": "#1a1a1a", // Slightly lighter card bg
+                        "background-input": "#262626",
+                        "surface-dark": "#1a1a1a",
+                        "sidebar-bg": "#0f0f0f", // Sidebar matches main bg in reference
+                        "text-main": "#ffffff",
+                        "text-muted": "#a3a3a3",
+                        "text-secondary": "#888888",
+                        "border-dark": "#333333",
+                        "accent-blue": "#3b82f6",
+                        "accent-green": "#22c55e",
+                        "accent-purple": "#a855f7",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    backgroundImage: {
+                        'gradient-dark': 'linear-gradient(to bottom right, #1a1a1a, #0f0f0f)',
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0f0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #333;
+            border-radius: 20px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #444;
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-text-main font-sans antialiased h-screen overflow-hidden selection:bg-primary selection:text-white">
+<div class="flex h-full w-full">
+<aside class="hidden lg:flex w-[260px] flex-col bg-sidebar-bg border-r border-border-dark h-full overflow-y-auto custom-scrollbar">
+<div class="p-5 flex items-center gap-3">
+<div class="flex items-center justify-center size-8 bg-primary rounded text-white font-bold text-lg">ia</div>
+<h1 class="text-lg font-bold text-white tracking-wide">iaMenu Ecosystem <span class="text-xs text-text-muted font-normal">[PT]</span></h1>
+</div>
+<div class="flex-1 px-3 py-2 space-y-6">
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-md transition-all group" href="#">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="text-sm">Notificações</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-md transition-all group" href="#">
+<span class="material-symbols-outlined text-[20px]">feed</span>
+<span class="text-sm">Feed</span>
+</a>
+</div>
+<div>
+<h3 class="px-3 mb-2 text-xs font-semibold text-text-secondary uppercase tracking-wider flex items-center justify-between cursor-pointer">
+                Comece por aqui
+                <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</h3>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-md transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+<span class="text-sm">Onboarding iaMenu</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-md transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">donut_large</span>
+<span class="text-sm">Visão do Ecossistema</span>
+</a>
+</div>
+</div>
+<div>
+<h3 class="px-3 mb-2 text-xs font-semibold text-text-secondary uppercase tracking-wider flex items-center justify-between cursor-pointer">
+                Academia e Gestão
+                <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</h3>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-md transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">star</span>
+<span class="text-sm">Audit de Reputação</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-md transition-all justify-between" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">rocket_launch</span>
+<span class="text-sm">iaMenu PRO - Upgrade</span>
+</div>
+<span class="text-[10px] bg-[#333] text-text-muted px-1.5 py-0.5 rounded">PRO</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-white/10 text-white border-l-2 border-primary rounded-r-md transition-all" href="#">
+<span class="material-symbols-outlined text-[20px] text-primary">description</span>
+<span class="text-sm font-medium">RFQs e Propostas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-md transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">calculate</span>
+<span class="text-sm">Food Cost &amp; Fichas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-md transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">ads_click</span>
+<span class="text-sm">Marketing Planner AI</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-md transition-all justify-between" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">photo_camera</span>
+<span class="text-sm">GastroLens AI</span>
+</div>
+<span class="text-[10px] bg-[#333] text-text-muted px-1.5 py-0.5 rounded">NOVO</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-md transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm">Dashboard BI</span>
+</a>
+</div>
+</div>
+<div>
+<h3 class="px-3 mb-2 text-xs font-semibold text-text-secondary uppercase tracking-wider flex items-center justify-between cursor-pointer">
+                Hub de Negócios
+                <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</h3>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-md transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">storefront</span>
+<span class="text-sm">Marketplace</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-md transition-all justify-between" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">location_on</span>
+<span class="text-sm">Hubs Regionais</span>
+</div>
+<span class="text-[10px] bg-[#333] text-text-muted px-1.5 py-0.5 rounded">5</span>
+</a>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-border-dark mt-auto">
+<a class="text-primary hover:text-white text-xs flex items-center gap-1 transition-colors" href="#">
+             Ver todos os grupos <span class="text-[10px]">→</span>
+</a>
+</div>
+</aside>
+<div class="flex-1 flex flex-col min-w-0 bg-background-dark">
+<header class="flex items-center justify-between px-6 py-4 border-b border-border-dark bg-background-dark z-20">
+<div class="lg:hidden">
+<button class="text-white">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+<nav class="hidden lg:flex items-center gap-6 text-sm text-text-muted font-medium">
+<a class="text-white bg-white/10 px-3 py-1.5 rounded-full transition-colors" href="#">Painel</a>
+<a class="hover:text-white transition-colors" href="#">Cursos</a>
+<a class="hover:text-white transition-colors" href="#">Hubs</a>
+<a class="hover:text-white transition-colors" href="#">Leaderboard</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-[18px]">search</span>
+<input class="bg-background-input border border-border-dark rounded-full py-1.5 pl-10 pr-4 text-sm text-white focus:ring-1 focus:ring-primary focus:border-primary placeholder-text-secondary w-64 transition-all" placeholder="Pesquisar..." type="text"/>
+</div>
+<div class="flex items-center gap-3 text-text-muted">
+<button class="hover:text-white transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 size-2 bg-primary rounded-full border-2 border-background-dark"></span>
+</button>
+<button class="hover:text-white transition-colors">
+<span class="material-symbols-outlined">chat_bubble_outline</span>
+</button>
+<button class="hover:text-white transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+<button class="size-8 rounded-full bg-background-input border border-border-dark flex items-center justify-center hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-6 lg:p-10 relative">
+<div class="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-primary/5 to-transparent pointer-events-none z-0"></div>
+<div class="relative z-10 max-w-7xl mx-auto flex flex-col gap-8">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-bold text-primary tracking-widest uppercase">RFQ MARKETPLACE</span>
+<div class="h-px w-8 bg-border-dark"></div>
+</div>
+<h1 class="text-3xl md:text-4xl font-bold text-white italic tracking-tight uppercase" style="font-family: 'Inter', sans-serif; font-style: italic;">
+                        Respostas: RFQ #3920
+                    </h1>
+<p class="text-text-muted mt-2 max-w-2xl">
+                        Análise detalhada das propostas recebidas para <span class="text-white font-medium">Carne de Novilho (50kg)</span>.
+                    </p>
+</div>
+<div class="flex items-center gap-3">
+<div class="hidden md:flex items-center px-4 py-2 bg-background-input rounded-lg border border-border-dark text-sm text-text-muted">
+<span class="size-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
+                         Status: Aberto
+                    </div>
+<button class="flex items-center gap-2 px-4 py-2 bg-background-card border border-border-dark hover:border-primary text-white text-sm font-medium rounded-lg transition-all shadow-lg hover:shadow-primary/20 group">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">refresh</span>
+<span>Atualizar</span>
+</button>
+<button class="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[20px]">download</span>
+<span>Exportar Relatório</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-background-card border border-border-dark rounded-xl p-6 relative overflow-hidden group hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-lg bg-background-input flex items-center justify-center text-text-muted group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">assignment</span>
+</div>
+<span class="px-2 py-0.5 bg-green-900/30 text-green-400 text-xs font-medium rounded border border-green-900/50 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">arrow_outward</span> +2
+                        </span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-4xl font-bold text-white">5</span>
+<span class="text-xs font-bold text-text-secondary uppercase tracking-wider">Total Propostas</span>
+</div>
+<div class="mt-4 text-xs text-text-muted">
+                        2 fornecedores responderam hoje
+                    </div>
+</div>
+<div class="bg-background-card border border-border-dark rounded-xl p-6 relative overflow-hidden group hover:border-primary/50 transition-colors">
+<div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-primary">savings</span>
+</div>
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-lg bg-background-input flex items-center justify-center text-text-muted group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<span class="px-2 py-0.5 bg-primary/20 text-primary text-xs font-medium rounded border border-primary/30 flex items-center gap-1">
+                            Melhor Oferta
+                        </span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-4xl font-bold text-white">€450.00</span>
+<span class="text-xs font-bold text-text-secondary uppercase tracking-wider">Melhor Preço Total</span>
+</div>
+<div class="mt-4 text-xs text-text-muted">
+                        €12.50 abaixo da média do mercado
+                    </div>
+</div>
+<div class="bg-background-card border border-border-dark rounded-xl p-6 relative overflow-hidden group hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-lg bg-background-input flex items-center justify-center text-text-muted group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">local_shipping</span>
+</div>
+<span class="px-2 py-0.5 bg-background-input text-text-muted text-xs font-medium rounded border border-border-dark">
+                            Rápido
+                        </span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-4xl font-bold text-white">24h</span>
+<span class="text-xs font-bold text-text-secondary uppercase tracking-wider">Entrega Recorde</span>
+</div>
+<div class="mt-4 text-xs text-text-muted">
+                        Fornecedor: Distribuidora Lisboa
+                    </div>
+</div>
+</div>
+<div class="bg-gradient-to-r from-[#1f1a18] to-background-card border border-border-dark rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none"></div>
+<div class="flex items-start gap-4 z-10">
+<div class="size-12 md:size-14 rounded-xl bg-gradient-to-br from-yellow-600/20 to-yellow-900/20 border border-yellow-700/30 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-yellow-500 text-3xl">emoji_events</span>
+</div>
+<div>
+<div class="flex items-center gap-3 mb-1">
+<h2 class="text-xl md:text-2xl font-bold text-white">MELHOR PROPOSTA</h2>
+<span class="bg-yellow-900/30 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded border border-yellow-700/30 uppercase">Recomendado pela IA</span>
+</div>
+<p class="text-text-muted text-sm max-w-xl">
+                            A <span class="text-white font-medium">Distribuidora Lisboa</span> oferece o melhor equilíbrio entre preço e prazo de entrega.
+                        </p>
+</div>
+</div>
+<div class="flex items-center gap-4 z-10 w-full md:w-auto">
+<div class="flex flex-col items-end mr-4">
+<span class="text-xs text-text-secondary uppercase">Poupança Estimada</span>
+<span class="text-xl font-bold text-green-500">€20.00</span>
+</div>
+<button class="w-full md:w-auto px-5 py-3 bg-white text-black hover:bg-gray-200 font-bold text-sm rounded-lg transition-colors shadow-lg">
+                        Aceitar Recomendação
+                     </button>
+</div>
+</div>
+<div class="bg-background-card border border-border-dark rounded-xl overflow-hidden shadow-xl">
+<div class="p-6 border-b border-border-dark flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<div class="w-1 h-6 bg-primary rounded-full"></div>
+<h3 class="font-bold text-lg text-white">Tabela Comparativa</h3>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-3 py-1.5 text-xs font-medium text-text-muted bg-background-input border border-border-dark rounded hover:bg-white/5 transition-colors">
+                             Filtrar por Preço
+                         </button>
+<button class="px-3 py-1.5 text-xs font-medium text-text-muted bg-background-input border border-border-dark rounded hover:bg-white/5 transition-colors">
+                             Status
+                         </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-background-input/50 border-b border-border-dark text-text-secondary text-xs uppercase tracking-wider font-semibold">
+<th class="px-6 py-4 min-w-[220px]">Fornecedor</th>
+<th class="px-6 py-4">Preço Total</th>
+<th class="px-6 py-4">Preço / Kg</th>
+<th class="px-6 py-4 min-w-[180px]">Condições</th>
+<th class="px-6 py-4 min-w-[200px]">Observações</th>
+<th class="px-6 py-4 text-center">Status</th>
+<th class="px-6 py-4 text-right min-w-[180px]">Ações</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-dark">
+<tr class="bg-primary/5 hover:bg-primary/10 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-white p-0.5 flex items-center justify-center overflow-hidden shrink-0">
+<img alt="Distribuidora Lisboa Logo" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfQKBaCWCwz_Cuzx-Y1_F9tg1r34xs5H203IeNmlnWpOggRlffEZAwd8DWbPm4T5TLIFX6cuqb4pv2gmlaDtaTVStSfS74rZGCvE5tGaLdJaZKTCsYaDTofH-vV-9t3BfW7rTmrRoRXsvnwr_VytcANtT-CFxyinpLStmKEHgmdSEgTc7EXboW1lowLz-rbQBDRwIa6WIv2iVszrqZSFxCP98tRZXISP3PYDxSBaCmhbtnKAto52jyHL3Bt7orlWMIz0lGBL3Ueg"/>
+</div>
+<div>
+<p class="font-bold text-white text-sm">Distribuidora Lisboa</p>
+<div class="flex items-center gap-1 text-xs text-yellow-500 mt-0.5">
+<span class="material-symbols-outlined text-[14px] icon-filled">star</span>
+<span class="font-medium text-text-secondary">4.8</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<p class="text-base font-bold text-green-400">€450.00</p>
+<span class="text-[10px] font-bold uppercase tracking-wide text-primary mt-1 inline-block">Melhor Preço</span>
+</td>
+<td class="px-6 py-5 text-sm text-text-muted font-mono">€9.00 /kg</td>
+<td class="px-6 py-5 text-xs text-text-muted">
+<div class="flex flex-col gap-1.5">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-text-secondary">calendar_today</span> Net 30 dias</span>
+<span class="flex items-center gap-1.5 text-white"><span class="material-symbols-outlined text-[14px] text-primary">bolt</span> Entrega 24h</span>
+</div>
+</td>
+<td class="px-6 py-5 text-xs text-text-muted">
+<p class="line-clamp-2 leading-relaxed">Carne fresca certificada. Origem nacional (Alentejo).</p>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="inline-flex items-center gap-1.5 rounded bg-yellow-900/20 border border-yellow-700/30 px-2 py-1 text-xs font-bold text-yellow-500 uppercase tracking-wide">
+                                        Pendente
+                                    </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex justify-end gap-2">
+<button class="px-3 py-1.5 rounded-md border border-border-dark text-text-muted hover:text-white text-xs font-bold hover:bg-white/5 transition-colors">
+                                            Negociar
+                                        </button>
+<button class="px-3 py-1.5 rounded-md bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors shadow-lg shadow-primary/10">
+                                            Aceitar
+                                        </button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-background-input/30 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-purple-400 font-bold text-sm shrink-0 border border-border-dark">
+                                            FB
+                                        </div>
+<div>
+<p class="font-bold text-white text-sm">Fresco &amp; Bom</p>
+<div class="flex items-center gap-1 text-xs text-yellow-500 mt-0.5">
+<span class="material-symbols-outlined text-[14px] icon-filled">star</span>
+<span class="font-medium text-text-secondary">4.5</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<p class="text-base font-bold text-white">€470.00</p>
+</td>
+<td class="px-6 py-5 text-sm text-text-muted font-mono">€9.40 /kg</td>
+<td class="px-6 py-5 text-xs text-text-muted">
+<div class="flex flex-col gap-1.5">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-text-secondary">payments</span> Pronto Pgto.</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-text-secondary">schedule</span> Entrega 48h</span>
+</div>
+</td>
+<td class="px-6 py-5 text-xs text-text-muted">
+<p class="line-clamp-2 leading-relaxed">Inclui corte personalizado gratuito.</p>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="inline-flex items-center gap-1.5 rounded bg-blue-900/20 border border-blue-700/30 px-2 py-1 text-xs font-bold text-blue-400 uppercase tracking-wide">
+                                        Negociação
+                                    </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+<button class="px-3 py-1.5 rounded-md border border-border-dark text-text-muted hover:text-white text-xs font-bold hover:bg-white/5 transition-colors">
+                                            Continuar
+                                        </button>
+<button class="px-3 py-1.5 rounded-md bg-white/5 hover:bg-white/10 text-white text-xs font-bold transition-colors border border-border-dark">
+                                            Aceitar
+                                        </button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-background-input/30 transition-colors group relative">
+<td class="px-6 py-5 relative">
+<div class="absolute left-0 top-0 bottom-0 w-0.5 bg-primary"></div>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-primary font-bold text-sm shrink-0 border border-border-dark">
+                                            CS
+                                        </div>
+<div>
+<p class="font-bold text-white text-sm flex items-center gap-2">
+                                                Carnes do Sul
+                                                <span class="text-[9px] bg-primary text-white px-1.5 py-0.5 rounded font-bold uppercase">Novo</span>
+</p>
+<div class="flex items-center gap-1 text-xs text-yellow-500 mt-0.5">
+<span class="material-symbols-outlined text-[14px] icon-filled">star</span>
+<span class="font-medium text-text-secondary">4.2</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<p class="text-base font-bold text-white">€460.00</p>
+</td>
+<td class="px-6 py-5 text-sm text-text-muted font-mono">€9.20 /kg</td>
+<td class="px-6 py-5 text-xs text-text-muted">
+<div class="flex flex-col gap-1.5">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-text-secondary">percent</span> 50% Adiant.</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-text-secondary">schedule</span> 3 dias</span>
+</div>
+</td>
+<td class="px-6 py-5 text-xs text-text-muted">
+<p class="line-clamp-2 leading-relaxed">Stock limitado. Confirmar até amanhã.</p>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="inline-flex items-center gap-1.5 rounded bg-yellow-900/20 border border-yellow-700/30 px-2 py-1 text-xs font-bold text-yellow-500 uppercase tracking-wide">
+                                        Pendente
+                                    </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+<button class="px-3 py-1.5 rounded-md border border-border-dark text-text-muted hover:text-white text-xs font-bold hover:bg-white/5 transition-colors">
+                                            Negociar
+                                        </button>
+<button class="px-3 py-1.5 rounded-md bg-white/5 hover:bg-white/10 text-white text-xs font-bold transition-colors border border-border-dark">
+                                            Aceitar
+                                        </button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-background-input/30 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-gray-400 font-bold text-sm shrink-0 border border-border-dark">
+                                            M
+                                        </div>
+<div>
+<p class="font-bold text-white text-sm">Makro Food Service</p>
+<div class="flex items-center gap-1 text-xs text-yellow-500 mt-0.5">
+<span class="material-symbols-outlined text-[14px] icon-filled">star</span>
+<span class="font-medium text-text-secondary">4.9</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<p class="text-base font-bold text-white">€485.00</p>
+</td>
+<td class="px-6 py-5 text-sm text-text-muted font-mono">€9.70 /kg</td>
+<td class="px-6 py-5 text-xs text-text-muted">
+<div class="flex flex-col gap-1.5">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-text-secondary">calendar_today</span> Net 60 dias</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-text-secondary">event</span> Agendada</span>
+</div>
+</td>
+<td class="px-6 py-5 text-xs text-text-muted">
+<p class="line-clamp-2 leading-relaxed">Produto standard. Embalagem a vácuo industrial.</p>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="inline-flex items-center gap-1.5 rounded bg-gray-800 border border-gray-700 px-2 py-1 text-xs font-bold text-gray-400 uppercase tracking-wide">
+                                        Lida
+                                    </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+<button class="px-3 py-1.5 rounded-md border border-border-dark text-text-muted hover:text-white text-xs font-bold hover:bg-white/5 transition-colors">
+                                            Negociar
+                                        </button>
+<button class="px-3 py-1.5 rounded-md bg-white/5 hover:bg-white/10 text-white text-xs font-bold transition-colors border border-border-dark">
+                                            Aceitar
+                                        </button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<footer class="mt-8 pt-6 border-t border-border-dark flex justify-between items-center text-xs text-text-secondary">
+<p>© 2024 iaMenu Ecosystem. Todos os direitos reservados.</p>
+<div class="flex gap-4">
+<a class="hover:text-white transition-colors" href="#">Privacidade</a>
+<a class="hover:text-white transition-colors" href="#">Termos</a>
+<a class="hover:text-white transition-colors" href="#">Ajuda</a>
+</div>
+</footer>
+</div>
+</main>
+</div>
+</div>
+
+</body></html>

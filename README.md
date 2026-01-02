@@ -51,38 +51,65 @@ iaMenu Ecosystem
 ## 🚀 Quick Start
 
 ### Pré-requisitos:
-- Java 17+
 - Node.js 18+
-- PostgreSQL 16
 - Docker & Docker Compose
+- **Para utilizadores Windows:** O WSL (Windows Subsystem for Linux) tem que estar atualizado. Se encontrar problemas com o Docker, execute `wsl --update` num terminal de administrador e reinicie o computador.
 
 ### Setup Local:
 
+#### 1. Instalar Dependências
+Na raiz do projeto, instale todas as dependências dos workspaces (isto irá instalar as dependências para todos os serviços Node.js).
 ```bash
-# 1. Instalar dependências
-npm install                        # Root (workspaces)
-cd core && mvn install             # Java Core
-cd services/community && npm install
-cd services/marketplace && npm install
-cd services/academy && npm install
+npm install
+```
 
-# 2. Setup Database
-docker-compose up postgres -d
-npm run db:migrate                 # Prisma migrations
-npm run db:seed                    # Seed data
-
-# 3. Configurar .env
+#### 2. Configurar Variáveis de Ambiente
+Copie o ficheiro de exemplo `.env.example` para um novo ficheiro chamado `.env`.
+```bash
 cp .env.example .env
-# Preencher: DATABASE_URL, JWT_SECRET, OPENAI_API_KEY
+```
+**Importante:** Verifique o ficheiro `.env` e preencha as variáveis necessárias, como `OPENAI_API_KEY`. O `DATABASE_URL` padrão deve funcionar com a configuração Docker abaixo.
 
-# 4. Run Development
-npm run dev                        # Todos serviços (Turborepo)
-# OU individual:
-npm run dev:core                   # Java Core (8080)
-npm run dev:community              # Community API (3001)
-npm run dev:marketplace            # Marketplace API (3002)
-npm run dev:academy                # Academy API (3003)
-npm run dev:frontend               # React Apps (3000)
+#### 3. Iniciar a Base de Dados
+Use o Docker Compose para iniciar o contentor da base de dados PostgreSQL em segundo plano.
+```bash
+docker compose up postgres -d
+```
+(Nota: as versões mais antigas do Docker podem usar `docker-compose` com um hífen).
+
+#### 4. Aplicar as Migrações da Base de Dados (passo a passo)
+Devido à arquitetura multi-esquema, cada serviço precisa de ter as suas migrações aplicadas individualmente. Execute os seguintes comandos pela ordem indicada, a partir da **raiz do projeto**:
+
+```bash
+# 1. Marketplace
+cd services/marketplace
+npx dotenv -e ../../.env npx prisma migrate dev --name initial_marketplace_schema
+cd ../..
+
+# 2. Academy
+cd services/academy
+npx dotenv -e ../../.env npx prisma migrate dev --name initial_academy_schema
+# Se o Prisma perguntar "Do you want to continue?", digite 'y' e Enter.
+cd ../..
+
+# 3. Business
+cd services/business
+npx dotenv -e ../../.env npx prisma migrate dev --name initial_business_schema
+# Se o Prisma perguntar "Do you want to continue?", digite 'y' e Enter.
+cd ../..
+
+# 4. Community
+cd services/community
+npx dotenv -e ../../.env npx prisma migrate dev --name initial_community_schema
+# Se o Prisma perguntar "Do you want to continue?", digite 'y' e Enter.
+cd ../..
+```
+Nota: Os serviços `business` e `community` têm scripts de "seed" que irão popular a base de dados com dados de exemplo automaticamente após a migração.
+
+#### 5. Executar os Serviços
+Depois de tudo configurado, pode iniciar todos os serviços de desenvolvimento com um único comando a partir da raiz do projeto:
+```bash
+npm run dev
 ```
 
 ### Deploy Railway:
@@ -189,7 +216,7 @@ npm run test:core                  # Java (JUnit)
 npm run test:community             # Node.js (Jest)
 
 # Integration tests
-npm run test:integration
+npm test                   # Runs all tests in all services
 
 # E2E tests
 npm run test:e2e                   # Playwright

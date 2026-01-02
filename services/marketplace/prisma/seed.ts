@@ -142,6 +142,34 @@ const productsData = [
     description: 'Saco de papel kraft biodegradável, resistente e ideal para transporte.',
     imageUrl: '/products/saco_kraft.png',
   },
+  // Products for Collective Bargains
+  {
+    id: 'prod-009-azeite',
+    name: 'Azeite Virgem Extra 5L',
+    category: 'Óleos e Gorduras',
+    subcategory: 'Azeite',
+    unit: 'litros',
+    description: 'Azeite virgem extra de alta qualidade, ideal para uso profissional.',
+    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDOa2ANFTnZDwoAbOvLPqhryEIw6p4Q35uEshghBFrEgHX65YvBfdXMc_bRYIEIxCVUNMhLwDMzAlMW3HtBhf1RGqaBxqt7SXbG1UzEc73bVqnwFyIjLdvsVKohn5yN8enLo_lvYqkhNha-nFEndTu-WB2fPr4M_rChJiXC-jy7X8FL8bgKuI6vYbFpQTzg5leNVXVTXTvi_kXlo3hrc10abyyjxPTDT92ewxWTd181hwSWlkd23czFrfnP1Uj5l_jNkF0ZTIsZTnBA',
+  },
+  {
+    id: 'prod-010-leite',
+    name: 'Leite UHT Meio Gordo 6x1L',
+    category: 'Laticínios',
+    subcategory: 'Leite',
+    unit: 'pacote',
+    description: 'Pack de 6 litros de leite UHT meio gordo, ideal para uso diário em restauração.',
+    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCqRfwPwMr0T-3857Yz0bgn4a14bpnuZTPcKK7sxfdXJPbpVe3KH0q_Mydh0vjhtWAqaOxTsD6J5KZD2AQBW3bCNQ7az3uKOYzRM-00oZUnfiVRTxsXb0UA5XBl-4gfoghdqNWV7SAH836qZcw-ILAecRlISGiSfNINw4MukLWdBsyrfAS7lyEGwCcyo8ss548a9OWAAHKk-vUpC5c6MJyV-lriNNMrU5rs7ykwmYjhyaXK1XgMXw',
+  },
+  {
+    id: 'prod-011-arroz',
+    name: 'Arroz Agulha Extra 5kg',
+    category: 'Mercearia',
+    subcategory: 'Arroz',
+    unit: 'kg',
+    description: 'Saco de arroz agulha extra de 5kg, perfeito para acompanhamentos.',
+    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBbwc3ZfJvOEigFEsv1b9MySK8bXANXGTOXSmGDE16eTNbEAEujdur_eV8LhIM2WaQEHMZdRFDD3OcLzxNEDfLisOfpQBYbcE7juPoQz8_qkBnT1aj8bF79dglSg_e1RIGte43Me9vA0h7YSttvNAcJfhoQxc4WmaAWQBsf6kHmAkh74mMdur_85fEF0T5eHEsv1b9MySK8bXANXGTOXSmGDE16eTNbEAEujdur_eV8LhIM2WaQEHMZdRFDD3OcLzxNEDfLisOfpQBYbcE7juPoQz8_qkBnT1aj8bF79dglSg_e1RIGte43Me9vA0h7YSttvNAcJfhoQxc4WmaAWQBsf6kHmAkh74mMdur_85fEF0T5eHEJtqJ6yveymCGDLX6na4oKtMsCcvuq4YTb7gmRHkXhG-yrGe-r8TnUjHxpFsM_ewWQ5URWo0lj6HSw',
+  },
 ];
 
 const supplierProductsData = [
@@ -207,6 +235,87 @@ const supplierProductsData = [
   },
 ];
 
+const collectiveBargainsData = [
+  {
+    id: 'cb-001-azeite',
+    creatorId: 'user-restaurante-a', // Dummy user
+    productName: 'Azeite Virgem Extra 5L',
+    category: 'Óleos e Gorduras',
+    targetParticipants: 10,
+    // currentParticipants: 3, // Calculated from BargainAdhesions
+    participants: ['user-restaurante-a', 'user-restaurante-b', 'user-restaurante-c'],
+    targetDiscount: '-5% no preço',
+    targetPrice: 7.50, // Example: target price per liter
+    deadline: new Date(new Date().setDate(new Date().getDate() + 3)), // 3 days from now
+    status: 'open',
+    // supplierId: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', // FrescoMar (can supply)
+    supplierOffer: { unitPrice: 8.00, discount5: 7.50, discount10: 7.00 },
+  },
+  {
+    id: 'cb-002-leite',
+    creatorId: 'user-restaurante-b',
+    productName: 'Leite UHT Meio Gordo 6x1L',
+    category: 'Laticínios',
+    targetParticipants: 5,
+    // currentParticipants: 1, // Calculated from BargainAdhesions
+    participants: ['user-restaurante-b'],
+    targetDiscount: '-3% no preço',
+    targetPrice: 5.00,
+    deadline: new Date(new Date().setDate(new Date().getDate() + 16)), // 16 days from now
+    status: 'open',
+    // supplierId: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', // FrescoMar (can supply)
+    supplierOffer: { unitPrice: 5.20, discount3: 5.00, discount5: 4.80 },
+  },
+  {
+    id: 'cb-003-arroz',
+    creatorId: 'user-restaurante-c',
+    productName: 'Arroz Agulha Extra 5kg',
+    category: 'Mercearia',
+    targetParticipants: 20,
+    // currentParticipants: 58, // Calculated from BargainAdhesions
+    participants: ['user-restaurante-c', 'user-restaurante-d', 'user-restaurante-e'],
+    targetDiscount: '-10% no preço',
+    targetPrice: 2.00,
+    deadline: new Date(new Date().setDate(new Date().getDate() - 1)), // Ended yesterday
+    status: 'closed-achieved',
+    // supplierId: 'c3d4e5f6-a7b8-9012-3456-7890abcdef2', // LusaPack (not ideal, but using existing)
+    supplierOffer: { unitPrice: 2.20, discount10: 2.00 },
+  },
+];
+
+const bargainAdhesionsData = [
+  { collectiveBargainId: 'cb-001-azeite', userId: 'user-restaurante-a', committedQuantity: 500 },
+  { collectiveBargainId: 'cb-001-azeite', userId: 'user-restaurante-b', committedQuantity: 200 },
+  { collectiveBargainId: 'cb-001-azeite', userId: 'user-restaurante-c', committedQuantity: 700 },
+  { collectiveBargainId: 'cb-002-leite', userId: 'user-restaurante-b', committedQuantity: 100 },
+  { collectiveBargainId: 'cb-003-arroz', userId: 'user-restaurante-c', committedQuantity: 5000 },
+  { collectiveBargainId: 'cb-003-arroz', userId: 'user-restaurante-d', committedQuantity: 10000 },
+  { collectiveBargainId: 'cb-003-arroz', userId: 'user-restaurante-e', committedQuantity: 7000 },
+];
+
+const priceHistoryData = [
+  // Price history for Bife da Vazia Maturado 30 dias (prod-001-carne) from Carne do Monte
+  { productId: 'prod-001-carne', supplierId: 'd4e5f6a7-b8c9-0123-4567-890abcdef3', price: 34.00, date: new Date('2025-09-01') },
+  { productId: 'prod-001-carne', supplierId: 'd4e5f6a7-b8c9-0123-4567-890abcdef3', price: 34.50, date: new Date('2025-09-15') },
+  { productId: 'prod-001-carne', supplierId: 'd4e5f6a7-b8c9-0123-4567-890abcdef3', price: 35.00, date: new Date('2025-10-01') },
+  { productId: 'prod-001-carne', supplierId: 'd4e5f6a7-b8c9-0123-4567-890abcdef3', price: 35.50, date: new Date('2025-10-15') },
+  { productId: 'prod-001-carne', supplierId: 'd4e5f6a7-b8c9-0123-4567-890abcdef3', price: 35.20, date: new Date('2025-11-01') },
+  { productId: 'prod-001-carne', supplierId: 'd4e5f6a7-b8c9-0123-4567-890abcdef3', price: 35.70, date: new Date('2025-11-15') },
+  { productId: 'prod-001-carne', supplierId: 'd4e5f6a7-b8c9-0123-4567-890abcdef3', price: 36.00, date: new Date('2025-12-01') },
+  { productId: 'prod-001-carne', supplierId: 'd4e5f6a7-b8c9-0123-4567-890abcdef3', price: 35.50, date: new Date('2025-12-15') }, // Current price
+
+  // Price history for Robalo Fresco Selvagem (prod-003-peixe) from FrescoMar Lda.
+  { productId: 'prod-003-peixe', supplierId: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', price: 27.50, date: new Date('2025-09-05') },
+  { productId: 'prod-003-peixe', supplierId: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', price: 28.00, date: new Date('2025-09-20') },
+  { productId: 'prod-003-peixe', supplierId: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', price: 28.50, date: new Date('2025-10-05') },
+  { productId: 'prod-003-peixe', supplierId: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', price: 29.00, date: new Date('2025-10-20') },
+  { productId: 'prod-003-peixe', supplierId: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', price: 28.80, date: new Date('2025-11-05') },
+  { productId: 'prod-003-peixe', supplierId: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', price: 29.10, date: new Date('2025-11-20') },
+  { productId: 'prod-003-peixe', supplierId: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', price: 29.50, date: new Date('2025-12-05') },
+  { productId: 'prod-003-peixe', supplierId: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', price: 28.90, date: new Date('2025-12-20') }, // Current price
+];
+
+
 async function main() {
   console.log('🌱 Seeding Marketplace data...');
 
@@ -255,6 +364,54 @@ async function main() {
     });
   }
   console.log(`✅ Seeded ${supplierProductsData.length} supplier products.`);
+
+  // Seed CollectiveBargains
+  console.log('🌱 Seeding Collective Bargains...');
+  for (const cb of collectiveBargainsData) {
+    await prisma.collectiveBargain.upsert({
+      where: { id: cb.id },
+      update: {
+        currentParticipants: cb.participants.length, // Update currentParticipants
+      },
+      create: {
+        ...cb,
+        currentParticipants: cb.participants.length, // Set currentParticipants based on participants array
+      },
+    });
+  }
+  console.log(`✅ Seeded ${collectiveBargainsData.length} collective bargains.`);
+
+  // Seed BargainAdhesions
+  console.log('🌱 Seeding Bargain Adhesions...');
+  for (const ba of bargainAdhesionsData) {
+    await prisma.bargainAdhesion.upsert({
+      where: { id: `${ba.collectiveBargainId}-${ba.userId}` }, // Unique ID for upsert
+      update: {
+        committedQuantity: ba.committedQuantity,
+      },
+      create: {
+        id: `${ba.collectiveBargainId}-${ba.userId}`, // Custom ID for upsert
+        collectiveBargainId: ba.collectiveBargainId,
+        userId: ba.userId,
+        committedQuantity: ba.committedQuantity,
+      },
+    });
+  }
+  console.log(`✅ Seeded ${bargainAdhesionsData.length} bargain adhesions.`);
+
+  // Seed PriceHistory
+  console.log('🌱 Seeding Price History...');
+  for (const ph of priceHistoryData) {
+    await prisma.priceHistory.create({
+      data: {
+        productId: ph.productId,
+        supplierId: ph.supplierId,
+        price: ph.price,
+        date: ph.date,
+      },
+    });
+  }
+  console.log(`✅ Seeded ${priceHistoryData.length} price history entries.`);
 }
 
 main()

@@ -1,13 +1,15 @@
 // Prisma Schema - Community API - SQLite (Local Development)
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../../../node_modules/@prisma/client-community"
+  provider        = "prisma-client-js"
+  output          = "../../../node_modules/@prisma/client-community"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["community"]
 }
 
 model Post {
@@ -31,6 +33,7 @@ model Post {
   group    Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
   @@map("posts")
+  @@schema("community")
 }
 
 model Comment {
@@ -49,6 +52,7 @@ model Comment {
   replies       Comment[] @relation("CommentReplies")
 
   @@map("comments")
+  @@schema("community")
 }
 
 model Group {
@@ -65,6 +69,7 @@ model Group {
   memberships GroupMembership[]
 
   @@map("groups")
+  @@schema("community")
 }
 
 model GroupMembership {
@@ -77,6 +82,7 @@ model GroupMembership {
 
   @@id([groupId, userId])
   @@map("group_memberships")
+  @@schema("community")
 }
 
 model Profile {
@@ -95,6 +101,7 @@ model Profile {
   updatedAt      DateTime @updatedAt
 
   @@map("profiles")
+  @@schema("community")
 }
 
 model Reaction {
@@ -107,6 +114,7 @@ model Reaction {
 
   @@unique([userId, targetType, targetId, reactionType])
   @@map("reactions")
+  @@schema("community")
 }
 
 model Notification {
@@ -120,6 +128,7 @@ model Notification {
   createdAt DateTime @default(now())
 
   @@map("notifications")
+  @@schema("community")
 }
 
 model Report {
@@ -136,4 +145,5 @@ model Report {
   createdAt  DateTime  @default(now())
 
   @@map("reports")
+  @@schema("community")
 }

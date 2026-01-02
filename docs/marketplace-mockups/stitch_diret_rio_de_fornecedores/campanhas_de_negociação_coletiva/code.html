@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>iaMenu - Campanhas de Negociação Coletiva</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#f95e1f", // Orange from reference
+                        "primary-hover": "#e04f16",
+                        background: "#050505", // Very dark background
+                        surface: "#111111", // Dark card background
+                        "surface-highlight": "#1a1a1a",
+                        border: "#27272a", // Subtle border
+                        text: "#ffffff",
+                        "text-muted": "#a1a1aa",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .glass-effect {
+                @apply bg-surface/80 backdrop-blur-md border border-white/5;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background font-display text-text antialiased h-screen flex overflow-hidden selection:bg-primary selection:text-white">
+<aside class="w-72 bg-background border-r border-border flex flex-col h-full overflow-y-auto hidden lg:flex shrink-0">
+<div class="p-6 flex items-center gap-3">
+<div class="bg-primary size-8 rounded flex items-center justify-center text-white font-bold">ia</div>
+<h1 class="font-bold text-lg tracking-tight">iaMenu Ecosystem [PT]</h1>
+</div>
+<div class="flex-1 px-4 py-2 space-y-8">
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">notifications</span>
+<span class="text-sm font-medium">Notificações</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">feed</span>
+<span class="text-sm font-medium">Feed</span>
+</a>
+</div>
+<div class="space-y-1">
+<div class="px-3 pb-2 text-xs font-bold text-text-muted/60 uppercase tracking-wider flex items-center justify-between cursor-pointer hover:text-text-muted">
+                    Academia e Gestão
+                    <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</div>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">star</span>
+<span class="text-sm font-medium">Audit de Reputação Online</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">bolt</span>
+<span class="text-sm font-medium">iaMenu PRO - Upgrade</span>
+<span class="ml-auto text-[10px] font-bold bg-white/10 text-white px-1.5 py-0.5 rounded">PRO</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">calculate</span>
+<span class="text-sm font-medium">Food Cost &amp; Fichas Técnicas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">target</span>
+<span class="text-sm font-medium">Marketing Planner AI</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">dashboard</span>
+<span class="text-sm font-medium">Dashboard Business Intel</span>
+</a>
+</div>
+<div class="space-y-1">
+<div class="px-3 pb-2 text-xs font-bold text-text-muted/60 uppercase tracking-wider flex items-center justify-between cursor-pointer hover:text-text-muted">
+                    Hub de Negócios
+                    <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</div>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded-lg transition-colors group border border-primary/20" href="#">
+<span class="material-symbols-outlined text-[20px]">handshake</span>
+<span class="text-sm font-bold">Campanhas Coletivas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">storefront</span>
+<span class="text-sm font-medium">Marketplace Fornecedores</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">location_on</span>
+<span class="text-sm font-medium">Hubs Regionais (Algarve)</span>
+<span class="ml-auto text-[10px] font-bold bg-white/10 text-text-muted px-1.5 py-0.5 rounded">5</span>
+</a>
+</div>
+<div class="space-y-1">
+<div class="px-3 pb-2 text-xs font-bold text-text-muted/60 uppercase tracking-wider flex items-center justify-between cursor-pointer hover:text-text-muted">
+                    Grupos da Comunidade
+                    <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</div>
+<a class="flex items-center gap-3 px-3 py-2 text-primary text-xs hover:underline mt-2" href="#">
+                    Ver todos os 0 grupos →
+                </a>
+</div>
+</div>
+</aside>
+<div class="flex-1 flex flex-col h-full overflow-hidden relative">
+<header class="h-16 border-b border-border flex items-center justify-between px-6 bg-background/80 backdrop-blur z-20 shrink-0">
+<div class="hidden md:flex items-center gap-1">
+<a class="px-4 py-1.5 rounded-full bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors" href="#">Home</a>
+<a class="px-4 py-1.5 rounded-full text-text-muted hover:text-white text-sm font-medium hover:bg-white/5 transition-colors" href="#">Cursos</a>
+<a class="px-4 py-1.5 rounded-full text-text-muted hover:text-white text-sm font-medium hover:bg-white/5 transition-colors" href="#">Hubs</a>
+<a class="px-4 py-1.5 rounded-full text-text-muted hover:text-white text-sm font-medium hover:bg-white/5 transition-colors" href="#">Leaderboard</a>
+</div>
+<button class="lg:hidden text-white mr-auto">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">search</span>
+<input class="bg-surface border border-border rounded-lg pl-9 pr-4 py-1.5 text-sm text-white focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-text-muted/50 w-64" placeholder="Pesquisar..." type="text"/>
+</div>
+<button class="text-text-muted hover:text-white transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="text-text-muted hover:text-white transition-colors"><span class="material-symbols-outlined">chat_bubble_outline</span></button>
+<button class="text-text-muted hover:text-white transition-colors"><span class="material-symbols-outlined">bookmark_border</span></button>
+<div class="size-8 rounded-full bg-surface border border-border flex items-center justify-center text-text-muted hover:text-white hover:border-primary cursor-pointer transition-colors overflow-hidden">
+<img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpFw_pHbLrbmj3v3NokB4WkMYPbig76XdhhpGpFWqvOs07ihGrzXkzD5-aQH84Wc8zQke4b4UPtzEn35PwCzbRWR8ujUkZyLMbKciOeoDRx2Qh16XSfnfUVQf_GjzojKyjw4qviUmvrqXp13idFu0aDO5l6fdBe2Rw-ok0-OpCRBqD_OO0BxXLM5LJluUZ4v6TTaGTOCFfkAQNh5WSv5fNxRgP7Jhr5BWc95pdppKfXGlzw8dNwfc5cjeSqC6b1qM3Zu8T8UDNUg"/>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto bg-background p-6 md:p-8 lg:p-12 scrollbar-hide">
+<div class="max-w-7xl mx-auto space-y-10">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="space-y-2">
+<h1 class="text-3xl md:text-5xl font-black italic tracking-tight text-white uppercase leading-none" style="font-family: 'Work Sans', sans-serif;">
+                            CAMPANHAS <br/><span class="text-primary">COLETIVAS</span>
+</h1>
+<p class="text-text-muted max-w-2xl text-sm md:text-base">
+                            CENTRAL DE NEGOCIAÇÃO AGREGADA PARA RESTAURANTES. AUMENTE SEU PODER DE COMPRA.
+                        </p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 bg-surface border border-border rounded-lg text-white text-sm font-medium hover:bg-surface-highlight transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">history</span>
+                            Histórico
+                        </button>
+<button class="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-bold shadow-lg shadow-primary/20 flex items-center gap-2 transition-all hover:scale-105 active:scale-95">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                            Sugerir Nova Campanha
+                        </button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-surface border border-border p-5 rounded-xl hover:border-white/20 transition-colors group">
+<div class="flex items-start justify-between mb-4">
+<div class="bg-white/5 p-2 rounded-lg text-text-muted group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">savings</span>
+</div>
+<span class="text-xs font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">trending_up</span> 12%
+                            </span>
+</div>
+<h3 class="text-3xl font-bold text-white">€1.250</h3>
+<p class="text-xs text-text-muted uppercase tracking-wider font-bold mt-1">Poupança Potencial</p>
+</div>
+<div class="bg-surface border border-border p-5 rounded-xl hover:border-white/20 transition-colors group">
+<div class="flex items-start justify-between mb-4">
+<div class="bg-white/5 p-2 rounded-lg text-text-muted group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">inventory_2</span>
+</div>
+<span class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">5 Ativas</span>
+</div>
+<h3 class="text-3xl font-bold text-white">450L</h3>
+<p class="text-xs text-text-muted uppercase tracking-wider font-bold mt-1">Volume Comprometido</p>
+</div>
+<div class="bg-surface border border-border p-5 rounded-xl hover:border-white/20 transition-colors group">
+<div class="flex items-start justify-between mb-4">
+<div class="bg-white/5 p-2 rounded-lg text-text-muted group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">group</span>
+</div>
+</div>
+<h3 class="text-3xl font-bold text-white">128</h3>
+<p class="text-xs text-text-muted uppercase tracking-wider font-bold mt-1">Participantes na Rede</p>
+</div>
+<div class="bg-surface border border-border p-5 rounded-xl hover:border-white/20 transition-colors group">
+<div class="flex items-start justify-between mb-4">
+<div class="bg-white/5 p-2 rounded-lg text-text-muted group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">verified</span>
+</div>
+<span class="text-xs font-bold text-text-muted bg-white/5 px-2 py-1 rounded">Aguardando</span>
+</div>
+<h3 class="text-3xl font-bold text-white">3</h3>
+<p class="text-xs text-text-muted uppercase tracking-wider font-bold mt-1">Condições Fechadas</p>
+</div>
+</div>
+<div class="bg-surface/50 border border-border rounded-xl p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
+<button class="px-4 py-2 rounded-lg bg-primary text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-primary/20">Todas</button>
+<button class="px-4 py-2 rounded-lg bg-surface hover:bg-white/10 border border-border text-text-muted hover:text-white text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap">Laticínios</button>
+<button class="px-4 py-2 rounded-lg bg-surface hover:bg-white/10 border border-border text-text-muted hover:text-white text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap">Óleos</button>
+<button class="px-4 py-2 rounded-lg bg-surface hover:bg-white/10 border border-border text-text-muted hover:text-white text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap">Carnes</button>
+<button class="px-4 py-2 rounded-lg bg-surface hover:bg-white/10 border border-border text-text-muted hover:text-white text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap">Não Alimentar</button>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<span class="text-xs text-text-muted font-bold uppercase">Ordenar:</span>
+<div class="relative group">
+<button class="flex items-center gap-1 text-sm font-bold text-white bg-surface border border-border px-3 py-1.5 rounded-lg hover:border-primary transition-colors">
+                                Prazo (Curto)
+                                <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+</button>
+</div>
+</div>
+</div>
+<section class="space-y-4">
+<div class="flex justify-between items-end px-2">
+<h2 class="text-xl font-bold text-white flex items-center gap-2">
+<span class="w-1 h-6 bg-primary rounded-full"></span>
+                            Campanhas Ativas
+                        </h2>
+<span class="text-xs text-text-muted font-medium bg-surface px-2 py-1 rounded border border-border">Atualizado agora</span>
+</div>
+<div class="flex flex-col rounded-xl border border-border bg-surface overflow-hidden">
+<div class="hidden md:grid grid-cols-12 gap-6 bg-white/5 px-6 py-4 border-b border-border">
+<div class="col-span-4 text-xs font-bold text-text-muted uppercase tracking-wider">Produto</div>
+<div class="col-span-2 text-xs font-bold text-text-muted uppercase tracking-wider text-center">Prazo</div>
+<div class="col-span-3 text-xs font-bold text-text-muted uppercase tracking-wider">Volume &amp; Meta</div>
+<div class="col-span-3 text-right text-xs font-bold text-text-muted uppercase tracking-wider">Adesão</div>
+</div>
+<div class="flex flex-col md:grid md:grid-cols-12 gap-6 border-b border-border p-6 items-center hover:bg-white/[0.02] transition-colors group relative">
+<div class="col-span-4 flex items-center gap-4 w-full">
+<div class="size-16 shrink-0 rounded-lg bg-[#222] border border-white/10 bg-center bg-cover" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDOa2ANFTnZDwoAbOvLPqhryEIw6p4Q35uEshghBFrEgHX65YvBfdXMc_bRYIEIxCVUNMhLwDMwAlMW3HtBhf1RGqaBxqt7SXbG1UzEc73bVqnwFyIjLdvsVKohn5yN8enLo_lvYqkhNha-nFEndTu-WB2fPr4M_rChJiXC-jy7X8FL8bgKuI6vYbFpQTzg5leNVYXTvi_kXlo3hrc10abyyjxPTDT92ewxWTd181hwSWlkd23czFrfnP1Uj5l_jNkF0ZTIsZTnBA');"></div>
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded w-fit uppercase tracking-wider">Óleos e Gorduras</span>
+<h3 class="text-base font-bold text-white leading-tight group-hover:text-primary transition-colors">Azeite Virgem Extra 5L</h3>
+<p class="text-xs text-text-muted font-mono">Ref: OLV-5L-VIRGEM</p>
+</div>
+</div>
+<div class="col-span-2 w-full flex md:flex-col justify-between md:justify-center items-center gap-1">
+<span class="md:hidden text-xs font-bold text-text-muted uppercase">Prazo:</span>
+<div class="flex flex-col items-end md:items-center">
+<span class="text-sm font-bold text-white">15 Nov 2023</span>
+<span class="text-[10px] font-bold text-red-400 bg-red-900/20 border border-red-900/30 px-2 py-0.5 rounded">3 dias restantes</span>
+</div>
+</div>
+<div class="col-span-3 w-full flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<span class="text-xs font-medium text-primary">Próx. Nível: -5% preço</span>
+<div class="text-right">
+<span class="text-sm font-bold text-white">7.500L</span>
+<span class="text-xs text-text-muted"> / 10.000L</span>
+</div>
+</div>
+<div class="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+<div class="h-full rounded-full bg-gradient-to-r from-primary to-orange-400 shadow-[0_0_10px_rgba(249,94,31,0.5)]" style="width: 75%;"></div>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<div class="flex -space-x-2">
+<div class="size-5 rounded-full bg-gray-700 border border-surface"></div>
+<div class="size-5 rounded-full bg-gray-600 border border-surface"></div>
+<div class="size-5 rounded-full bg-gray-500 border border-surface flex items-center justify-center text-[8px] font-bold text-white">+40</div>
+</div>
+<span class="text-xs text-text-muted">Participantes</span>
+</div>
+</div>
+<div class="col-span-3 w-full flex flex-col items-end gap-3 mt-4 md:mt-0">
+<div class="flex items-stretch w-full max-w-[200px]">
+<input class="w-full rounded-l-lg border border-border bg-background px-3 py-2 text-sm text-right focus:border-primary focus:ring-1 focus:ring-primary text-white placeholder-text-muted/50" placeholder="0" type="number"/>
+<div class="flex items-center bg-white/5 border border-l-0 border-border px-3 rounded-r-lg text-xs font-bold text-text-muted uppercase">
+                                        Litros
+                                    </div>
+</div>
+<button class="w-full max-w-[200px] bg-white text-black hover:bg-primary hover:text-white py-2 px-4 rounded-lg text-sm font-bold transition-all active:scale-95 shadow-lg shadow-white/5 hover:shadow-primary/30">
+                                    Aderir
+                                </button>
+</div>
+</div>
+<div class="flex flex-col md:grid md:grid-cols-12 gap-6 border-b border-border p-6 items-center hover:bg-white/[0.02] transition-colors group">
+<div class="col-span-4 flex items-center gap-4 w-full">
+<div class="size-16 shrink-0 rounded-lg bg-[#222] border border-white/10 bg-center bg-cover" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCqRfwPwMr0T-3857Yz0bgn4a14bpnuZTPcKK7sxfdXJPbpVe3KH0q_Mydh0vjhtWAqaOxTsD6J5KZD2AQBW3bCNQ7az3uKOYzRM-00oZUnfiVRTxsXb0UA5XBl-4gfoghdqNWV7SAH836qZcw-ILAecRlISGiSfNINw4MukLWdBsyrfAS7lyEGwCcyo8ss548a9OWAAHKk-vUpC5c6MJyV-lriNNMrU5rs7ykwmKDgaVNQm3LyN4s2gCDBFr1gmjhyiaXK1XgMXw');"></div>
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded w-fit uppercase tracking-wider">Laticínios</span>
+<h3 class="text-base font-bold text-white leading-tight group-hover:text-primary transition-colors">Leite UHT Meio Gordo 6x1L</h3>
+<p class="text-xs text-text-muted font-mono">Ref: LEITE-UHT-MG</p>
+</div>
+</div>
+<div class="col-span-2 w-full flex md:flex-col justify-between md:justify-center items-center gap-1">
+<span class="md:hidden text-xs font-bold text-text-muted uppercase">Prazo:</span>
+<div class="flex flex-col items-end md:items-center">
+<span class="text-sm font-bold text-white">28 Nov 2023</span>
+<span class="text-[10px] font-bold text-text-muted bg-white/10 border border-white/10 px-2 py-0.5 rounded">16 dias restantes</span>
+</div>
+</div>
+<div class="col-span-3 w-full flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<span class="text-xs font-medium text-text-muted">Meta longe</span>
+<div class="text-right">
+<span class="text-sm font-bold text-white">1.250L</span>
+<span class="text-xs text-text-muted"> / 5.000L</span>
+</div>
+</div>
+<div class="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+<div class="h-full rounded-full bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.3)]" style="width: 25%;"></div>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<div class="flex -space-x-2">
+<div class="size-5 rounded-full bg-gray-700 border border-surface"></div>
+<div class="size-5 rounded-full bg-gray-600 border border-surface flex items-center justify-center text-[8px] font-bold text-white">+6</div>
+</div>
+<span class="text-xs text-text-muted">Participantes</span>
+</div>
+</div>
+<div class="col-span-3 w-full flex flex-col items-end gap-3 mt-4 md:mt-0">
+<div class="flex items-stretch w-full max-w-[200px]">
+<input class="w-full rounded-l-lg border border-border bg-background px-3 py-2 text-sm text-right focus:border-primary focus:ring-1 focus:ring-primary text-white placeholder-text-muted/50" placeholder="0" type="number"/>
+<div class="flex items-center bg-white/5 border border-l-0 border-border px-3 rounded-r-lg text-xs font-bold text-text-muted uppercase">
+                                        Litros
+                                    </div>
+</div>
+<button class="w-full max-w-[200px] bg-white text-black hover:bg-primary hover:text-white py-2 px-4 rounded-lg text-sm font-bold transition-all active:scale-95 shadow-lg shadow-white/5 hover:shadow-primary/30">
+                                    Aderir
+                                </button>
+</div>
+</div>
+<div class="flex flex-col md:grid md:grid-cols-12 gap-6 p-6 items-center bg-primary/5 border-l-4 border-l-primary relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none"></div>
+<div class="col-span-4 flex items-center gap-4 w-full relative z-10">
+<div class="size-16 shrink-0 rounded-lg bg-[#222] border border-primary/30 bg-center bg-cover shadow-[0_0_15px_rgba(249,94,31,0.2)]" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBbwc3ZfJvOEigFEsv1b9MySK8bXANXGTOXSmGDE16eTNbEAEujdur_eV8LhIM2WaQEHMZdRFDD3OcLzxNEDfLisOfpQBYbcE7juPoQz8_qkBnT1aj8bF79dglSg_e1RIGte43Me9vA0h7YSttvNAcJfhoQxc4WmaAWQBsf6kHmAkh74mMdur_85fEF0T5eHEJtqJ6yveymCGDLX6na4oKtMsCcvuq4YTb7gmRHkXG-yrGe-r8TnUjHxpFsM_ewWQ5URWo0lj6HSw');"></div>
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold text-white bg-primary px-1.5 py-0.5 rounded w-fit uppercase tracking-wider">Mercearia</span>
+<h3 class="text-base font-bold text-white leading-tight">Arroz Agulha Extra 5kg</h3>
+<p class="text-xs text-primary/80 font-mono">Ref: ARR-AGU-5KG</p>
+</div>
+</div>
+<div class="col-span-2 w-full flex md:flex-col justify-between md:justify-center items-center gap-1 relative z-10">
+<span class="md:hidden text-xs font-bold text-text-muted uppercase">Prazo:</span>
+<div class="flex flex-col items-end md:items-center">
+<span class="text-sm font-bold text-white">12 Nov 2023</span>
+<span class="text-[10px] font-bold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded animate-pulse">Termina Hoje!</span>
+</div>
+</div>
+<div class="col-span-3 w-full flex flex-col gap-2 relative z-10">
+<div class="flex justify-between items-end">
+<span class="text-xs font-bold text-primary flex items-center gap-1 uppercase">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                        Meta Atingida!
+                                    </span>
+<div class="text-right">
+<span class="text-sm font-bold text-white">22.000kg</span>
+<span class="text-xs text-text-muted"> / 20.000kg</span>
+</div>
+</div>
+<div class="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+<div class="h-full rounded-full bg-primary shadow-[0_0_15px_rgba(249,94,31,0.6)]" style="width: 100%;"></div>
+</div>
+<div class="flex justify-between text-xs mt-1">
+<span class="text-text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">group</span> 58 Participantes</span>
+<span class="text-white font-bold">Desconto Máximo!</span>
+</div>
+</div>
+<div class="col-span-3 w-full flex flex-col items-end gap-3 mt-4 md:mt-0 relative z-10">
+<div class="flex flex-col items-end gap-1 w-full">
+<span class="text-[10px] font-bold text-primary uppercase tracking-wider">Sua participação</span>
+<div class="flex items-center gap-2">
+<span class="text-xl font-black text-white">500kg</span>
+<button class="text-text-muted hover:text-white"><span class="material-symbols-outlined text-[16px]">edit</span></button>
+</div>
+</div>
+<button class="w-full max-w-[200px] border border-primary text-primary hover:bg-primary hover:text-white py-2 px-4 rounded-lg text-sm font-bold transition-colors shadow-[0_0_10px_rgba(249,94,31,0.1)] hover:shadow-[0_0_20px_rgba(249,94,31,0.4)]">
+                                    Ver Detalhes
+                                </button>
+</div>
+</div>
+</div>
+</section>
+<section class="rounded-xl border border-border bg-gradient-to-br from-surface to-background overflow-hidden relative p-8 md:p-10">
+<div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none translate-x-1/2 -translate-y-1/2"></div>
+<div class="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-8">
+<div class="flex flex-col gap-6 max-w-xl">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="bg-primary/20 text-primary p-2 rounded-lg material-symbols-outlined">handshake</span>
+<span class="text-sm font-bold text-primary uppercase tracking-wider">Modelo de Negócio</span>
+</div>
+<h3 class="text-2xl md:text-3xl font-bold text-white">Como funciona a negociação coletiva?</h3>
+</div>
+<div class="space-y-4">
+<div class="flex gap-4">
+<div class="flex flex-col items-center gap-1">
+<div class="size-2 rounded-full bg-primary mt-2"></div>
+<div class="w-0.5 h-full bg-white/10"></div>
+</div>
+<p class="text-sm text-text-muted leading-relaxed pb-4">
+<strong class="text-white block mb-1">Escalões de Volume</strong>
+                                        O volume total de todos os restaurantes desbloqueia escalões de preço progressivos. Quanto mais participantes, menor o preço final.
+                                    </p>
+</div>
+<div class="flex gap-4">
+<div class="flex flex-col items-center gap-1">
+<div class="size-2 rounded-full bg-white mt-2"></div>
+<div class="w-0.5 h-full bg-white/10"></div>
+</div>
+<p class="text-sm text-text-muted leading-relaxed pb-4">
+<strong class="text-white block mb-1">Compromisso Vinculativo</strong>
+                                        Após o fecho da campanha, se a meta mínima for atingida, a encomenda é processada automaticamente.
+                                    </p>
+</div>
+<div class="flex gap-4">
+<div class="flex flex-col items-center gap-1">
+<div class="size-2 rounded-full bg-white mt-2"></div>
+</div>
+<p class="text-sm text-text-muted leading-relaxed">
+<strong class="text-white block mb-1">Logística Centralizada</strong>
+                                        A iaMenu gere a faturação e logística, garantindo uma única entrega consolidada.
+                                    </p>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+<button class="px-6 py-4 rounded-xl border border-border hover:bg-white/5 text-text-muted hover:text-white font-medium transition-colors text-center">
+                                Termos e Condições
+                            </button>
+<button class="px-6 py-4 rounded-xl bg-primary text-white font-bold shadow-[0_0_20px_rgba(249,94,31,0.3)] hover:shadow-[0_0_30px_rgba(249,94,31,0.5)] hover:scale-[1.02] transition-all text-center">
+                                Ver Tabela de Escalões
+                            </button>
+</div>
+</div>
+</section>
+<div class="h-10"></div> 
+</div>
+</main>
+</div>
+
+</body></html>

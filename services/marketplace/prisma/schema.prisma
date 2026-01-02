@@ -1,132 +1,237 @@
-// Prisma Schema - Marketplace API
-// Schema: marketplace (PostgreSQL)
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../../../node_modules/@prisma/client-marketplace"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["marketplace"]
+  // Using a specific schema for marketplace tables
+  // This is a common pattern when sharing a database with multiple services
+  // If your database user has default schema 'public', you might need to adjust
+  // based on how your PostgreSQL is configured to handle schemas.
+  // For now, we'll assume the tables will be created under the 'marketplace' schema.
+  // Prisma will map these models to 'marketplace.TableName'
+  // by convention if the schema is set up correctly in the database URL.
+  // Example DATABASE_URL: "postgresql://user:password@host:port/database?schema=marketplace"
 }
 
 model Supplier {
-  id              String   @id @default(uuid())
-  userId          String   @unique @map("user_id")
-  companyName     String   @map("company_name") @db.VarChar(200)
-  logoUrl         String?  @map("logo_url") @db.Text
-  description     String?  @db.Text
-  categories      String[]
-  locationCity    String   @map("location_city") @db.VarChar(100)
-  locationRegion  String   @map("location_region") @db.VarChar(100)
-  nationalDelivery Boolean @default(false) @map("national_delivery")
+  id                 String    @id @default(uuid()) @map("id")
+  userId             String    @map("user_id") // FK to users.id (assuming 'User' model is in another service or shared schema)
+  companyName        String    @map("company_name")
+  logoUrl            String?   @map("logo_url")
+  description        String?
+  categories         String[]  @default([])
+  locationCity       String?   @map("location_city")
+  locationRegion     String?   @map("location_region")
+  nationalDelivery   Boolean   @default(false) @map("national_delivery")
 
-  contactPhone    String   @map("contact_phone") @db.VarChar(50)
-  contactEmail    String   @map("contact_email") @db.VarChar(100)
-  contactWebsite  String?  @map("contact_website") @db.Text
+  contactPhone       String?   @map("contact_phone")
+  contactEmail       String?   @map("contact_email")
+  contactWebsite     String?   @map("contact_website")
 
-  deliveryZones   String[] @map("delivery_zones")
-  deliveryCost    String?  @map("delivery_cost") @db.Text
-  minOrder        Decimal? @map("min_order") @db.Decimal(10, 2)
-  paymentTerms    String?  @map("payment_terms") @db.Text
+  productsDescription String?   @map("products_description")
+  catalogPdfUrl      String?   @map("catalog_pdf_url")
+  priceListPublic    Boolean   @default(false) @map("price_list_public")
 
-  certifications  String[]
+  deliveryZones      String[]  @default([]) @map("delivery_zones")
+  deliveryCost       String?   @map("delivery_cost")
+  deliveryFrequency  String?   @map("delivery_frequency")
+  minOrder           Decimal?  @map("min_order")
+  paymentTerms       String?   @map("payment_terms")
 
-  ratingAvg       Decimal  @default(0) @map("rating_avg") @db.Decimal(3, 2)
-  reviewCount     Int      @default(0) @map("review_count")
+  certifications     String[]  @default([])
 
-  verified        Boolean  @default(false)
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  ratingAvg          Decimal   @default(0.0) @map("rating_avg")
+  reviewCount        Int       @default(0) @map("review_count")
 
-  reviews         Review[]
-  products        SupplierProduct[]
+  verified           Boolean   @default(false)
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at")
 
-  @@index([locationRegion])
+  // Relations
+  reviews            Review[]
+  supplierProducts   SupplierProduct[]
+  quotes             Quote[]
+  collectiveBargains CollectiveBargain[]
+  priceHistory       PriceHistory[] // <--- NEW RELATION
+
   @@map("suppliers")
-  @@schema("marketplace")
+  @@index([locationRegion])
+  @@index([ratingAvg(sort: Desc)])
+  @@index([categories]) // For Gin index for array column
 }
 
 model Review {
-  id              String   @id @default(uuid())
-  supplierId      String   @map("supplier_id")
-  reviewerId      String   @map("reviewer_id")
+  id                 String    @id @default(uuid())
+  supplierId         String    @map("supplier_id")
+  reviewerId         String    @map("reviewer_id") // FK to users.id
 
-  ratingOverall   Int      @map("rating_overall")
-  ratingQuality   Int      @map("rating_quality")
-  ratingDelivery  Int      @map("rating_delivery")
-  ratingPrice     Int      @map("rating_price")
-  ratingService   Int      @map("rating_service")
+  ratingOverall      Int       @map("rating_overall")
+  ratingQuality      Int       @map("rating_quality")
+  ratingDelivery     Int       @map("rating_delivery")
+  ratingPrice        Int       @map("rating_price")
+  ratingService      Int       @map("rating_service")
 
-  comment         String?  @db.Text
-  recommend       Boolean
-  anonymous       Boolean  @default(false)
+  comment            String?
+  recommend          Boolean?
+  anonymous          Boolean   @default(false)
 
-  helpfulCount    Int      @default(0) @map("helpful_count")
+  helpfulCount       Int       @default(0) @map("helpful_count")
+  unhelpfulCount     Int       @default(0) @map("unhelpful_count")
 
-  supplierResponse String? @map("supplier_response") @db.Text
+  supplierResponse   String?   @map("supplier_response")
+  supplierResponseAt DateTime? @map("supplier_response_at")
 
-  verifiedPurchase Boolean @default(false) @map("verified_purchase")
+  verifiedPurchase   Boolean   @default(false) @map("verified_purchase")
 
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at")
 
-  supplier        Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  supplier           Supplier  @relation(fields: [supplierId], references: [id])
 
-  @@unique([supplierId, reviewerId])
+  @@unique([supplierId, reviewerId]) // 1 review per supplier per reviewer
   @@index([supplierId])
   @@map("reviews")
-  @@schema("marketplace")
 }
 
-model Product {
-  id          String   @id @default(uuid())
-  name        String   @db.VarChar(200)
-  category    String   @db.VarChar(100)
-  subcategory String?  @db.VarChar(100)
-  unit        String   @db.VarChar(50)
-  description String?  @db.Text
-  imageUrl    String?  @map("image_url") @db.Text
-  createdAt   DateTime @default(now()) @map("created_at")
+// Separate model for helpful/unhelpful markings if needed later, but for now we'll keep counts in Review
+// model ReviewHelpful {
+//   reviewId String
+//   userId   String
+//   helpful  Boolean // true = helpful, false = unhelpful
 
-  suppliers   SupplierProduct[]
+//   @@id([reviewId, userId]) // Composite primary key
+//   @@map("review_helpful")
+// }
+
+model Product {
+  id            String    @id @default(uuid())
+  name          String
+  category      String?
+  subcategory   String?
+  unit          String?
+  description   String?
+  imageUrl      String?   @map("image_url")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  supplierProducts SupplierProduct[]
+  priceHistory     PriceHistory[] // <--- NEW RELATION
 
   @@index([category])
   @@map("products")
-  @@schema("marketplace")
 }
 
 model SupplierProduct {
-  id              String   @id @default(uuid())
-  supplierId      String   @map("supplier_id")
-  productId       String   @map("product_id")
-  price           Decimal  @db.Decimal(10, 2)
-  unit            String   @db.VarChar(50)
-  minQuantity     Int?     @map("min_quantity")
+  id              String    @id @default(uuid())
+  supplierId      String    @map("supplier_id")
+  productId       String    @map("product_id")
+  price           Decimal
+  unit            String?
+  minQuantity     Int?      @map("min_quantity")
   deliveryIncluded Boolean @default(false) @map("delivery_included")
-  available       Boolean  @default(true)
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  available       Boolean   @default(true)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
 
-  supplier        Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
-  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  supplier        Supplier  @relation(fields: [supplierId], references: [id])
+  product         Product   @relation(fields: [productId], references: [id])
 
   @@unique([supplierId, productId])
+  @@index([supplierId])
   @@map("supplier_products")
-  @@schema("marketplace")
 }
 
 model QuoteRequest {
-  id               String   @id @default(uuid())
-  restaurantId     String   @map("restaurant_id")
-  suppliers        String[]
-  items            Json
-  deliveryFrequency String? @map("delivery_frequency") @db.VarChar(50)
-  deliveryAddress  String?  @map("delivery_address") @db.Text
-  notes            String?  @db.Text
-  status           String   @default("pending") @db.VarChar(20)
-  createdAt        DateTime @default(now()) @map("created_at")
+  id                  String    @id @default(uuid())
+  restaurantId        String    @map("restaurant_id") // FK to users.id
+  suppliers           String[] // Array of supplier IDs
+  items               Json // JSONB for detailed item requests
+  deliveryFrequency   String?   @map("delivery_frequency")
+  deliveryAddress     String?   @map("delivery_address")
+  notes               String?
+  preferredStartDate  DateTime? @map("preferred_start_date") @db.Date
+  status              String    @default("pending") // 'pending' | 'quoted' | 'accepted' | 'cancelled'
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  quotes              Quote[]
 
   @@map("quote_requests")
-  @@schema("marketplace")
 }
+
+model Quote {
+  id               String    @id @default(uuid())
+  quoteRequestId   String    @map("quote_request_id")
+  supplierId       String    @map("supplier_id")
+  items            Json // JSONB for detailed quoted items
+  deliveryTerms    String?   @map("delivery_terms")
+  paymentTerms     String?   @map("payment_terms")
+  validUntil       DateTime? @map("valid_until") @db.Date
+  notes            String?
+  status           String    @default("sent") // 'sent' | 'accepted' | 'rejected' | 'expired'
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  quoteRequest     QuoteRequest @relation(fields: [quoteRequestId], references: [id])
+  supplier         Supplier     @relation(fields: [supplierId], references: [id])
+
+  @@map("quotes")
+}
+
+model CollectiveBargain {
+  id                 String    @id @default(uuid())
+  creatorId          String    @map("creator_id") // FK to users.id
+  supplierId         String?   @map("supplier_id")
+  productName        String    @map("product_name")
+  category           String?
+  targetParticipants Int?      @map("target_participants")
+  currentParticipants Int       @default(1) @map("current_participants")
+  participants       String[]  @default([]) // Array of user IDs
+  targetDiscount     String?   @map("target_discount")
+  targetPrice        Decimal?  @map("target_price")
+  deadline           DateTime? @db.Date
+  status             String    @default("open") // 'open' | 'reached' | 'negotiating' | 'closed' | 'failed'
+  supplierOffer      Json?     @map("supplier_offer") // JSONB for supplier's offer details
+  communityGroupId   String?   @map("community_group_id") // FK to community.groups.id
+
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  supplier           Supplier? @relation(fields: [supplierId], references: [id])
+  bargainAdhesions   BargainAdhesion[] // <--- NEW RELATION
+
+  @@map("collective_bargains")
+}
+
+model BargainAdhesion {
+  id                  String    @id
+  collectiveBargainId String    @map("collective_bargain_id")
+  userId              String    @map("user_id") // FK to users.id
+  committedQuantity   Decimal   @map("committed_quantity")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  collectiveBargain   CollectiveBargain @relation(fields: [collectiveBargainId], references: [id])
+
+  @@unique([collectiveBargainId, userId]) // User can only adhere once per bargain
+  @@map("bargain_adhesions")
+}
+
+model PriceHistory {
+  id        String    @id @default(uuid())
+  productId String    @map("product_id")
+  supplierId String   @map("supplier_id")
+  price     Decimal
+  date      DateTime
+
+  product   Product   @relation(fields: [productId], references: [id])
+  supplier  Supplier  @relation(fields: [supplierId], references: [id])
+
+  @@unique([productId, supplierId, date]) // A product from a supplier has one price per day
+  @@map("price_history")
+}
+
