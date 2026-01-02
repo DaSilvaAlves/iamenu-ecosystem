@@ -21,3 +21,19 @@ export const getProductComparison = asyncHandler(async (req: Request, res: Respo
 
   res.status(200).json(result);
 }); // <--- CLOSED asyncHandler
+
+export const getAllProducts = asyncHandler(async (req: Request, res: Response) => {
+  const { search, category, limit, offset } = req.query;
+
+  const parsedLimit = limit ? parseInt(limit as string, 10) : undefined;
+  const parsedOffset = offset ? parseInt(offset as string, 10) : undefined;
+
+  const result = await productService.getProducts(
+    search as string,
+    category as string,
+    parsedLimit,
+    parsedOffset
+  );
+
+  res.status(200).json(result);
+});

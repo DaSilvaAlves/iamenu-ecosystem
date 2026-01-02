@@ -125,3 +125,33 @@ export const compareProducts = async (params: CompareProductsParams) => {
 
   return comparativeProducts;
 };
+
+export const getProducts = async (search?: string, category?: string, limit: number = 20, offset: number = 0) => {
+  const where: any = {};
+
+  if (search) {
+    where.name = { contains: search, mode: 'insensitive' };
+  }
+
+  if (category) {
+    where.category = { contains: category, mode: 'insensitive' };
+  }
+
+  const products = await prisma.product.findMany({
+    where,
+    take: limit,
+    skip: offset,
+    orderBy: {
+      name: 'asc',
+    },
+  });
+
+  const total = await prisma.product.count({ where });
+
+  return {
+    products,
+    total,
+    limit,
+    offset,
+  };
+};
