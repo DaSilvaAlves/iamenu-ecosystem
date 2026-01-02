@@ -13,8 +13,8 @@ import {
 // Importa os novos componentes
 import ComparisonTab from './ComparisonTab';
 import RfqTab from './RfqTab';
-import ResponsesTab from './ResponsesTab';
-import ProfilesTab from './ProfilesTab';
+import RfqRequestsTab from './RfqRequestsTab';
+import IncomingRfqTab from './IncomingRfqTab'; // <--- NEW IMPORT
 
 // Placeholder para os separadores em desenvolvimento
 const StandardPlaceholder = ({ title }) => (
@@ -294,6 +294,8 @@ function Marketplace() {
         { id: 'comparison', label: 'Comparador', icon: Scale },
 
         { id: 'rfq', label: 'Pedidos (RFQ)', icon: ClipboardList },
+        { id: 'my-rfqs', label: 'Meus Pedidos', icon: Inbox },
+        { id: 'incoming-rfqs', label: 'Pedidos Recebidos', icon: Inbox }, // <--- NEW TAB
         { id: 'responses', label: 'Respostas', icon: Inbox },
         { id: 'profiles', label: 'Perfis', icon: Contact },
     ];
@@ -309,6 +311,10 @@ function Marketplace() {
 
             case 'rfq':
                 return <RfqTab />;
+            case 'my-rfqs':
+                return <RfqRequestsTab />;
+            case 'incoming-rfqs': // <--- NEW CASE
+                return <IncomingRfqTab />;
             case 'responses':
                 return <ResponsesTab />;
             case 'profiles':
