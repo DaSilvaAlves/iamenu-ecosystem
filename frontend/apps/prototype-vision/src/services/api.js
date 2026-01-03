@@ -1,5 +1,5 @@
 // ===== COMMUNITY API CLIENT =====
-// Connects Prototype-Vision to Community API Backend (localhost:3001)
+// Connects Prototype-Vision to Community API Backend (localhost:3004)
 
 const API_BASE = 'http://localhost:3004/api/v1/community';
 
