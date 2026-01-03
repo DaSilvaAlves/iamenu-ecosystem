@@ -18,6 +18,7 @@ import UpgradePROView from './views/UpgradePROView';
 import TourRapidoView from './views/TourRapidoView';
 import OnboardingView from './views/OnboardingView';
 import Marketplace from './views/Marketplace';
+import ResponsesTab from './views/ResponsesTab'; // Adicionar import para ResponsesTab
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -104,6 +105,7 @@ const App = () => {
                                         <Route path="/reputacao" element={<StandardPlaceholder title="Audit de Reputação" />} />
                                         <Route path="/equipas" element={<StandardPlaceholder title="Escalas de Staff AI" />} />
                                         <Route path="/marketplace" element={<Marketplace />} />
+                                        <Route path="/marketplace/quotes/:rfqId/responses" element={<ResponsesTab />} />
                                         <Route path="/marketplace/suppliers/:id" element={<SupplierDetail />} />
                                         <Route path="/hubs" element={<StandardPlaceholder title="Hubs Regionais" />} />
                                         <Route path="/lab" element={<ChatView />} />

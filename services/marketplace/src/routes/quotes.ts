@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as quoteController from '../controllers/quotes.controller';
-// import { authenticateJWT } from '../../src/middleware/auth';
+import { authenticateJWT } from '../../src/middleware/auth';
 
 const router = Router();
 
@@ -20,5 +20,12 @@ router.get('/incoming', quoteController.getIncomingQuoteRequests);
 // This endpoint is for a supplier to respond to a specific quote request
 // router.post('/:id/respond', authenticateJWT, quoteController.respondToQuoteRequest);
 router.post('/:id/respond', quoteController.respondToQuoteRequest);
+
+// This endpoint is for a restaurant to get all responses for a specific quote request
+router.get('/requests/:id/responses', quoteController.getQuoteResponses);
+
+// This endpoint is for updating the status of a specific quote
+router.patch('/:id/status', authenticateJWT, quoteController.updateQuoteStatus);
+
 
 export default router;

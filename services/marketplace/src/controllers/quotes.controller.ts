@@ -74,3 +74,35 @@ export const respondToQuoteRequest = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error responding to quote request', error: error.message });
   }
 };
+
+export const getQuoteResponses = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; // This is the quoteRequestId
+    const quoteRequestWithResponses = await quoteService.getQuoteResponses(id);
+
+    if (quoteRequestWithResponses) {
+      res.status(200).json(quoteRequestWithResponses.quotes);
+    } else {
+      res.status(404).json({ message: 'Quote request not found' });
+    }
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error fetching quote responses' });
+  }
+};
+
+export const updateQuoteStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; // This is the quoteId
+    const { status } = req.body; // New status (e.g., 'accepted')
+
+    // Basic validation
+    if (!status || !['sent', 'accepted', 'rejected', 'expired'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid or missing status' });
+    }
+
+    const updatedQuote = await quoteService.updateQuoteStatus(id, status);
+    res.status(200).json(updatedQuote);
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error updating quote status', error: error.message });
+  }
+};

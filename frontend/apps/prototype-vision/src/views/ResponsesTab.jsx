@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast'; // Import react-hot-toast
 
 const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
     const { rfqId: paramRfqId } = useParams(); // Get rfqId from URL params
@@ -11,9 +12,16 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
     const [error, setError] = useState(null);
     const [filterStatus, setFilterStatus] = useState('all'); // State for status filter
     const [sortBy, setSortBy] = useState('priceAsc'); // State for sorting, default to price ascending
+    const [isAcceptingProposal, setIsAcceptingProposal] = useState(false); // State for loading during acceptance
 
-    // calculateTotalPrice and useMemo MUST be defined here, at the to level
-    // of the component, before any conditional returns (like if loading/error).
+    // Placeholder for getting the auth token - assuming it's available globally or via a context/utility
+    const getAuthToken = () => {
+        // This is a placeholder. Replace with actual token retrieval logic.
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const token = user.token || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LXVzZXItMDAxIiwiZW1haWwiOiJldXJpY29AaWFtZW51LnB0Iiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzY3NDE1NTczLCJleHAiOjE3Njc1MDE5NzN9.dRzJwIHOL13HNRLBO2Y1Iiniq5ueWSVSV_Dif0QFinw'; // Default test token
+        return token;
+    };
+
     const calculateTotalPrice = (items) => items.reduce((acc, item) => acc + (item.total || 0), 0);
 
     // Apply filtering and sorting
@@ -37,7 +45,6 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
             } else if (sortBy === 'priceDesc') {
                 return priceB - priceA;
             }
-            // Add other sort criteria here if needed
             return 0;
         });
 
@@ -45,7 +52,6 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
     }, [responses, filterStatus, sortBy]);
 
     // Calculate summary statistics and best proposal based on filteredAndSortedResponses
-    // This block is now correctly placed after filteredAndSortedResponses is defined
     const totalProposals = filteredAndSortedResponses.length;
 
     let bestProposal = null;
@@ -59,11 +65,6 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
                 minTotalPrice = currentTotalPrice;
                 bestProposal = { ...quote, calculatedTotalPrice: currentTotalPrice };
             }
-            // Basic logic for fastest delivery - assuming "24h" is fastest, needs refinement
-            // This needs to be robust, for now, just pick one with '24h' if exists
-            // and ensure we don't overwrite if one is already found.
-            // A more advanced logic would parse delivery terms (e.g., "24h", "2-3 dias")
-            // and find the true minimum.
             if (quote.deliveryTerms && quote.deliveryTerms.includes('24h') && !fastestDelivery) {
                 fastestDelivery = { ...quote, calculatedTotalPrice: currentTotalPrice };
             }
@@ -74,34 +75,123 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
     const bestDeliverySupplier = fastestDelivery ? fastestDelivery.supplier?.companyName : 'N/A';
     const bestDeliveryTerm = fastestDelivery ? fastestDelivery.deliveryTerms : 'N/A';
 
-    useEffect(() => {
-        const fetchResponses = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                // Using localhost:3002 as per previous discussions for Marketplace API
-                const response = await fetch(`http://localhost:3002/api/v1/marketplace/quotes/requests/${currentRfqId}/responses`);
-                if (!response.ok) {
-                    const errorBody = await response.text(); // Get raw text for more info
-                    console.error('API Error Response:', response.status, errorBody);
-                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorBody}`);
-                }
-                const data = await response.json();
-                setResponses(data);
-            } catch (e) {
-                console.error('Fetch error:', e); // Log the full error object
-                setError(e.message);
-            } finally {
-                setLoading(false);
+    const fetchResponses = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(`http://localhost:3002/api/v1/marketplace/quotes/requests/${currentRfqId}/responses`);
+            if (!response.ok) {
+                const errorBody = await response.text();
+                console.error('API Error Response:', response.status, errorBody);
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorBody}`);
             }
-        };
+            const data = await response.json();
+            setResponses(data);
+        } catch (e) {
+            console.error('Fetch error:', e);
+            setError(e.message);
+        } finally {
+            setLoading(false);
+        }
+    }, [currentRfqId]);
 
+    useEffect(() => {
         if (currentRfqId) {
             fetchResponses();
         }
-    }, [currentRfqId]); // Dependency array includes currentRfqId
+    }, [currentRfqId, fetchResponses]);
 
-    // Conditional renders MUST come after all Hooks are called
+    const handleAcceptProposal = async (quoteId) => {
+        if (!bestProposal || !quoteId) {
+            toast.error('Nenhuma proposta para aceitar.');
+            return;
+        }
+
+        setIsAcceptingProposal(true);
+        toast.loading('A aceitar proposta...');
+
+        try {
+            const token = getAuthToken();
+            if (!token) {
+                toast.error('Autenticação necessária para aceitar propostas.');
+                setIsAcceptingProposal(false);
+                return;
+            }
+
+            const response = await fetch(`http://localhost:3002/api/v1/marketplace/quotes/${quoteId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ status: 'accepted' }),
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.json();
+                throw new Error(errorBody.message || `Erro HTTP! status: ${response.status}`);
+            }
+
+            const acceptedQuote = await response.json();
+            toast.dismiss();
+            toast.success('Proposta aceite com sucesso!');
+            console.log('Proposta aceite:', acceptedQuote);
+            fetchResponses(); // Re-fetch to show updated status
+        } catch (err) {
+            toast.dismiss();
+            toast.error(`Falha ao aceitar proposta: ${err.message}`);
+            console.error('Erro ao aceitar proposta:', err);
+        } finally {
+            setIsAcceptingProposal(false);
+        }
+    };
+
+    const handleAcceptIndividualQuote = async (quoteId) => {
+        if (!quoteId) {
+            toast.error('ID da proposta inválido.');
+            return;
+        }
+
+        setIsAcceptingProposal(true); // Reusing this state for any acceptance
+        toast.loading('A aceitar proposta individual...');
+
+        try {
+            const token = getAuthToken();
+            if (!token) {
+                toast.error('Autenticação necessária para aceitar propostas.');
+                setIsAcceptingProposal(false);
+                return;
+            }
+
+            const response = await fetch(`http://localhost:3002/api/v1/marketplace/quotes/${quoteId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ status: 'accepted' }),
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.json();
+                throw new Error(errorBody.message || `Erro HTTP! status: ${response.status}`);
+            }
+
+            const acceptedQuote = await response.json();
+            toast.dismiss();
+            toast.success('Proposta individual aceite com sucesso!');
+            console.log('Proposta individual aceite:', acceptedQuote);
+            fetchResponses(); // Re-fetch to show updated status
+        } catch (err) {
+            toast.dismiss();
+            toast.error(`Falha ao aceitar proposta individual: ${err.message}`);
+            console.error('Erro ao aceitar proposta individual:', err);
+        } finally {
+            setIsAcceptingProposal(false);
+        }
+    };
+
+
     if (loading) {
         return (
             <motion.div
@@ -207,8 +297,15 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
                         ))}
                     </ul>
                     <div className="flex justify-end mt-6 gap-3">
-                        <button className="px-4 py-2 rounded-md border border-border-dark text-text-muted hover:text-white font-bold hover:bg-white/5 transition-colors">Ver Detalhes</button>
-                        <button className="px-4 py-2 rounded-md bg-primary hover:bg-primary-hover text-white font-bold transition-colors shadow-lg shadow-primary/10">Aceitar Proposta</button>
+                        <button
+                            onClick={() => console.log('Ver Detalhes da Melhor Proposta:', bestProposal)}
+                            className="px-4 py-2 rounded-md border border-border-dark text-text-muted hover:text-white font-bold hover:bg-white/5 transition-colors"
+                        >Ver Detalhes</button>
+                        <button
+                            onClick={() => handleAcceptProposal(bestProposal.id)}
+                            disabled={isAcceptingProposal}
+                            className="px-4 py-2 rounded-md bg-primary hover:bg-primary-hover text-white font-bold transition-colors shadow-lg shadow-primary/10"
+                        >Aceitar Proposta</button>
                     </div>
                 </motion.div>
             )}
@@ -304,7 +401,10 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
                                                 <button className="px-3 py-1.5 rounded-md border border-border-dark text-text-muted hover:text-white text-xs font-bold hover:bg-white/5 transition-colors">
                                                     Negociar
                                                 </button>
-                                                <button className="px-3 py-1.5 rounded-md bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors shadow-lg shadow-primary/10">
+                                                <button
+                                                    onClick={() => handleAcceptIndividualQuote(quote.id)}
+                                                    disabled={isAcceptingProposal}
+                                                    className="px-3 py-1.5 rounded-md bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors shadow-lg shadow-primary/10">
                                                     Aceitar
                                                 </button>
                                             </div>

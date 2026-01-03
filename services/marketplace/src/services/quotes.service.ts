@@ -12,6 +12,15 @@ interface QuoteRequestData {
   preferredStartDate?: Date;
 }
 
+interface RespondToQuoteRequestData {
+  quoteRequestId: string;
+  supplierId: string;
+  items: any[];
+  totalPrice?: number;
+  deliveryDate?: Date;
+  notes?: string;
+}
+
 export const createQuoteRequest = async (data: QuoteRequestData) => {
   const { restaurantId, suppliers, items, ...rest } = data;
 
@@ -104,4 +113,45 @@ export const respondToQuoteRequest = async (data: RespondToQuoteRequestData) => 
   // Here you would typically notify the restaurant that a quote has been received.
 
   return quote;
+};
+
+export const getQuoteResponses = async (quoteRequestId: string) => {
+  return prisma.quoteRequest.findUnique({
+    where: { id: quoteRequestId },
+    include: {
+      quotes: {
+        include: {
+          supplier: true, // Include supplier details in each response
+        },
+      },
+    },
+  });
+};
+
+export const updateQuoteStatus = async (quoteId: string, newStatus: 'sent' | 'accepted' | 'rejected' | 'expired') => {
+  const updatedQuote = await prisma.quote.update({
+    where: { id: quoteId },
+    data: { status: newStatus },
+    include: { quoteRequest: true },
+  });
+
+  // If a quote is accepted, we might want to mark the parent quote request as accepted
+  // or handle other business logic, like rejecting other quotes for the same request.
+  if (newStatus === 'accepted') {
+    await prisma.quoteRequest.update({
+      where: { id: updatedQuote.quoteRequestId },
+      data: { status: 'accepted' },
+    });
+    // Optional: Reject other quotes for this request
+    await prisma.quote.updateMany({
+      where: {
+        quoteRequestId: updatedQuote.quoteRequestId,
+        id: { not: quoteId },
+        status: { not: 'accepted' }, // Don't reject if already accepted (shouldn't happen)
+      },
+      data: { status: 'rejected' },
+    });
+  }
+
+  return updatedQuote;
 };

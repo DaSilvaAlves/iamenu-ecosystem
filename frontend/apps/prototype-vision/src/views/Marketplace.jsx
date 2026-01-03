@@ -14,7 +14,9 @@ import {
 import ComparisonTab from './ComparisonTab';
 import RfqTab from './RfqTab';
 import RfqRequestsTab from './RfqRequestsTab';
-import IncomingRfqTab from './IncomingRfqTab'; // <--- NEW IMPORT
+import IncomingRfqTab from './IncomingRfqTab';
+import ResponsesTab from './ResponsesTab'; // Import ResponsesTab
+import ProfilesTab from './ProfilesTab';
 
 // Placeholder para os separadores em desenvolvimento
 const StandardPlaceholder = ({ title }) => (
@@ -316,7 +318,7 @@ function Marketplace() {
             case 'incoming-rfqs': // <--- NEW CASE
                 return <IncomingRfqTab />;
             case 'responses':
-                return <ResponsesTab />;
+                return <ResponsesTab rfqId="824287df-1484-40d0-a81a-45fcf485063f" />; // Temporary hardcoded RFQ ID
             case 'profiles':
                 return <ProfilesTab />;
             default:
