@@ -58,4 +58,20 @@ if (rating) {
   };
 };
 
-// TODO: Implement createSupplier, getSupplierById, updateSupplier, deleteSupplier
+export const getSupplierById = async (supplierId: string) => {
+  const supplier = await prisma.supplier.findUnique({
+    where: { id: supplierId },
+    include: {
+      reviews: {
+        orderBy: { createdAt: 'desc' },
+      },
+      supplierProducts: {
+        include: { product: true },
+        orderBy: { updatedAt: 'desc' },
+      },
+    },
+  });
+  return supplier;
+};
+
+// TODO: Implement createSupplier, updateSupplier, deleteSupplier

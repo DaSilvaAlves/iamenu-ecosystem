@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import * as supplierService from '../services/suppliers.service';
-import { asyncHandler } from '../middleware/errorHandler'; // <--- NEW IMPORT
+import { asyncHandler } from '../middleware/errorHandler';
 
-export const getAllSuppliers = asyncHandler(async (req: Request, res: Response) => { // <--- WRAPPED
+export const getAllSuppliers = asyncHandler(async (req: Request, res: Response) => {
   const { search, category, location, rating, limit, offset } = req.query;
 
   const parsedLimit = limit ? parseInt(limit as string, 10) : undefined;
@@ -19,6 +19,28 @@ export const getAllSuppliers = asyncHandler(async (req: Request, res: Response) 
   });
 
   res.status(200).json(result);
-}); // <--- CLOSED asyncHandler
+});
 
-// TODO: Implement getSupplierById, createSupplier, updateSupplier, deleteSupplier
+export const getSupplierById = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const supplier = await supplierService.getSupplierById(id);
+
+  if (!supplier) {
+    res.status(404).json({ message: 'Supplier not found' });
+    return;
+  }
+
+  res.status(200).json(supplier);
+});
+
+export const createSupplier = asyncHandler(async (req: Request, res: Response) => {
+  res.status(501).json({ message: 'Not Implemented: createSupplier' });
+});
+
+export const updateSupplier = asyncHandler(async (req: Request, res: Response) => {
+  res.status(501).json({ message: 'Not Implemented: updateSupplier' });
+});
+
+export const deleteSupplier = asyncHandler(async (req: Request, res: Response) => {
+  res.status(501).json({ message: 'Not Implemented: deleteSupplier' });
+});
