@@ -19,6 +19,7 @@ import TourRapidoView from './views/TourRapidoView';
 import OnboardingView from './views/OnboardingView';
 import Marketplace from './views/Marketplace';
 import ResponsesTab from './views/ResponsesTab'; // Adicionar import para ResponsesTab
+import TakewayLandingView from './views/TakewayLandingView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -107,6 +108,7 @@ const App = () => {
                                         <Route path="/marketplace" element={<Marketplace />} />
                                         <Route path="/marketplace/quotes/:rfqId/responses" element={<ResponsesTab />} />
                                         <Route path="/marketplace/suppliers/:id" element={<SupplierDetail />} />
+                                        <Route path="/takeway" element={<TakewayLandingView />} />
                                         <Route path="/hubs" element={<StandardPlaceholder title="Hubs Regionais" />} />
                                         <Route path="/lab" element={<ChatView />} />
                                     </Routes>

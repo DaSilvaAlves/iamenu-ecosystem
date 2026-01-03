@@ -19,7 +19,8 @@ import {
     Star,
     CreditCard,
     Camera,
-    ChefHat
+    ChefHat,
+    Package
 } from 'lucide-react';
 import { CommunityAPI } from '../services/api';
 import NotificationBadge from './NotificationBadge';
@@ -157,6 +158,7 @@ const Sidebar = ({ selectedGroup, setSelectedGroup }) => {
             <SidebarSection title="Academia e Gestão">
                 <NavItem label="Audit de Reputação Online" icon={Star} to="/reputacao" />
                 <NavItem label="iaMenu PRO - Upgrade" icon={Zap} to="/upgrade" badge="PRO" />
+                <NavItem label="iaMenu Takeway" icon={Package} to="/takeway" badge="NOVO" />
                 <NavItem label="Food Cost & Fichas Técnicas" icon={Calculator} to="/foodcost" />
                 <NavItem label="Marketing Planner AI" icon={Target} to="/marketing" />
                 <NavItem label="GastroLens AI" icon={Camera} to="/gastrolens" badge="NOVO" />
