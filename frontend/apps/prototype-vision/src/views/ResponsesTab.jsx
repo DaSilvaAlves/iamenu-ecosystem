@@ -79,7 +79,7 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`http://localhost:3002/api/v1/marketplace/quotes/requests/${currentRfqId}/responses`);
+            const response = await fetch(`http://localhost:3005/api/v1/marketplace/quotes/requests/${currentRfqId}/responses`);
             if (!response.ok) {
                 const errorBody = await response.text();
                 console.error('API Error Response:', response.status, errorBody);
@@ -118,7 +118,7 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
                 return;
             }
 
-            const response = await fetch(`http://localhost:3002/api/v1/marketplace/quotes/${quoteId}/status`, {
+            const response = await fetch(`http://localhost:3005/api/v1/marketplace/quotes/${quoteId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -163,7 +163,7 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
                 return;
             }
 
-            const response = await fetch(`http://localhost:3002/api/v1/marketplace/quotes/${quoteId}/status`, {
+            const response = await fetch(`http://localhost:3005/api/v1/marketplace/quotes/${quoteId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

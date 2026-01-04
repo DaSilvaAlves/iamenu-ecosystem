@@ -10,7 +10,7 @@ function SupplierDetail() {
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
-        const response = await fetch(`http://localhost:3002/api/v1/marketplace/suppliers/${id}`);
+        const response = await fetch(`http://localhost:3005/api/v1/marketplace/suppliers/${id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

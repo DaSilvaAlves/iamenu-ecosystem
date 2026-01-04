@@ -44,7 +44,7 @@ const DirectoryTab = () => {
     useEffect(() => {
         const fetchSuppliers = async () => {
             try {
-                const response = await fetch('http://localhost:3002/api/v1/marketplace/suppliers');
+                const response = await fetch('http://localhost:3005/api/v1/marketplace/suppliers');
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 setSuppliers(data.suppliers);
@@ -116,7 +116,7 @@ const CampaignsTab = () => {
     useEffect(() => {
         const fetchCampaigns = async () => {
             try {
-                const response = await fetch('http://localhost:3002/api/v1/marketplace/collective-bargains');
+                const response = await fetch('http://localhost:3005/api/v1/marketplace/collective-bargains');
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 setCampaigns(data);

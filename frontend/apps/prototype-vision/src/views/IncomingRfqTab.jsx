@@ -27,7 +27,7 @@ const IncomingRfqTab = () => {
                 return;
             }
 
-            const response = await fetch(`http://localhost:3002/api/v1/marketplace/quotes/incoming?supplierId=${supplierId}`);
+            const response = await fetch(`http://localhost:3005/api/v1/marketplace/quotes/incoming?supplierId=${supplierId}`);
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
@@ -84,7 +84,7 @@ const IncomingRfqTab = () => {
                 notes: responseNotes,
             };
 
-            const response = await fetch(`http://localhost:3002/api/v1/marketplace/quotes/${quoteRequestId}/respond`, {
+            const response = await fetch(`http://localhost:3005/api/v1/marketplace/quotes/${quoteRequestId}/respond`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
