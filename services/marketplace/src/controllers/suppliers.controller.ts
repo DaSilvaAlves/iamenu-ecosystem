@@ -38,7 +38,29 @@ export const createSupplier = asyncHandler(async (req: Request, res: Response) =
 });
 
 export const updateSupplier = asyncHandler(async (req: Request, res: Response) => {
-  res.status(501).json({ message: 'Not Implemented: updateSupplier' });
+  const { id } = req.params;
+  const data = req.body;
+
+  // Process uploaded files
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+  const logoUrl = files?.logoFile?.[0] ? `/uploads/${files.logoFile[0].filename}` : undefined;
+  const headerImageUrl = files?.headerFile?.[0] ? `/uploads/${files.headerFile[0].filename}` : undefined;
+
+  // Merge file URLs with data
+  const updateData = {
+    ...data,
+    ...(logoUrl && { logoUrl }),
+    ...(headerImageUrl && { headerImageUrl })
+  };
+
+  const updatedSupplier = await supplierService.updateSupplier(id, updateData);
+
+  if (!updatedSupplier) {
+    res.status(404).json({ message: 'Supplier not found' });
+    return;
+  }
+
+  res.status(200).json(updatedSupplier);
 });
 
 export const deleteSupplier = asyncHandler(async (req: Request, res: Response) => {

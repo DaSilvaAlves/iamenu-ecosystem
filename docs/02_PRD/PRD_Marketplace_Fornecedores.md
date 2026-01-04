@@ -1246,7 +1246,7 @@ SIM
 
 **Status:** 📝 Draft
 **Próximo:** Review Eurico → Desenvolvimento Semana 3-4
-**Owner:** Claude Code + Eurico
+**Owner:** Claude Code + Eurico Alves
 
 ---
 

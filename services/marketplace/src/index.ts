@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import path from 'path';
 import { PrismaClient } from '@prisma/client-marketplace';
 import { authenticateJWT } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
@@ -22,6 +23,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(compression());
 app.use(process.env.NODE_ENV !== 'production' ? morgan('dev') : morgan('combined'));
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Health Check
 app.get('/health', (req: Request, res: Response) => {

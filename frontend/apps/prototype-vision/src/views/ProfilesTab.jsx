@@ -1,309 +1,1022 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { Copy, QrCode, Edit, ExternalLink, TrendingUp, Mail, Star, Eye, CheckCircle, X, Save, Upload } from 'lucide-react';
 
 const ProfilesTab = () => {
+    // Placeholder: ID do fornecedor logado (futuramente virá do auth context)
+    const [supplierId] = useState('b2c3d4e5-f6a7-8901-2345-67890abcdef1'); // Horta Bio Nacional
+    const [supplier, setSupplier] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [copySuccess, setCopySuccess] = useState(false);
+
+    // Edit Modal States
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
+    const [saveError, setSaveError] = useState(null);
+
+    // Form Data
+    const [formData, setFormData] = useState({
+        companyName: '',
+        description: '',
+        categories: [],
+        locationCity: '',
+        locationRegion: '',
+        nationalDelivery: false,
+        contactPhone: '',
+        contactEmail: '',
+        contactWebsite: '',
+        deliveryZones: [],
+        deliveryCost: '',
+        deliveryFrequency: '',
+        minOrder: '',
+        paymentTerms: '',
+        certifications: []
+    });
+
+    // Image files (separate state for file uploads)
+    const [logoFile, setLogoFile] = useState(null);
+    const [headerFile, setHeaderFile] = useState(null);
+    const [logoPreview, setLogoPreview] = useState('');
+    const [headerPreview, setHeaderPreview] = useState('');
+
+    // Fetch supplier data
+    useEffect(() => {
+        const fetchSupplier = async () => {
+            try {
+                const response = await fetch(`http://localhost:3005/api/v1/marketplace/suppliers/${supplierId}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                setSupplier(data);
+
+                // Initialize form data with supplier data
+                setFormData({
+                    companyName: data.companyName || '',
+                    description: data.description || '',
+                    categories: data.categories || [],
+                    locationCity: data.locationCity || '',
+                    locationRegion: data.locationRegion || '',
+                    nationalDelivery: data.nationalDelivery || false,
+                    contactPhone: data.contactPhone || '',
+                    contactEmail: data.contactEmail || '',
+                    contactWebsite: data.contactWebsite || '',
+                    deliveryZones: data.deliveryZones || [],
+                    deliveryCost: data.deliveryCost || '',
+                    deliveryFrequency: data.deliveryFrequency || '',
+                    minOrder: data.minOrder || '',
+                    paymentTerms: data.paymentTerms || '',
+                    certifications: data.certifications || []
+                });
+
+                // Set image previews if they exist
+                if (data.logoUrl) setLogoPreview(data.logoUrl);
+                if (data.headerImageUrl) setHeaderPreview(data.headerImageUrl);
+            } catch (e) {
+                setError(e.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSupplier();
+    }, [supplierId]);
+
+    // Copy invite link
+    const handleCopyInviteLink = () => {
+        const inviteLink = `https://iamenu.pt/marketplace/join?ref=${supplier?.companyName.toUpperCase().replace(/\s+/g, '')}`;
+        navigator.clipboard.writeText(inviteLink);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+    };
+
+    // Handle form input changes
+    const handleInputChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
+
+    // Handle categories change
+    const handleCategoriesChange = (category) => {
+        setFormData(prev => ({
+            ...prev,
+            categories: prev.categories.includes(category)
+                ? prev.categories.filter(c => c !== category)
+                : [...prev.categories, category]
+        }));
+    };
+
+    // Handle certifications change
+    const handleCertificationsChange = (cert) => {
+        setFormData(prev => ({
+            ...prev,
+            certifications: prev.certifications.includes(cert)
+                ? prev.certifications.filter(c => c !== cert)
+                : [...prev.certifications, cert]
+        }));
+    };
+
+    // Submit form
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSaving(true);
+        setSaveError(null);
+        setSaveSuccess(false);
+
+        try {
+            // Get auth token from localStorage
+            const token = localStorage.getItem('auth_token');
+
+            // Create FormData for file upload
+            const formDataToSend = new FormData();
+
+            // Append all form fields
+            Object.keys(formData).forEach(key => {
+                if (formData[key] !== undefined && formData[key] !== null) {
+                    if (Array.isArray(formData[key])) {
+                        formDataToSend.append(key, JSON.stringify(formData[key]));
+                    } else {
+                        formDataToSend.append(key, formData[key]);
+                    }
+                }
+            });
+
+            // Append image files if selected
+            if (logoFile) {
+                formDataToSend.append('logoFile', logoFile);
+            }
+            if (headerFile) {
+                formDataToSend.append('headerFile', headerFile);
+            }
+
+            const response = await fetch(`http://localhost:3005/api/v1/marketplace/suppliers/${supplierId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                    // Don't set Content-Type - browser will set it with boundary for FormData
+                },
+                body: formDataToSend
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const updatedSupplier = await response.json();
+            setSupplier(updatedSupplier);
+
+            // Update previews with new URLs
+            if (updatedSupplier.logoUrl) setLogoPreview(updatedSupplier.logoUrl);
+            if (updatedSupplier.headerImageUrl) setHeaderPreview(updatedSupplier.headerImageUrl);
+
+            setSaveSuccess(true);
+
+            // Close modal after 1.5 seconds
+            setTimeout(() => {
+                setIsEditModalOpen(false);
+                setSaveSuccess(false);
+                setLogoFile(null);
+                setHeaderFile(null);
+            }, 1500);
+        } catch (e) {
+            setSaveError(e.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    if (loading) return <div className="text-center py-12 text-white/60">A carregar perfil...</div>;
+    if (error) return <div className="text-center py-12 text-red-500">Erro ao carregar perfil: {error}</div>;
+    if (!supplier) return <div className="text-center py-12 text-white/60">Fornecedor não encontrado.</div>;
+
+    // Mock stats (futuramente vêm do backend)
+    const stats = {
+        views: 247,
+        rfqsReceived: 12,
+        responseRate: 98,
+        referrals: 8
+    };
+
+    // Generate invite link
+    const inviteLink = `https://iamenu.pt/marketplace/join?ref=${supplier.companyName.toUpperCase().replace(/\s+/g, '')}`;
+
+    // Available options
+    const availableCategories = [
+        'Frescos & Vegetais',
+        'Peixe e Marisco',
+        'Carnes e Charcutaria',
+        'Bebidas',
+        'Laticínios',
+        'Padaria e Pastelaria',
+        'Embalagens',
+        'Limpeza',
+        'Equipamento'
+    ];
+
+    const availableCertifications = [
+        'HACCP',
+        'ISO 9001',
+        'Certificação Bio PT-BIO-03',
+        'Origem DOP',
+        'Comércio Justo',
+        'FSC'
+    ];
+
     return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-7xl mx-auto w-full">
-            <nav aria-label="Breadcrumb" className="flex mb-6">
-                <ol className="flex items-center space-x-2">
-                    <li><a className="text-text-muted hover:text-primary text-sm" href="#">Mercado</a></li>
-                    <li><span className="text-text-muted">/</span></li>
-                    <li><a className="text-text-muted hover:text-primary text-sm" href="#">Frescos</a></li>
-                    <li><span className="text-text-muted">/</span></li>
-                    <li aria-current="page" className="text-primary text-sm font-medium">Distribuidora Lisboa Central</li>
-                </ol>
-            </nav>
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-                <div className="xl:col-span-8 flex flex-col gap-6">
-                    <section className="bg-background-card rounded-xl border border-border-color overflow-hidden relative group">
-                        <div className="h-56 bg-cover bg-center relative" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAaitveJWLd3H9MNPShAzL7KaQPSz35bx5KiIbKS6HeTYdSfqlMOzfjEe_JecFOAz7hVOfjQGnSaHoOo8t6kF47M5FBOjwnemhd12PQQk2G42TaFkcbvvgay0LJxok4A7KeO9IwJtpQnTtN5Tkg-7j507PW57_2urgo_AF_DeAf7sAf5XvHQQcErLgjIgemtSMCU_ipw1F3SmksQI21Z8izgZoPPimS38SsPf5nCB8hTtQxHuOjsMM32Rx0VIKVeixgrUzu_zjaSA')"}}>
-                            <div className="absolute inset-0 bg-gradient-to-t from-background-card via-background-card/80 to-transparent"></div>
-                            <div className="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row items-end sm:items-end gap-6">
-                                <div className="size-28 rounded-xl bg-background-card p-3 shadow-2xl border border-border-color flex items-center justify-center shrink-0">
-                                    <div className="w-full h-full bg-contain bg-center bg-no-repeat rounded-lg" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAfu-pieyIOnDBMuEUbC1TfCLyriUgnq7ghePyClmVMnsK9e6EywDvSAfU4UChQHpSQzIfp-lNMPb-hGzGWESbXg341RifKsAs1lS-NeWMSsgGJTGSi5O5QWRWq8YHRm_u6Cj2UULwut2Z5zPBiUk_87hBrEcbZbF8gK8rEbCSMgNebxwBzrzdJqAG2t9Ln2ppI-OAJKv43fsabdvuW2hbXs3SPCKBIeOc0kh2uYiophV5kfMicsYXi_8wETaYOm1l_T58fm-xTEA')"}}></div>
-                                </div>
-                                <div className="mb-1 flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide bg-primary/20 text-primary border border-primary/30">Fornecedor Premium</span>
-                                        <span className="flex items-center gap-1 text-yellow-500 text-sm">
-                                            <span className="material-symbols-outlined icon-filled text-[16px]">star</span>
-                                            <span className="font-bold">4.8</span>
-                                            <span className="text-text-muted font-normal">(124 avaliações)</span>
-                                        </span>
-                                    </div>
-                                    <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">Distribuidora Lisboa Central</h1>
-                                    <div className="flex flex-wrap items-center gap-4 text-sm text-text-muted">
-                                        <span className="flex items-center gap-1.5">
-                                            <span className="material-symbols-outlined text-[18px]">location_on</span>
-                                            Lisboa, Portugal
-                                        </span>
-                                        <span className="w-1 h-1 rounded-full bg-text-muted/30"></span>
-                                        <span className="flex items-center gap-1.5">
-                                            <span className="material-symbols-outlined text-[18px]">inventory_2</span>
-                                            Frescos &amp; Laticínios
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border-color border-t border-border-color bg-white/5 backdrop-blur-sm">
-                            <div className="p-4 flex flex-col items-center justify-center text-center">
-                                <span className="text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1">Mínimo Enc.</span>
-                                <span className="text-xl font-bold text-white">150,00 €</span>
-                            </div>
-                            <div className="p-4 flex flex-col items-center justify-center text-center">
-                                <span className="text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1">Lead Time</span>
-                                <span className="text-xl font-bold text-white">24h</span>
-                            </div>
-                            <div className="p-4 flex flex-col items-center justify-center text-center">
-                                <span className="text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1">Entrega</span>
-                                <span className="text-xl font-bold text-primary">Grátis &gt; 300€</span>
-                            </div>
-                            <div className="p-4 flex flex-col items-center justify-center text-center">
-                                <span className="text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1">Taxa de Resposta</span>
-                                <span className="text-xl font-bold text-primary">98%</span>
-                            </div>
-                        </div>
-                    </section>
-                    <div className="border-b border-border-color">
-                        <div className="flex gap-8">
-                            <button className="pb-3 text-sm font-bold text-primary border-b-2 border-primary">Visão Geral</button>
-                            <button className="pb-3 text-sm font-medium text-text-muted hover:text-white border-b-2 border-transparent transition-colors">Catálogo <span className="text-xs bg-white/10 px-1.5 py-0.5 rounded ml-1">840</span></button>
-                            <button className="pb-3 text-sm font-medium text-text-muted hover:text-white border-b-2 border-transparent transition-colors">Avaliações</button>
-                            <button className="pb-3 text-sm font-medium text-text-muted hover:text-white border-b-2 border-transparent transition-colors">Políticas</button>
-                        </div>
+        <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-7xl mx-auto w-full space-y-8">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                    <div>
+                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                            <span className="material-symbols-outlined text-primary">store</span>
+                            Meu Perfil de Fornecedor
+                        </h2>
+                        <p className="text-sm text-text-muted mt-1">Gere o teu perfil, convida restaurantes e acompanha performance</p>
                     </div>
-                    <div className="space-y-6">
-                        <div className="grid md:grid-cols-1 gap-6">
-                            <div className="bg-background-card p-6 rounded-xl border border-border-color">
-                                <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-primary">info</span>
-                                    Sobre o Fornecedor
-                                </h3>
-                                <p className="text-text-muted leading-relaxed text-sm">
-                                    Líder na distribuição de produtos frescos e laticínios na região da Grande Lisboa há mais de 15 anos. Somos o parceiro de confiança para mais de 500 restaurantes, hotéis e cafés. Trabalhamos diretamente com produtores locais para garantir a máxima frescura, com entregas diárias antes das 10h da manhã. A nossa frota refrigerada garante a cadeia de frio desde o armazém até à sua porta.
-                                </p>
-                            </div>
-                            <div className="bg-background-card p-6 rounded-xl border border-border-color">
-                                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-primary">loyalty</span>
-                                    Marcas em Distribuição
-                                </h3>
-                                <div className="flex flex-wrap gap-4">
-                                    <div className="h-14 w-20 bg-white/5 border border-border-color rounded-lg flex items-center justify-center p-2 hover:bg-white/10 transition-colors">
-                                        <img alt="Compal" className="max-h-full max-w-full object-contain filter grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMIjwweTc10eBGpsqv3bVOpPeDL8Ip374Ij8aQpKrMRm0dnpAydc_8aYPqJjrl23gI1nQP1hE9Kplv9SM-aNrGE2vKbVr-YDbdn_Wh8II1o4MEyj1DhJ-w8k8PSt0-S1Cg-UnuQq63ZvkGFyI8l3X9UWPuGaRAJe75FJ5ba8nAu2bH6InT_XiIcjNZioXSpFpmCfOd3yEeydF-kZspGsPo4gY1JgHeT9TMcFArxBX3d48_JrEgDx1RFyvw8APHu4ofkM6ZUFSjZta6p1HFuOm3A"/>
-                                    </div>
-                                    <div className="h-14 w-20 bg-white/5 border border-border-color rounded-lg flex items-center justify-center p-2 hover:bg-white/10 transition-colors">
-                                        <img alt="Delta" className="max-h-full max-w-full object-contain filter grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAd1_0DuFAiaF_us8QIzmkP4XN40c2tV17aAgiu5nA1DjYIa4t_ZPniwkC92hxUqagXwR3CTc-b6uQJqpkPVv-TsYYOdrINKBgLne_gUSxKZL4J9DGAWTaKDuUuRKdooJ9X8OOVJymalgI0XG83Cch0V4gP8MjE8__eILMoNcgVJSVZtaZSZYZ9sN05VO_f9hP2D1HW2zebpAr9AlhBhUVkbbLSBi03BfCpw6WSQzYtDaWxwPC7pL-LCxjLXcNUjlJkL-GcGgZsMw"/>
-                                    </div>
-                                    <div className="h-14 w-20 bg-white/5 border border-border-color rounded-lg flex items-center justify-center p-2 hover:bg-white/10 transition-colors">
-                                        <img alt="Mimosa" className="max-h-full max-w-full object-contain filter grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRtr4nI0oJNLaPJze091Jix15qc_Ylnu6xHV4QqDyihAoix5B9zA5Um7Gb0Kgc7QHXdJujHTQNOX_Zw4rriAat5QCtL6GPD2SE0goP_mWyGG1a4UPvHwr7j8UTmJEU36ww0g9xFKMTOHhHpwqO9bEb6gH1I5c48hh6cF7eCS6ZIuB8L1SrvuuhINN6DZBxSmV-W_sqWS7di4FcfgeF93i9DaeTTEG33pMDUYzcfY5FzBPrz42kq37RrXisX8N7rB-SjS68rJcW5Yv7v6-XkR92Q0"/>
-                                    </div>
-                                    <div className="h-14 w-20 bg-white/5 border border-border-color rounded-lg flex items-center justify-center p-2 hover:bg-white/10 transition-colors">
-                                        <img alt="Danone" className="max-h-full max-w-full object-contain filter grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5PDuiAgiJm__k1QK3BOfuAE3F8NJ56KN1IUg0Ir1RYTMIwQr-PLDWr6D9BXu_cjOdqnfg_LwPRgWChViWGbcfd2n01qIqBXVLd2z2QAvIVVAPYhag_uv1vVSlJZzWblb1IXbvqkUZj2UuJ0aKbQldtgITcB95IIEDz2cBugfGulGk4YtMrvV_J1NSdKqBBWT01Jf4IVnEOK95RifjWwwMDTSly-KlergYZkSWAcJPeQsdWTREonXFE1SweVyk5KhMBHVCq2dTbw"/>
-                                    </div>
-                                    <div className="h-14 w-20 bg-white/5 border border-border-color rounded-lg flex items-center justify-center p-2 hover:bg-white/10 transition-colors cursor-pointer group">
-                                        <span className="text-[10px] text-center font-bold text-text-muted group-hover:text-white transition-colors">+ 25 Marcas</span>
-                                    </div>
-                                </div>
+                    <Link
+                        to={`/marketplace/suppliers/${supplierId}`}
+                        className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-border rounded-lg text-white text-sm font-medium transition-colors"
+                    >
+                        <ExternalLink size={16} />
+                        Ver como Restaurante
+                    </Link>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-surface border border-border p-5 rounded-xl hover:border-white/20 transition-colors group">
+                        <div className="flex items-start justify-between mb-3">
+                            <div className="bg-blue-500/10 p-2 rounded-lg text-blue-400 group-hover:bg-blue-500/20 transition-colors">
+                                <Eye size={20} />
                             </div>
                         </div>
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="bg-background-card p-6 rounded-xl border border-border-color">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="bg-blue-500/10 text-blue-500 p-2 rounded-lg border border-blue-500/20">
-                                        <span className="material-symbols-outlined">local_shipping</span>
-                                    </div>
-                                    <h3 className="text-lg font-bold text-white">Entrega e Logística</h3>
-                                </div>
-                                <ul className="space-y-3 text-sm">
-                                    <li className="flex items-start gap-3 text-text-muted">
-                                        <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-                                        <span>Entregas de Seg a Sáb (06:00 - 14:00)</span>
-                                    </li>
-                                    <li className="flex items-start gap-3 text-text-muted">
-                                        <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-                                        <span>Cut-off para dia seguinte: 16:00</span>
-                                    </li>
-                                    <li className="flex items-start gap-3 text-text-muted">
-                                        <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-                                        <span>Área: Grande Lisboa, Sintra, Cascais</span>
-                                    </li>
-                                    <li className="flex items-start gap-3 text-text-muted">
-                                        <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-                                        <span>Custo fixo de 15€ para encomendas &lt; 300€</span>
-                                    </li>
-                                </ul>
+                        <h3 className="text-3xl font-bold text-white">{stats.views}</h3>
+                        <p className="text-xs text-text-muted uppercase tracking-wider font-bold mt-1">Views (30 dias)</p>
+                    </div>
+
+                    <div className="bg-surface border border-border p-5 rounded-xl hover:border-white/20 transition-colors group">
+                        <div className="flex items-start justify-between mb-3">
+                            <div className="bg-orange-500/10 p-2 rounded-lg text-orange-400 group-hover:bg-orange-500/20 transition-colors">
+                                <Mail size={20} />
                             </div>
-                            <div className="bg-background-card p-6 rounded-xl border border-border-color">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="bg-orange-500/10 text-orange-500 p-2 rounded-lg border border-orange-500/20">
-                                        <span className="material-symbols-outlined">assignment_return</span>
-                                    </div>
-                                    <h3 className="text-lg font-bold text-white">Devoluções e Qualidade</h3>
-                                </div>
-                                <ul className="space-y-3 text-sm">
-                                    <li className="flex items-start gap-3 text-text-muted">
-                                        <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-                                        <span>Devolução no ato da entrega aceite</span>
-                                    </li>
-                                    <li className="flex items-start gap-3 text-text-muted">
-                                        <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-                                        <span>Reclamações até 24h para perecíveis</span>
-                                    </li>
-                                    <li className="flex items-start gap-3 text-text-muted">
-                                        <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-                                        <span>Certificação HACCP em toda a frota</span>
-                                    </li>
-                                </ul>
+                            <span className="text-xs font-bold text-orange-400 bg-orange-500/10 px-2 py-1 rounded">
+                                {stats.rfqsReceived} novos
+                            </span>
+                        </div>
+                        <h3 className="text-3xl font-bold text-white">{stats.rfqsReceived}</h3>
+                        <p className="text-xs text-text-muted uppercase tracking-wider font-bold mt-1">RFQs Recebidos</p>
+                    </div>
+
+                    <div className="bg-surface border border-border p-5 rounded-xl hover:border-white/20 transition-colors group">
+                        <div className="flex items-start justify-between mb-3">
+                            <div className="bg-green-500/10 p-2 rounded-lg text-green-400 group-hover:bg-green-500/20 transition-colors">
+                                <TrendingUp size={20} />
                             </div>
                         </div>
-                        <section className="bg-background-card rounded-xl border border-border-color p-6">
-                            <div className="flex justify-between items-end mb-6">
-                                <div>
-                                    <h3 className="text-lg font-bold text-white">Destaques da Semana</h3>
-                                    <p className="text-sm text-text-muted">Produtos com maior procura nesta época</p>
-                                </div>
-                                <button className="px-4 py-1.5 rounded bg-white/5 hover:bg-white/10 text-white text-xs font-bold border border-border-color transition-colors">
-                                    Ver Todos
+                        <h3 className="text-3xl font-bold text-white">{stats.responseRate}%</h3>
+                        <p className="text-xs text-text-muted uppercase tracking-wider font-bold mt-1">Taxa de Resposta</p>
+                    </div>
+
+                    <div className="bg-surface border border-border p-5 rounded-xl hover:border-white/20 transition-colors group">
+                        <div className="flex items-start justify-between mb-3">
+                            <div className="bg-yellow-500/10 p-2 rounded-lg text-yellow-400 group-hover:bg-yellow-500/20 transition-colors">
+                                <Star size={20} />
+                            </div>
+                        </div>
+                        <h3 className="text-3xl font-bold text-white">{supplier.ratingAvg}</h3>
+                        <p className="text-xs text-text-muted uppercase tracking-wider font-bold mt-1">Rating Médio ({supplier.reviewCount} reviews)</p>
+                    </div>
+                </div>
+
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    {/* Left Column - Preview & Invite */}
+                    <div className="xl:col-span-2 space-y-6">
+                        {/* Profile Preview */}
+                        <div className="bg-surface border border-border rounded-xl p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-primary">preview</span>
+                                    Preview do Perfil Público
+                                </h3>
+                                <button
+                                    onClick={() => setIsEditModalOpen(true)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg transition-colors text-sm"
+                                >
+                                    <Edit size={16} />
+                                    Editar Perfil
                                 </button>
                             </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="group cursor-pointer bg-background-page rounded-lg p-3 border border-border-color hover:border-primary/50 transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.1)]">
-                                    <div className="aspect-square bg-background-input rounded-md mb-3 relative overflow-hidden">
-                                        <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCX9oWx8LoU8D-PgE06XrZdvEaxFbaEo3MCieGAniY21Jj0QJgLaU8v3GBfdlV0Xdn90Dde11f96GUqugD9t10EdAv8SLbywT_Rg8D1uM0p6pqCaNboZw72lOtThdDX2xFRKwFDyzTZT5xkYCSATEUvBzqrgoz2_c9NiW_bgUR9buulSyK5d53XLY1cWqw90pLsCANVvtSNw1U7C40ZXChKFR524Vnbxwc4ulnGu_pb-jeoKQJmDTTCVUt7r5bZ-lDcuv1hMj0pUg')"}}></div>
+                            <div className="bg-background-page border border-border rounded-lg p-6 space-y-4">
+                                <div className="flex items-start gap-4">
+                                    <div className="size-20 bg-white rounded-lg p-2 flex items-center justify-center shrink-0">
+                                        <span className="text-2xl font-black text-gray-800">{supplier.companyName.substring(0, 2)}</span>
                                     </div>
-                                    <h4 className="font-bold text-sm text-white line-clamp-2 group-hover:text-primary transition-colors">Batata Doce Nacional - Saco 5kg</h4>
-                                    <p className="text-[10px] text-text-muted mt-1 uppercase tracking-wide">Ref: 20491 • Kg</p>
-                                    <div className="mt-2 flex items-baseline justify-between">
-                                        <p className="font-bold text-white">1,25 € <span className="text-xs font-normal text-text-muted">/ kg</span></p>
-                                        <button className="size-6 rounded bg-primary text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span className="material-symbols-outlined text-[16px]">add</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="group cursor-pointer bg-background-page rounded-lg p-3 border border-border-color hover:border-primary/50 transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.1)]">
-                                    <div className="aspect-square bg-background-input rounded-md mb-3 relative overflow-hidden">
-                                        <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBckBpOfjV91LxpHix_XiR1J78By2aeQmYPBQqtCQ5xB5YVaueSKfqx-5fa9_CIlgDZzW0XeXXDPB2K0z_qCJq7p1Kyq2YgN7hwIeKR9w-1HA03k4M1kG6ldDrhoxG85Pg-y7w4XWW-ZEhyViIeIWsqPz2ZhlAKE38KU-zQnxWji8CjIz-v5GUnovUiOAy5wNMbQGUk_AAxji7eZFYruteqA')"}}></div>
-                                    </div>
-                                    <h4 className="font-bold text-sm text-white line-clamp-2 group-hover:text-primary transition-colors">Tomate Cherry Rama Premium</h4>
-                                    <p className="text-[10px] text-text-muted mt-1 uppercase tracking-wide">Ref: 10234 • Cx 3kg</p>
-                                    <div className="mt-2 flex items-baseline justify-between">
-                                        <p className="font-bold text-white">3,45 € <span className="text-xs font-normal text-text-muted">/ kg</span></p>
-                                        <button className="size-6 rounded bg-primary text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span className="material-symbols-outlined text-[16px]">add</span>
-                                        </button>
+                                    <div className="flex-1">
+                                        <h4 className="text-xl font-bold text-white mb-1">{supplier.companyName}</h4>
+                                        <p className="text-sm text-text-muted line-clamp-2">{supplier.description}</p>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <span className="flex items-center gap-1 text-yellow-500 text-sm">
+                                                <Star size={14} fill="currentColor" />
+                                                <span className="font-bold">{supplier.ratingAvg}</span>
+                                            </span>
+                                            <span className="text-xs text-text-muted">({supplier.reviewCount} avaliações)</span>
+                                            {supplier.verified && (
+                                                <span className="ml-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-green-500/20 text-green-300 border border-green-500/30">
+                                                    Verificado
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="group cursor-pointer bg-background-page rounded-lg p-3 border border-border-color hover:border-primary/50 transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.1)]">
-                                    <div className="aspect-square bg-background-input rounded-md mb-3 relative overflow-hidden">
-                                        <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDLqQ3Qs2slWkwFK7mR-DQ7xYyMMRx3ZWy0hWyXdLHmkNhBr-j0MLjMy9nReROLo9x4cwkbAsNa0aLFY8NunWoC-GdjJ3D2T-lV6d8exIq3MNFBpn0uArQU9G5tncZ6Ab_1yZi_qNgFZpcDbnfi6wlbuCg55o_ptDyqq4-UH1rHzlm7a_kNmNjh_aajJjQRBt0FAmCaqBO4NhwqRP0D7_uk-2OoNqeWKSLrEyMXy_JM3uz3m0rabrmSiBzk2GPWb9GjKxTC8boQcg')"}}></div>
+                                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
+                                    <div>
+                                        <p className="text-xs text-text-muted uppercase tracking-wide font-bold mb-1">Localização</p>
+                                        <p className="text-sm text-white">{supplier.locationCity}, {supplier.locationRegion}</p>
                                     </div>
-                                    <h4 className="font-bold text-sm text-white line-clamp-2 group-hover:text-primary transition-colors">Alface Iceberg Fresca</h4>
-                                    <p className="text-[10px] text-text-muted mt-1 uppercase tracking-wide">Ref: 30112 • Unid</p>
-                                    <div className="mt-2 flex items-baseline justify-between">
-                                        <p className="font-bold text-white">0,89 € <span className="text-xs font-normal text-text-muted">/ un</span></p>
-                                        <button className="size-6 rounded bg-primary text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span className="material-symbols-outlined text-[16px]">add</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="group cursor-pointer bg-background-page rounded-lg p-3 border border-border-color hover:border-primary/50 transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.1)]">
-                                    <div className="aspect-square bg-background-input rounded-md mb-3 relative overflow-hidden">
-                                        <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDiqthhrioq_zdNOzHQsypklNsWEIi7OmW-WY6cFGvXVmFf94WmVdkBaj3kFO8VI8XCzBXA00PiWv4C17dkuSaDAeKmZHFYxJtvrJXjU-lEeLRTTNMQUKebEza5U1Rcrbx5bQZgjX0rgsNd7-owBszyALhhIKW9ck11Kkz_xkUXzlByJ95cbSn1I6VZbvoXFoaykfpqJdK5hSd4qtyhz1h1Q20hc3AoklOHCD7TXOImC_TEO7ZNQiL9lLvvhTkoVYi2a9fsdjT96Q')"}}></div>
-                                    </div>
-                                    <h4 className="font-bold text-sm text-white line-clamp-2 group-hover:text-primary transition-colors">Queijo Flamengo Bola Inteira</h4>
-                                    <p className="text-[10px] text-text-muted mt-1 uppercase tracking-wide">Ref: 55019 • Un ~2kg</p>
-                                    <div className="mt-2 flex items-baseline justify-between">
-                                        <p className="font-bold text-white">7,90 € <span className="text-xs font-normal text-text-muted">/ kg</span></p>
-                                        <button className="size-6 rounded bg-primary text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span className="material-symbols-outlined text-[16px]">add</span>
-                                        </button>
+                                    <div>
+                                        <p className="text-xs text-text-muted uppercase tracking-wide font-bold mb-1">Categorias</p>
+                                        <div className="flex flex-wrap gap-1">
+                                            {supplier.categories.map(cat => (
+                                                <span key={cat} className="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-900/30 text-blue-300 border border-blue-900/50">
+                                                    {cat}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </section>
+                        </div>
+
+                        {/* Invite Section */}
+                        <div className="bg-surface border border-border rounded-xl p-6">
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="material-symbols-outlined text-primary">share</span>
+                                <h3 className="text-lg font-bold text-white">Convidar Restaurantes</h3>
+                            </div>
+                            <p className="text-sm text-text-muted mb-4">
+                                Partilha o teu link de convite para atrair novos clientes ao marketplace.
+                                Ganhas visibilidade e os restaurantes descobrem os teus produtos!
+                            </p>
+
+                            <div className="bg-background-page border border-border rounded-lg p-4 mb-4">
+                                <p className="text-xs text-text-muted uppercase tracking-wide font-bold mb-2">Teu Link de Convite</p>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="text"
+                                        value={inviteLink}
+                                        readOnly
+                                        className="flex-1 bg-background-card border border-border rounded px-3 py-2 text-sm text-white font-mono"
+                                    />
+                                    <button
+                                        onClick={handleCopyInviteLink}
+                                        className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg transition-colors text-sm"
+                                    >
+                                        {copySuccess ? (
+                                            <>
+                                                <CheckCircle size={16} />
+                                                Copiado!
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Copy size={16} />
+                                                Copiar
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                                <button className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-border rounded-lg text-white text-sm font-medium transition-colors">
+                                    <QrCode size={16} />
+                                    Gerar QR Code
+                                </button>
+                                <div className="flex items-center gap-2 text-sm">
+                                    <span className="flex items-center justify-center size-6 bg-green-500/20 text-green-400 rounded-full">
+                                        <CheckCircle size={14} />
+                                    </span>
+                                    <span className="text-text-muted">
+                                        <span className="font-bold text-green-400">{stats.referrals} restaurantes</span> aderiram via teu convite
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Reviews */}
+                        <div className="bg-surface border border-border rounded-xl p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-primary">reviews</span>
+                                    Reviews Recentes
+                                </h3>
+                                <Link to="#" className="text-sm text-primary hover:text-primary-hover font-medium">
+                                    Ver todas ({supplier.reviewCount})
+                                </Link>
+                            </div>
+                            {supplier.reviews && supplier.reviews.length > 0 ? (
+                                <div className="space-y-4">
+                                    {supplier.reviews.slice(0, 3).map((review) => (
+                                        <div key={review.id} className="bg-background-page border border-border rounded-lg p-4">
+                                            <div className="flex items-start justify-between mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-1 text-yellow-500">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <Star
+                                                                key={i}
+                                                                size={12}
+                                                                fill={i < review.ratingOverall ? 'currentColor' : 'none'}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    <span className="text-sm font-bold text-white">
+                                                        {review.anonymous ? 'Restaurador Anónimo' : `Restaurante #${review.reviewerId.substring(0, 8)}`}
+                                                    </span>
+                                                </div>
+                                                <span className="text-xs text-text-muted">
+                                                    {new Date(review.createdAt).toLocaleDateString('pt-PT')}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-text-muted">{review.comment || 'Sem comentário'}</p>
+                                            {!review.supplierResponse && (
+                                                <button className="mt-3 text-xs text-primary hover:text-primary-hover font-medium flex items-center gap-1">
+                                                    <span className="material-symbols-outlined text-[14px]">reply</span>
+                                                    Responder
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-text-muted">
+                                    <p className="text-sm">Ainda não tens reviews.</p>
+                                    <p className="text-xs mt-1">Encoraja os teus clientes a deixar feedback!</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Right Column - Quick Actions */}
+                    <div className="space-y-6">
+                        {/* Quick Actions */}
+                        <div className="bg-surface border border-border rounded-xl p-6">
+                            <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider mb-4">Ações Rápidas</h3>
+                            <div className="space-y-3">
+                                <button
+                                    onClick={() => setIsEditModalOpen(true)}
+                                    className="w-full flex items-center gap-3 p-3 rounded-lg bg-background-page border border-border hover:border-primary/50 transition-colors group"
+                                >
+                                    <div className="bg-primary/10 p-2 rounded-lg text-primary group-hover:bg-primary/20 transition-colors">
+                                        <Edit size={18} />
+                                    </div>
+                                    <div className="text-left">
+                                        <h4 className="text-sm font-bold text-white">Editar Perfil</h4>
+                                        <p className="text-xs text-text-muted">Atualizar informações</p>
+                                    </div>
+                                </button>
+
+                                <Link
+                                    to="#"
+                                    className="flex items-center gap-3 p-3 rounded-lg bg-background-page border border-border hover:border-primary/50 transition-colors group"
+                                >
+                                    <div className="bg-orange-500/10 p-2 rounded-lg text-orange-400 group-hover:bg-orange-500/20 transition-colors">
+                                        <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-bold text-white">Gerir Catálogo</h4>
+                                        <p className="text-xs text-text-muted">{supplier.supplierProducts?.length || 0} produtos</p>
+                                    </div>
+                                </Link>
+
+                                <Link
+                                    to="#"
+                                    className="flex items-center gap-3 p-3 rounded-lg bg-background-page border border-border hover:border-primary/50 transition-colors group"
+                                >
+                                    <div className="bg-blue-500/10 p-2 rounded-lg text-blue-400 group-hover:bg-blue-500/20 transition-colors">
+                                        <Mail size={18} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-bold text-white">Ver RFQs</h4>
+                                        <p className="text-xs text-text-muted">{stats.rfqsReceived} pendentes</p>
+                                    </div>
+                                    {stats.rfqsReceived > 0 && (
+                                        <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                            {stats.rfqsReceived}
+                                        </span>
+                                    )}
+                                </Link>
+                            </div>
+                        </div>
+
+                        {/* Certifications */}
+                        {supplier.certifications && supplier.certifications.length > 0 && (
+                            <div className="bg-surface border border-border rounded-xl p-6">
+                                <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider mb-4">Certificações</h3>
+                                <div className="space-y-2">
+                                    {supplier.certifications.map((cert, index) => (
+                                        <div key={index} className="flex items-center gap-2 p-2 rounded-lg bg-background-page border border-border">
+                                            <div className="bg-green-500/10 p-1.5 rounded text-green-400">
+                                                <CheckCircle size={14} />
+                                            </div>
+                                            <span className="text-xs font-medium text-white">{cert}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Contact Info */}
+                        <div className="bg-surface border border-border rounded-xl p-6">
+                            <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider mb-4">Informação de Contacto</h3>
+                            <div className="space-y-3 text-sm">
+                                {supplier.contactEmail && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-text-muted text-[16px]">mail</span>
+                                        <span className="text-white">{supplier.contactEmail}</span>
+                                    </div>
+                                )}
+                                {supplier.contactPhone && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-text-muted text-[16px]">phone</span>
+                                        <span className="text-white">{supplier.contactPhone}</span>
+                                    </div>
+                                )}
+                                {supplier.contactWebsite && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-text-muted text-[16px]">language</span>
+                                        <a href={supplier.contactWebsite} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary-hover">
+                                            {supplier.contactWebsite}
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="xl:col-span-4 space-y-6 sticky top-24">
-                    <div className="bg-background-card p-6 rounded-xl border border-border-color relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                            <span className="material-symbols-outlined text-[150px] text-white">store</span>
-                        </div>
-                        <div className="flex items-center justify-between mb-6 relative z-10">
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">
-                                <span className="block size-2 rounded-full bg-green-500 animate-pulse"></span>
-                                Aberto Agora
-                            </span>
-                            <span className="text-xs text-text-muted font-medium bg-white/5 px-2 py-1 rounded">Fecha às 18:00</span>
-                        </div>
-                        <div className="space-y-3 mb-6 relative z-10">
-                            <button className="w-full flex items-center justify-center gap-2 h-12 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]">
-                                <span className="material-symbols-outlined">menu_book</span>
-                                Ver Catálogo
-                            </button>
-                            <button className="w-full flex items-center justify-center gap-2 h-12 bg-transparent hover:bg-white/5 border border-primary text-primary font-bold rounded-lg transition-colors">
-                                <span className="material-symbols-outlined">request_quote</span>
-                                Enviar RFQ
-                            </button>
-                        </div>
-                        <div className="pt-4 border-t border-border-color flex items-center justify-center relative z-10">
-                            <button className="flex items-center gap-2 text-text-muted hover:text-red-500 transition-colors text-sm font-medium group">
-                                <span className="material-symbols-outlined group-hover:icon-filled transition-all">favorite</span>
-                                Adicionar aos Meus Fornecedores
-                            </button>
-                        </div>
-                    </div>
-                    <div className="bg-background-card p-6 rounded-xl border border-border-color">
-                        <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-4">Certificações &amp; Selos</h3>
-                        <div className="flex flex-col gap-3">
-                            <div className="flex items-center gap-3 p-3 rounded-lg bg-background-page border border-border-color hover:border-primary/30 transition-colors group">
-                                <div className="size-10 rounded bg-green-900/30 text-green-400 flex items-center justify-center border border-green-800/50 group-hover:text-green-300 transition-colors">
-                                    <span className="material-symbols-outlined">verified</span>
-                                </div>
+            </motion.div>
+
+            {/* Edit Profile Modal */}
+            <AnimatePresence>
+                {isEditModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-surface border border-border rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+                        >
+                            {/* Modal Header */}
+                            <div className="p-6 border-b border-border flex items-center justify-between">
                                 <div>
-                                    <h4 className="text-sm font-bold text-white">Fornecedor Verificado</h4>
-                                    <p className="text-xs text-text-muted">Validado pela iaMenu em 2023</p>
+                                    <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                        <Edit size={24} className="text-primary" />
+                                        Editar Perfil do Fornecedor
+                                    </h2>
+                                    <p className="text-sm text-text-muted mt-1">Atualiza as informações do teu perfil público</p>
                                 </div>
+                                <button
+                                    onClick={() => setIsEditModalOpen(false)}
+                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                >
+                                    <X size={24} className="text-text-muted" />
+                                </button>
                             </div>
-                            <div className="flex items-center gap-3 p-3 rounded-lg bg-background-page border border-border-color hover:border-primary/30 transition-colors group">
-                                <div className="size-10 rounded bg-blue-900/30 text-blue-400 flex items-center justify-center border border-blue-800/50 group-hover:text-blue-300 transition-colors">
-                                    <span className="material-symbols-outlined">safety_check</span>
+
+                            {/* Modal Body */}
+                            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
+                                <div className="space-y-6">
+                                    {/* Company Info Section */}
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white mb-4">Informações da Empresa</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="md:col-span-2">
+                                                <label className="block text-sm font-medium text-white mb-2">
+                                                    Nome da Empresa *
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="companyName"
+                                                    value={formData.companyName}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    className="w-full px-4 py-2 bg-background-input border border-border rounded-lg text-white placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary"
+                                                    placeholder="Nome da tua empresa"
+                                                />
+                                            </div>
+
+                                            <div className="md:col-span-2">
+                                                <label className="block text-sm font-medium text-white mb-2">
+                                                    Descrição *
+                                                </label>
+                                                <textarea
+                                                    name="description"
+                                                    value={formData.description}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    rows={4}
+                                                    className="w-full px-4 py-2 bg-background-input border border-border rounded-lg text-white placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary resize-none"
+                                                    placeholder="Descreve a tua empresa e o que ofereces..."
+                                                />
+                                                <p className="text-xs text-text-muted mt-1">{formData.description.length} caracteres</p>
+                                            </div>
+
+                                            <div className="md:col-span-2">
+                                                <label className="block text-sm font-medium text-white mb-2">
+                                                    Categorias *
+                                                </label>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {availableCategories.map((category) => (
+                                                        <button
+                                                            key={category}
+                                                            type="button"
+                                                            onClick={() => handleCategoriesChange(category)}
+                                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                                                                formData.categories.includes(category)
+                                                                    ? 'bg-primary text-white'
+                                                                    : 'bg-white/5 text-text-muted hover:bg-white/10'
+                                                            }`}
+                                                        >
+                                                            {category}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Images Section */}
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white mb-4">Imagens do Perfil</h3>
+                                        <div className="grid grid-cols-1 gap-6">
+                                            {/* Logo Upload */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-white mb-3 flex items-center gap-2">
+                                                    <span className="material-symbols-outlined text-primary">photo_camera</span>
+                                                    Foto de Perfil
+                                                </label>
+                                                <div className="flex gap-4 items-center">
+                                                    {/* Logo Preview */}
+                                                    <div className="size-24 rounded-lg border-2 border-border overflow-hidden shrink-0 bg-white flex items-center justify-center">
+                                                        {logoPreview ? (
+                                                            <img
+                                                                src={logoPreview}
+                                                                alt="Logo preview"
+                                                                className="w-full h-full object-contain"
+                                                            />
+                                                        ) : (
+                                                            <span className="material-symbols-outlined text-gray-400 text-4xl">image</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-border rounded-lg text-white text-sm font-medium transition-colors">
+                                                            <Upload size={18} />
+                                                            Escolher ficheiro
+                                                            <input
+                                                                type="file"
+                                                                accept="image/png,image/jpeg,image/jpg,image/svg+xml"
+                                                                onChange={(e) => {
+                                                                    const file = e.target.files?.[0];
+                                                                    if (file) {
+                                                                        setLogoFile(file);
+                                                                        // Create preview
+                                                                        const reader = new FileReader();
+                                                                        reader.onloadend = () => {
+                                                                            setLogoPreview(reader.result);
+                                                                        };
+                                                                        reader.readAsDataURL(file);
+                                                                    }
+                                                                }}
+                                                                className="hidden"
+                                                            />
+                                                        </label>
+                                                        <p className="text-xs text-text-muted mt-2">
+                                                            PNG, JPG ou SVG (máx. 2MB)
+                                                        </p>
+                                                        {logoPreview && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setLogoFile(null);
+                                                                    setLogoPreview('');
+                                                                }}
+                                                                className="text-xs text-red-400 hover:text-red-300 mt-1"
+                                                            >
+                                                                Remover imagem
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Header Image Upload */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-white mb-3 flex items-center gap-2">
+                                                    <span className="material-symbols-outlined text-primary">wallpaper</span>
+                                                    Foto de Capa
+                                                </label>
+                                                <div className="space-y-3">
+                                                    {/* Header Preview */}
+                                                    <div className="w-full h-40 rounded-lg border-2 border-border overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                                                        {headerPreview ? (
+                                                            <img
+                                                                src={headerPreview}
+                                                                alt="Header preview"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="text-center">
+                                                                <span className="material-symbols-outlined text-gray-600 text-5xl">landscape</span>
+                                                                <p className="text-xs text-gray-500 mt-2">1200 x 400px recomendado</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-border rounded-lg text-white text-sm font-medium transition-colors">
+                                                            <Upload size={18} />
+                                                            Escolher ficheiro
+                                                            <input
+                                                                type="file"
+                                                                accept="image/png,image/jpeg,image/jpg"
+                                                                onChange={(e) => {
+                                                                    const file = e.target.files?.[0];
+                                                                    if (file) {
+                                                                        setHeaderFile(file);
+                                                                        // Create preview
+                                                                        const reader = new FileReader();
+                                                                        reader.onloadend = () => {
+                                                                            setHeaderPreview(reader.result);
+                                                                        };
+                                                                        reader.readAsDataURL(file);
+                                                                    }
+                                                                }}
+                                                                className="hidden"
+                                                            />
+                                                        </label>
+                                                        {headerPreview && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setHeaderFile(null);
+                                                                    setHeaderPreview('');
+                                                                }}
+                                                                className="text-xs text-red-400 hover:text-red-300"
+                                                            >
+                                                                Remover imagem
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-xs text-text-muted">
+                                                        PNG ou JPG (máx. 5MB, 1200x400px recomendado)
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Location Section */}
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white mb-4">Localização</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-white mb-2">
+                                                    Cidade *
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="locationCity"
+                                                    value={formData.locationCity}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    className="w-full px-4 py-2 bg-background-input border border-border rounded-lg text-white placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary"
+                                                    placeholder="Lisboa"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-white mb-2">
+                                                    Região *
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="locationRegion"
+                                                    value={formData.locationRegion}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    className="w-full px-4 py-2 bg-background-input border border-border rounded-lg text-white placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary"
+                                                    placeholder="Lisboa"
+                                                />
+                                            </div>
+
+                                            <div className="md:col-span-2">
+                                                <label className="flex items-center gap-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        name="nationalDelivery"
+                                                        checked={formData.nationalDelivery}
+                                                        onChange={handleInputChange}
+                                                        className="w-4 h-4 rounded border-border bg-background-input text-primary focus:ring-primary"
+                                                    />
+                                                    <span className="text-sm font-medium text-white">Entrega nacional</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Contact Section */}
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white mb-4">Contacto</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-white mb-2">
+                                                    Email
+                                                </label>
+                                                <input
+                                                    type="email"
+                                                    name="contactEmail"
+                                                    value={formData.contactEmail}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-4 py-2 bg-background-input border border-border rounded-lg text-white placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary"
+                                                    placeholder="comercial@empresa.pt"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-white mb-2">
+                                                    Telefone
+                                                </label>
+                                                <input
+                                                    type="tel"
+                                                    name="contactPhone"
+                                                    value={formData.contactPhone}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-4 py-2 bg-background-input border border-border rounded-lg text-white placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary"
+                                                    placeholder="+351 XXX XXX XXX"
+                                                />
+                                            </div>
+
+                                            <div className="md:col-span-2">
+                                                <label className="block text-sm font-medium text-white mb-2">
+                                                    Website
+                                                </label>
+                                                <input
+                                                    type="url"
+                                                    name="contactWebsite"
+                                                    value={formData.contactWebsite}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-4 py-2 bg-background-input border border-border rounded-lg text-white placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary"
+                                                    placeholder="https://www.empresa.pt"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Delivery & Business Section */}
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white mb-4">Entrega e Negócio</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-white mb-2">
+                                                    Custo de Entrega
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="deliveryCost"
+                                                    value={formData.deliveryCost}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-4 py-2 bg-background-input border border-border rounded-lg text-white placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary"
+                                                    placeholder="Grátis > 300€"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-white mb-2">
+                                                    Frequência de Entrega
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="deliveryFrequency"
+                                                    value={formData.deliveryFrequency}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-4 py-2 bg-background-input border border-border rounded-lg text-white placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary"
+                                                    placeholder="2x/semana"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-white mb-2">
+                                                    Encomenda Mínima (€)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="minOrder"
+                                                    value={formData.minOrder}
+                                                    onChange={handleInputChange}
+                                                    min="0"
+                                                    step="0.01"
+                                                    className="w-full px-4 py-2 bg-background-input border border-border rounded-lg text-white placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary"
+                                                    placeholder="150"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-white mb-2">
+                                                    Termos de Pagamento
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="paymentTerms"
+                                                    value={formData.paymentTerms}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-4 py-2 bg-background-input border border-border rounded-lg text-white placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary"
+                                                    placeholder="30 dias"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Certifications Section */}
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white mb-4">Certificações</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {availableCertifications.map((cert) => (
+                                                <button
+                                                    key={cert}
+                                                    type="button"
+                                                    onClick={() => handleCertificationsChange(cert)}
+                                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                                                        formData.certifications.includes(cert)
+                                                            ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+                                                            : 'bg-white/5 text-text-muted hover:bg-white/10 border border-border'
+                                                    }`}
+                                                >
+                                                    {formData.certifications.includes(cert) && (
+                                                        <CheckCircle size={14} className="inline mr-1" />
+                                                    )}
+                                                    {cert}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Error Message */}
+                                    {saveError && (
+                                        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                                            <p className="text-sm text-red-400">
+                                                Erro ao guardar: {saveError}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Success Message */}
+                                    {saveSuccess && (
+                                        <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                                            <p className="text-sm text-green-400 flex items-center gap-2">
+                                                <CheckCircle size={16} />
+                                                Perfil atualizado com sucesso!
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
-                                <div>
-                                    <h4 className="text-sm font-bold text-white">HACCP Certificado</h4>
-                                    <p className="text-xs text-text-muted">Segurança alimentar garantida</p>
-                                </div>
+                            </form>
+
+                            {/* Modal Footer */}
+                            <div className="p-6 border-t border-border flex items-center justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditModalOpen(false)}
+                                    disabled={isSaving}
+                                    className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-border rounded-lg text-white font-medium transition-colors disabled:opacity-50"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    onClick={handleSubmit}
+                                    disabled={isSaving}
+                                    className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            A Guardar...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save size={18} />
+                                            Guardar Alterações
+                                        </>
+                                    )}
+                                </button>
                             </div>
-                            <div className="flex items-center gap-3 p-3 rounded-lg bg-background-page border border-border-color hover:border-primary/30 transition-colors group">
-                                <div className="size-10 rounded bg-emerald-900/30 text-emerald-400 flex items-center justify-center border border-emerald-800/50 group-hover:text-emerald-300 transition-colors">
-                                    <span className="material-symbols-outlined">eco</span>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-bold text-white">Produtor Local</h4>
-                                    <p className="text-xs text-text-muted">Apoio à economia regional</p>
-                                </div>
-                            </div>
-                        </div>
+                        </motion.div>
                     </div>
-                    <div className="bg-background-card p-6 rounded-xl border border-border-color">
-                        <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-4">Contacto Comercial</h3>
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="size-12 rounded-full bg-cover bg-center border-2 border-border-color" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAHz0RJMJyWVODgIynM4h_kTAgaa5ob6QQGg6m9ZO79BKX7ISVesHhSDO00ZZ94xJt0qEmlnc2o8coTriIal94T8gJ6mz1Y5o00i6leXI-uug-8VJ2TbCpbFQm1LRGKHjQ0jSHg7WybGyxtHI2Ldche_gI4iP8PycPDrrguuldp5_MgZI7REzS0YrvjajTNqAop9L-4RS5NKJnQTR147g0xf5hqwnf5gLV0IXOlXt1m09d7r9MnoNW9-XvKxx1rM8Oy0UEU4Ier9g')"}}></div>
-                            <div>
-                                <p className="text-sm font-bold text-white">Carlos Silva</p>
-                                <p className="text-xs text-text-muted">Gestor de Conta</p>
-                                <p className="text-xs text-primary mt-0.5">Disponível</p>
-                            </div>
-                        </div>
-                        <button className="w-full text-sm text-text-muted hover:text-white border border-border-color rounded-lg py-2 hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
-                            <span className="material-symbols-outlined text-[16px]">mail</span>
-                            Enviar Mensagem
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </motion.div>
+                )}
+            </AnimatePresence>
+        </>
     );
 };
 

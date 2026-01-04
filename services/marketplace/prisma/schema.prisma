@@ -24,6 +24,7 @@ model Supplier {
   userId             String    @map("user_id") // FK to users.id (assuming 'User' model is in another service or shared schema)
   companyName        String    @map("company_name")
   logoUrl            String?   @map("logo_url")
+  headerImageUrl     String?   @map("header_image_url")
   description        String?
   categories         String[]  @default([])
   locationCity       String?   @map("location_city")
