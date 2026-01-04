@@ -22,6 +22,7 @@ import ResponsesTab from './views/ResponsesTab'; // Adicionar import para Respon
 import TakewayLandingView from './views/TakewayLandingView';
 import ReputacaoOnlineView from './views/ReputacaoOnlineView';
 import HubsRegionaisView from './views/HubsRegionaisView';
+import VisaoEcossistemaView from './views/VisaoEcossistemaView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -104,7 +105,7 @@ const App = () => {
                                         <Route path="/pagamentos" element={<PaymentsAutomationView />} />
                                         <Route path="/aulas" element={<Academy />} />
                                         <Route path="/onboarding" element={<OnboardingView onComplete={() => { /* navigate to dashboard */ }} />} />
-                                        <Route path="/visao" element={<StandardPlaceholder title="Visão do Ecossistema" />} />
+                                        <Route path="/visao" element={<VisaoEcossistemaView />} />
                                         <Route path="/reputacao" element={<ReputacaoOnlineView />} />
                                         <Route path="/equipas" element={<StandardPlaceholder title="Escalas de Staff AI" />} />
                                         <Route path="/marketplace" element={<Marketplace />} />
