@@ -156,7 +156,7 @@ const Sidebar = ({ selectedGroup, setSelectedGroup }) => {
             </SidebarSection>
 
             <SidebarSection title="Academia e Gestão">
-                <NavItem label="Audit de Reputação Online" icon={Star} to="/reputacao" />
+                <NavItem label="Reputação Online" icon={Star} to="/reputacao" />
                 <NavItem label="iaMenu PRO - Upgrade" icon={Zap} to="/upgrade" badge="PRO" />
                 <NavItem label="iaMenu Takeway" icon={Package} to="/takeway" badge="NOVO" />
                 <NavItem label="Food Cost & Fichas Técnicas" icon={Calculator} to="/foodcost" />

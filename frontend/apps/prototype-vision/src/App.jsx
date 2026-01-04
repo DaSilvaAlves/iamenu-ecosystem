@@ -20,6 +20,7 @@ import OnboardingView from './views/OnboardingView';
 import Marketplace from './views/Marketplace';
 import ResponsesTab from './views/ResponsesTab'; // Adicionar import para ResponsesTab
 import TakewayLandingView from './views/TakewayLandingView';
+import ReputacaoOnlineView from './views/ReputacaoOnlineView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -103,7 +104,7 @@ const App = () => {
                                         <Route path="/aulas" element={<Academy />} />
                                         <Route path="/onboarding" element={<OnboardingView onComplete={() => { /* navigate to dashboard */ }} />} />
                                         <Route path="/visao" element={<StandardPlaceholder title="Visão do Ecossistema" />} />
-                                        <Route path="/reputacao" element={<StandardPlaceholder title="Audit de Reputação" />} />
+                                        <Route path="/reputacao" element={<ReputacaoOnlineView />} />
                                         <Route path="/equipas" element={<StandardPlaceholder title="Escalas de Staff AI" />} />
                                         <Route path="/marketplace" element={<Marketplace />} />
                                         <Route path="/marketplace/quotes/:rfqId/responses" element={<ResponsesTab />} />
