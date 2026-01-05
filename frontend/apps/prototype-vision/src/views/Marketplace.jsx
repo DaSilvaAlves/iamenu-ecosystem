@@ -57,15 +57,42 @@ const DirectoryTab = () => {
         fetchSuppliers();
     }, []);
 
-    if (loading) return <div className="text-center py-12 text-white/60">A carregar fornecedores...</div>;
+    if (loading) return (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="bg-surface border border-border rounded-xl overflow-hidden animate-pulse">
+                    <div className="p-5 space-y-4">
+                        <div className="h-6 bg-white/10 rounded w-3/4"></div>
+                        <div className="h-4 bg-white/10 rounded w-full"></div>
+                        <div className="flex gap-2">
+                            <div className="h-6 bg-white/10 rounded w-20"></div>
+                            <div className="h-6 bg-white/10 rounded w-24"></div>
+                        </div>
+                        <div className="space-y-2">
+                            <div className="h-4 bg-white/10 rounded w-1/2"></div>
+                            <div className="h-4 bg-white/10 rounded w-2/3"></div>
+                        </div>
+                        <div className="h-9 bg-white/10 rounded"></div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
     if (error) return <div className="text-center py-12 text-red-500">Erro ao carregar fornecedores: {error}</div>;
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 mt-8">
              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {suppliers.length > 0 ? (
-                suppliers.map(supplier => (
-                    <div key={supplier.id} className="group bg-surface border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col h-full hover:shadow-lg hover:shadow-black/40">
+                suppliers.map((supplier, index) => (
+                    <motion.div
+                        key={supplier.id}
+                        className="group bg-surface border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col h-full"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                        whileHover={{ y: -6, boxShadow: '0 12px 32px rgba(242, 84, 45, 0.2)' }}
+                    >
                         <div className="p-5 flex flex-col flex-1">
                             <div className="mb-3">
                                 <h3 className="font-bold text-lg text-white flex items-center gap-2">
@@ -97,7 +124,7 @@ const DirectoryTab = () => {
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 ))
                 ) : (
                 <p>Nenhum fornecedor encontrado.</p>
