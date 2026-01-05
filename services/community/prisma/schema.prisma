@@ -29,6 +29,7 @@ model Post {
   useful    Int      @default(0)
   thanks    Int      @default(0)
 
+  author   Profile   @relation("PostAuthor", fields: [authorId], references: [userId], onDelete: Cascade)
   comments Comment[]
   group    Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
@@ -99,6 +100,8 @@ model Profile {
   role           String?  @default("user")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  posts Post[] @relation("PostAuthor")
 
   @@map("profiles")
   @@schema("community")

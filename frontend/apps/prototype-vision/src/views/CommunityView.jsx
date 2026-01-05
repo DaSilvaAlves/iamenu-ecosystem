@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, Award, MoreHorizontal, Plus, Loader } from 'lucide-react';
+import { MessageSquare, Award, MoreHorizontal, Plus, Loader, User } from 'lucide-react';
 import { CommunityAPI, Auth } from '../services/api';
 import TextRenderer from '../components/TextRenderer';
 import MentionInput from '../components/MentionInput';
@@ -483,13 +483,26 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                                             fontSize: '1.2rem',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            justifyContent: 'center'
+                                            justifyContent: 'center',
+                                            overflow: 'hidden'
                                         }}>
-                                            👤
+                                            {post.author?.profilePhoto ? (
+                                                <img
+                                                    src={`http://localhost:3004${post.author.profilePhoto}`}
+                                                    alt={post.author.displayName || 'User'}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'cover'
+                                                    }}
+                                                />
+                                            ) : (
+                                                <User size={24} />
+                                            )}
                                         </div>
                                         <div>
                                             <h4 style={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                                                {post.authorName || 'Restaurador'}
+                                                {post.author?.displayName || post.authorName || 'Restaurador'}
                                             </h4>
                                             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                                                 {formatTimeAgo(post.createdAt)} • <span style={{ color: 'var(--primary)', fontWeight: '600' }}>

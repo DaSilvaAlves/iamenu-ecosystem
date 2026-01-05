@@ -81,13 +81,38 @@ export class PostsService {
       },
     });
 
-    // Add reaction counts to each post
+    // Get unique author IDs
+    const authorIds = [...new Set(posts.map(p => p.authorId))];
+
+    // Fetch all author profiles in one query
+    const authors = await prisma.profile.findMany({
+      where: {
+        userId: { in: authorIds }
+      },
+      select: {
+        userId: true,
+        username: true,
+        restaurantName: true,
+        profilePhoto: true,
+      }
+    });
+
+    // Create a map for quick lookup
+    const authorMap = new Map(authors.map(a => [a.userId, a]));
+
+    // Add reaction counts and author data to each post
     const postsWithReactions = await Promise.all(
       posts.map(async (post) => {
         const reactions = await this.getPostReactions(post.id);
         const totalReactions = Object.values(reactions).reduce((sum, count) => sum + count, 0);
+        const author = authorMap.get(post.authorId);
         return {
           ...post,
+          author: author ? {
+            userId: author.userId,
+            displayName: author.restaurantName || author.username || 'Utilizador',
+            profilePhoto: author.profilePhoto,
+          } : null,
           reactions,
           _count: {
             ...post._count,
@@ -131,7 +156,25 @@ export class PostsService {
       return null;
     }
 
-    return post;
+    // Fetch author profile
+    const author = await prisma.profile.findUnique({
+      where: { userId: post.authorId },
+      select: {
+        userId: true,
+        username: true,
+        restaurantName: true,
+        profilePhoto: true,
+      }
+    });
+
+    return {
+      ...post,
+      author: author ? {
+        userId: author.userId,
+        displayName: author.restaurantName || author.username || 'Utilizador',
+        profilePhoto: author.profilePhoto,
+      } : null,
+    };
   }
 
   /**
