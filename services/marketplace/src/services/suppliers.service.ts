@@ -152,9 +152,7 @@ export const updateSupplier = async (supplierId: string, data: any) => {
     sanitizedData.paymentTerms = null;
   }
 
-  if (data.certifications && data.certifications.length > 0) {
-    sanitizedData.certifications = data.certifications;
-  }
+  // certifications already handled via parsedCertifications (line 109)
 
   // Update supplier in database
   const updatedSupplier = await prisma.supplier.update({
