@@ -23,6 +23,7 @@ import TakewayLandingView from './views/TakewayLandingView';
 import ReputacaoOnlineView from './views/ReputacaoOnlineView';
 import HubsRegionaisView from './views/HubsRegionaisView';
 import VisaoEcossistemaView from './views/VisaoEcossistemaView';
+import StaffAIView from './views/StaffAIView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -107,7 +108,7 @@ const App = () => {
                                         <Route path="/onboarding" element={<OnboardingView onComplete={() => { /* navigate to dashboard */ }} />} />
                                         <Route path="/visao" element={<VisaoEcossistemaView />} />
                                         <Route path="/reputacao" element={<ReputacaoOnlineView />} />
-                                        <Route path="/equipas" element={<StandardPlaceholder title="Escalas de Staff AI" />} />
+                                        <Route path="/equipas" element={<StaffAIView />} />
                                         <Route path="/marketplace" element={<Marketplace />} />
                                         <Route path="/marketplace/quotes/:rfqId/responses" element={<ResponsesTab />} />
                                         <Route path="/marketplace/suppliers/:id" element={<SupplierDetail />} />
