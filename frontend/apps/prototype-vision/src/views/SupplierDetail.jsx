@@ -127,7 +127,7 @@ function SupplierDetail() {
               className="h-56 bg-cover bg-center relative"
               style={{
                 backgroundImage: supplier.headerImageUrl
-                  ? `url(${supplier.headerImageUrl})`
+                  ? `url(http://localhost:3005${supplier.headerImageUrl})`
                   : 'linear-gradient(135deg, #1a4d2e 0%, #2d5a3d 100%)'
               }}
             >
@@ -138,7 +138,7 @@ function SupplierDetail() {
                 <div className="size-28 rounded-xl bg-surface p-3 shadow-2xl border border-border flex items-center justify-center shrink-0">
                   {supplier.logoUrl ? (
                     <img
-                      src={supplier.logoUrl}
+                      src={`http://localhost:3005${supplier.logoUrl}`}
                       alt={supplier.companyName}
                       className="w-full h-full object-contain rounded-lg"
                     />

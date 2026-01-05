@@ -104,10 +104,8 @@ export const updateSupplier = async (supplierId: string, data: any) => {
     sanitizedData.headerImageUrl = data.headerImageUrl;
   }
 
-  // Handle certifications
-  if (parsedCertifications && parsedCertifications.length > 0) {
-    sanitizedData.certifications = parsedCertifications;
-  }
+  // Handle certifications (always set as array, even if empty)
+  sanitizedData.certifications = parsedCertifications;
 
   // Only include optional fields if they have values
   if (data.contactPhone && data.contactPhone !== '') {
