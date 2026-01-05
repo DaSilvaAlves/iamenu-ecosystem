@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, Bell, MessageSquare, Bookmark, User, X } from 'lucide-react';
-import { CommunityAPI } from '../services/api';
+import { CommunityAPI, Auth } from '../services/api';
 
 const TopBar = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [userProfile, setUserProfile] = useState(null);
     const dropdownRef = useRef(null);
     const location = useLocation();
 
     useEffect(() => {
         loadNotifications();
+        loadUserProfile();
         const interval = setInterval(loadNotifications, 30000);
         return () => clearInterval(interval);
     }, []);
@@ -39,6 +41,18 @@ const TopBar = () => {
             setUnreadCount(data.unreadCount || 0);
         } catch (err) {
             console.error('Error loading notifications:', err);
+        }
+    };
+
+    const loadUserProfile = async () => {
+        try {
+            const userId = Auth.getUserId();
+            if (userId) {
+                const profileData = await CommunityAPI.getProfile(userId);
+                setUserProfile(profileData.data);
+            }
+        } catch (err) {
+            console.error('Error loading user profile:', err);
         }
     };
 
@@ -218,10 +232,34 @@ const TopBar = () => {
                     <MessageSquare size={20} className="cursor-pointer hover:text-white" />
                     <Bookmark size={20} className="cursor-pointer hover:text-white" />
                     <Link to="/perfil"
-                        style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }}
-                        className="hover:bg-primary"
+                        style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            backgroundColor: 'var(--border)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            overflow: 'hidden',
+                            border: '2px solid rgba(255,255,255,0.1)',
+                            transition: 'border-color 0.2s'
+                        }}
+                        className="hover:border-primary"
                     >
-                        <User size={20} />
+                        {userProfile?.profilePhoto ? (
+                            <img
+                                src={`http://localhost:3004${userProfile.profilePhoto}`}
+                                alt="Profile"
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover'
+                                }}
+                            />
+                        ) : (
+                            <User size={18} />
+                        )}
                     </Link>
                 </div>
             </div>

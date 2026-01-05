@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client-community';
 import { gamificationService } from './gamification.service';
+import { followersService } from './followers.service';
 
 const prisma = new PrismaClient();
 
@@ -55,7 +56,7 @@ export class ProfilesService {
   }
 
   /**
-   * Get user statistics (posts, comments, reactions received)
+   * Get user statistics (posts, comments, reactions received, followers, following)
    */
   async getUserStats(userId: string) {
     const [postsCount, commentsCount, reactionsReceived] = await Promise.all([
@@ -84,10 +85,15 @@ export class ProfilesService {
     // Get gamification data (level, XP, badges)
     const gamificationData = await gamificationService.getGamificationData(userId);
 
+    // Get followers/following counts
+    const followCounts = await followersService.getFollowCounts(userId);
+
     return {
       postsCount,
       commentsCount,
       reactionsReceived,
+      followersCount: followCounts.followersCount,
+      followingCount: followCounts.followingCount,
       // Gamification data
       level: gamificationData.level,
       totalXP: gamificationData.totalXP,

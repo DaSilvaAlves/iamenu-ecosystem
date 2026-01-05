@@ -287,18 +287,17 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
             <div style={{
                 display: 'flex',
                 gap: '12px',
-                borderBottom: '1px solid var(--border)',
                 marginTop: '20px',
-                marginBottom: '0px'
+                marginBottom: '20px'
             }}>
                 <button
                     onClick={() => setFeedTab('all')}
                     style={{
-                        padding: '12px 20px',
-                        backgroundColor: feedTab === 'all' ? 'var(--primary)' : 'transparent',
-                        borderBottom: feedTab === 'all' ? '3px solid var(--primary)' : '3px solid transparent',
-                        color: feedTab === 'all' ? 'var(--primary)' : 'var(--text-muted)',
+                        padding: '10px 20px',
+                        backgroundColor: feedTab === 'all' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                        color: feedTab === 'all' ? 'white' : 'var(--text-muted)',
                         border: 'none',
+                        borderRadius: '8px',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         fontSize: '0.95rem',
@@ -310,11 +309,11 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                 <button
                     onClick={() => setFeedTab('mygroups')}
                     style={{
-                        padding: '12px 20px',
-                        backgroundColor: feedTab === 'mygroups' ? 'var(--primary)' : 'transparent',
-                        borderBottom: feedTab === 'mygroups' ? '3px solid var(--primary)' : '3px solid transparent',
-                        color: feedTab === 'mygroups' ? 'var(--primary)' : 'var(--text-muted)',
+                        padding: '10px 20px',
+                        backgroundColor: feedTab === 'mygroups' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                        color: feedTab === 'mygroups' ? 'white' : 'var(--text-muted)',
                         border: 'none',
+                        borderRadius: '8px',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         fontSize: '0.95rem',

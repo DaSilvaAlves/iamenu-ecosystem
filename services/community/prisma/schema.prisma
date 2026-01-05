@@ -147,3 +147,16 @@ model Report {
   @@map("reports")
   @@schema("community")
 }
+
+model Follower {
+  id          String   @id @default(uuid())
+  followerId  String   // User who is following
+  followingId String   // User being followed
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("followers")
+  @@schema("community")
+}

@@ -12,6 +12,25 @@ const handleResponse = async (response) => {
   return response.json();
 };
 
+// Authorized fetch - automatically adds JWT token to requests
+const authorizedFetch = async (url, options = {}) => {
+  const token = getToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  // Add Authorization header if token exists
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+  });
+};
+
 // Get JWT token from localStorage (if exists)
 const getToken = () => {
   return localStorage.getItem('auth_token');
@@ -47,6 +66,7 @@ export const CommunityAPI = {
    * @returns {Promise<string>} JWT token
    */
   getTestToken: async () => {
+    // Don't use authorizedFetch here - we're getting the token!
     const response = await fetch(`${API_BASE}/auth/test-token`);
     const data = await handleResponse(response);
     setToken(data.token);
@@ -90,7 +110,7 @@ export const CommunityAPI = {
     if (category) url += `&category=${encodeURIComponent(category)}`;
     if (sortBy) url += `&sortBy=${sortBy}`;
 
-    const response = await fetch(url);
+    const response = await authorizedFetch(url);
     return handleResponse(response);
   },
 
@@ -100,7 +120,7 @@ export const CommunityAPI = {
    * @returns {Promise<Object>} Post data
    */
   getPost: async (id) => {
-    const response = await fetch(`${API_BASE}/posts/${id}`);
+    const response = await authorizedFetch(`${API_BASE}/posts/${id}`);
     return handleResponse(response);
   },
 
@@ -160,7 +180,7 @@ export const CommunityAPI = {
       throw new Error('Authentication required');
     }
 
-    const response = await fetch(`${API_BASE}/posts/${id}`, {
+    const response = await authorizedFetch(`${API_BASE}/posts/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -182,7 +202,7 @@ export const CommunityAPI = {
       throw new Error('Authentication required');
     }
 
-    const response = await fetch(`${API_BASE}/posts/${id}`, {
+    const response = await authorizedFetch(`${API_BASE}/posts/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -207,7 +227,7 @@ export const CommunityAPI = {
       throw new Error('Authentication required');
     }
 
-    const response = await fetch(`${API_BASE}/posts/${postId}/react`, {
+    const response = await authorizedFetch(`${API_BASE}/posts/${postId}/react`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -225,7 +245,7 @@ export const CommunityAPI = {
    * @returns {Promise<Object>} Reaction counts { like: 5, useful: 2, ... }
    */
   getPostReactions: async (postId) => {
-    const response = await fetch(`${API_BASE}/posts/${postId}/reactions`);
+    const response = await authorizedFetch(`${API_BASE}/posts/${postId}/reactions`);
     return handleResponse(response);
   },
 
@@ -244,7 +264,7 @@ export const CommunityAPI = {
       throw new Error('Authentication required');
     }
 
-    const response = await fetch(
+    const response = await authorizedFetch(
       `${API_BASE}/notifications?limit=${limit}&offset=${offset}`,
       {
         headers: {
@@ -266,7 +286,7 @@ export const CommunityAPI = {
       throw new Error('Authentication required');
     }
 
-    const response = await fetch(`${API_BASE}/notifications/${id}/read`, {
+    const response = await authorizedFetch(`${API_BASE}/notifications/${id}/read`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -285,7 +305,7 @@ export const CommunityAPI = {
       throw new Error('Authentication required');
     }
 
-    const response = await fetch(`${API_BASE}/notifications/read-all`, {
+    const response = await authorizedFetch(`${API_BASE}/notifications/read-all`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -314,7 +334,7 @@ export const CommunityAPI = {
     if (type) url += `&type=${type}`;
     if (sortBy) url += `&sortBy=${sortBy}`;
 
-    const response = await fetch(url);
+    const response = await authorizedFetch(url);
     return handleResponse(response);
   },
 
@@ -324,7 +344,7 @@ export const CommunityAPI = {
    * @returns {Promise<Object>} Group data with recent posts
    */
   getGroup: async (id) => {
-    const response = await fetch(`${API_BASE}/groups/${id}`);
+    const response = await authorizedFetch(`${API_BASE}/groups/${id}`);
     return handleResponse(response);
   },
 
@@ -334,7 +354,7 @@ export const CommunityAPI = {
    * @returns {Promise<Object>} Filtered groups
    */
   getGroupsByCategory: async (category) => {
-    const response = await fetch(`${API_BASE}/groups/category/${category}`);
+    const response = await authorizedFetch(`${API_BASE}/groups/category/${category}`);
     return handleResponse(response);
   },
 
@@ -344,7 +364,7 @@ export const CommunityAPI = {
    * @returns {Promise<Object>} Groups data with membership info
    */
   getUserGroups: async (userId) => {
-    const response = await fetch(`${API_BASE}/groups/user/${userId}`);
+    const response = await authorizedFetch(`${API_BASE}/groups/user/${userId}`);
     return handleResponse(response);
   },
 
@@ -384,7 +404,7 @@ export const CommunityAPI = {
       body = JSON.stringify(groupData);
     }
 
-    const response = await fetch(`${API_BASE}/groups`, {
+    const response = await authorizedFetch(`${API_BASE}/groups`, {
       method: 'POST',
       headers,
       body
@@ -403,7 +423,7 @@ export const CommunityAPI = {
    * @returns {Promise<Object>} Comments data with pagination
    */
   getComments: async (postId, { limit = 20, offset = 0 } = {}) => {
-    const response = await fetch(
+    const response = await authorizedFetch(
       `${API_BASE}/posts/${postId}/comments?limit=${limit}&offset=${offset}`
     );
     return handleResponse(response);
@@ -422,7 +442,7 @@ export const CommunityAPI = {
       throw new Error('Authentication required. Please login first.');
     }
 
-    const response = await fetch(`${API_BASE}/posts/${postId}/comments`, {
+    const response = await authorizedFetch(`${API_BASE}/posts/${postId}/comments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -445,7 +465,7 @@ export const CommunityAPI = {
       throw new Error('Authentication required');
     }
 
-    const response = await fetch(`${API_BASE}/posts/${postId}/comments/${commentId}`, {
+    const response = await authorizedFetch(`${API_BASE}/posts/${postId}/comments/${commentId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -471,7 +491,7 @@ export const CommunityAPI = {
       throw new Error('Authentication required');
     }
 
-    const response = await fetch(`${API_BASE}/posts/${postId}/comments/${commentId}/react`, {
+    const response = await authorizedFetch(`${API_BASE}/posts/${postId}/comments/${commentId}/react`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -490,7 +510,7 @@ export const CommunityAPI = {
    * @returns {Promise<Object>} Reaction counts { like: 5, useful: 2, ... }
    */
   getCommentReactions: async (postId, commentId) => {
-    const response = await fetch(`${API_BASE}/posts/${postId}/comments/${commentId}/reactions`);
+    const response = await authorizedFetch(`${API_BASE}/posts/${postId}/comments/${commentId}/reactions`);
     return handleResponse(response);
   },
 
@@ -502,7 +522,7 @@ export const CommunityAPI = {
    * @returns {Promise<Object>} Profile data
    */
   getProfile: async (userId) => {
-    const response = await fetch(`${API_BASE}/profiles/${userId}`);
+    const response = await authorizedFetch(`${API_BASE}/profiles/${userId}`);
     return handleResponse(response);
   },
 
@@ -525,7 +545,7 @@ export const CommunityAPI = {
       }
     });
 
-    const response = await fetch(`${API_BASE}/profiles/${userId}`, {
+    const response = await authorizedFetch(`${API_BASE}/profiles/${userId}`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -541,7 +561,7 @@ export const CommunityAPI = {
    * @returns {Promise<Object>} User stats
    */
   getUserStats: async (userId) => {
-    const response = await fetch(`${API_BASE}/profiles/${userId}/stats`);
+    const response = await authorizedFetch(`${API_BASE}/profiles/${userId}/stats`);
     return handleResponse(response);
   },
 
@@ -556,7 +576,7 @@ export const CommunityAPI = {
     if (params.limit) queryParams.append('limit', params.limit);
     if (params.offset) queryParams.append('offset', params.offset);
 
-    const response = await fetch(`${API_BASE}/profiles/${userId}/posts?${queryParams}`);
+    const response = await authorizedFetch(`${API_BASE}/profiles/${userId}/posts?${queryParams}`);
     return handleResponse(response);
   },
 
@@ -567,7 +587,108 @@ export const CommunityAPI = {
    * @returns {Promise<Object>} Matching profiles
    */
   searchProfiles: async ({ q }) => {
-    const response = await fetch(`${API_BASE}/profiles/search?q=${encodeURIComponent(q)}`);
+    const response = await authorizedFetch(`${API_BASE}/profiles/search?q=${encodeURIComponent(q)}`);
+    return handleResponse(response);
+  },
+
+  // ===== FOLLOWERS/FOLLOWING =====
+
+  /**
+   * Follow a user (requires authentication)
+   * @param {string} userId - User ID to follow
+   * @returns {Promise<Object>} Follow relationship
+   */
+  followUser: async (userId) => {
+    const token = getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await authorizedFetch(`${API_BASE}/profiles/${userId}/follow`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return handleResponse(response);
+  },
+
+  /**
+   * Unfollow a user (requires authentication)
+   * @param {string} userId - User ID to unfollow
+   * @returns {Promise<Object>} Success message
+   */
+  unfollowUser: async (userId) => {
+    const token = getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await authorizedFetch(`${API_BASE}/profiles/${userId}/follow`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return handleResponse(response);
+  },
+
+  /**
+   * Check if authenticated user is following this user
+   * @param {string} userId - User ID to check
+   * @returns {Promise<Object>} { isFollowing: boolean }
+   */
+  getFollowStatus: async (userId) => {
+    const token = getToken();
+    if (!token) {
+      return { data: { isFollowing: false } };
+    }
+
+    const response = await authorizedFetch(`${API_BASE}/profiles/${userId}/follow/status`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return handleResponse(response);
+  },
+
+  /**
+   * Get user's followers list
+   * @param {string} userId - User ID
+   * @param {Object} params - Query params (limit, offset)
+   * @returns {Promise<Object>} Followers list with pagination
+   */
+  getFollowers: async (userId, params = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.limit) queryParams.append('limit', params.limit);
+    if (params.offset) queryParams.append('offset', params.offset);
+
+    const response = await authorizedFetch(`${API_BASE}/profiles/${userId}/followers?${queryParams}`);
+    return handleResponse(response);
+  },
+
+  /**
+   * Get users that this user is following
+   * @param {string} userId - User ID
+   * @param {Object} params - Query params (limit, offset)
+   * @returns {Promise<Object>} Following list with pagination
+   */
+  getFollowing: async (userId, params = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.limit) queryParams.append('limit', params.limit);
+    if (params.offset) queryParams.append('offset', params.offset);
+
+    const response = await authorizedFetch(`${API_BASE}/profiles/${userId}/following?${queryParams}`);
+    return handleResponse(response);
+  },
+
+  /**
+   * Get follower and following counts for a user
+   * @param {string} userId - User ID
+   * @returns {Promise<Object>} { followersCount, followingCount }
+   */
+  getFollowCounts: async (userId) => {
+    const response = await authorizedFetch(`${API_BASE}/profiles/${userId}/follow/counts`);
     return handleResponse(response);
   }
 };

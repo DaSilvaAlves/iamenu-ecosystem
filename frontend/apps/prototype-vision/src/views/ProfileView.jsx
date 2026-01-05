@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Briefcase, Calendar, Edit, Camera, X } from 'lucide-react';
+import { MapPin, Briefcase, Calendar, Edit, Camera, X, UserPlus, UserCheck } from 'lucide-react';
 import { CommunityAPI, Auth } from '../services/api';
 
 const ProfileView = ({ userId }) => {
@@ -11,6 +11,8 @@ const ProfileView = ({ userId }) => {
     const [error, setError] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
     const [isOwnProfile, setIsOwnProfile] = useState(false);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [followLoading, setFollowLoading] = useState(false);
 
     // Use test user ID if not provided (must match the JWT token userId)
     const currentUserId = userId || 'test-user-001';
@@ -32,8 +34,20 @@ const ProfileView = ({ userId }) => {
             setStats(statsData.data);
             setPosts(postsData.data || []);
 
-            // Check if it's own profile (in real app, compare with logged user)
-            setIsOwnProfile(true); // For now, always true in test mode
+            // Check if it's own profile (compare with logged user)
+            const loggedUserId = Auth.getUserId();
+            const isOwn = loggedUserId === currentUserId;
+            setIsOwnProfile(isOwn);
+
+            // Load follow status if not own profile
+            if (!isOwn) {
+                try {
+                    const followStatus = await CommunityAPI.getFollowStatus(currentUserId);
+                    setIsFollowing(followStatus.data?.isFollowing || false);
+                } catch (err) {
+                    console.error('Error loading follow status:', err);
+                }
+            }
 
             setError(null);
         } catch (err) {
@@ -41,6 +55,27 @@ const ProfileView = ({ userId }) => {
             setError(err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleFollowToggle = async () => {
+        try {
+            setFollowLoading(true);
+            if (isFollowing) {
+                await CommunityAPI.unfollowUser(currentUserId);
+                setIsFollowing(false);
+            } else {
+                await CommunityAPI.followUser(currentUserId);
+                setIsFollowing(true);
+            }
+            // Reload stats to update follower count
+            const statsData = await CommunityAPI.getUserStats(currentUserId);
+            setStats(statsData.data);
+        } catch (err) {
+            console.error('Error toggling follow:', err);
+            alert('Erro ao seguir/deixar de seguir utilizador');
+        } finally {
+            setFollowLoading(false);
         }
     };
 
@@ -81,7 +116,7 @@ const ProfileView = ({ userId }) => {
                         : 'linear-gradient(135deg, var(--primary) 0%, #667eea 100%)',
                     position: 'relative'
                 }}>
-                    {isOwnProfile && (
+                    {isOwnProfile ? (
                         <button
                             style={{
                                 position: 'absolute',
@@ -100,6 +135,30 @@ const ProfileView = ({ userId }) => {
                             onClick={() => setShowEditModal(true)}
                         >
                             <Edit size={16} /> Editar Perfil
+                        </button>
+                    ) : (
+                        <button
+                            style={{
+                                position: 'absolute',
+                                top: '16px',
+                                right: '16px',
+                                padding: '8px 16px',
+                                backgroundColor: isFollowing ? 'rgba(0,0,0,0.6)' : 'var(--primary)',
+                                border: `1px solid ${isFollowing ? 'rgba(255,255,255,0.3)' : 'var(--primary)'}`,
+                                borderRadius: '8px',
+                                color: 'white',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                cursor: followLoading ? 'not-allowed' : 'pointer',
+                                opacity: followLoading ? 0.6 : 1,
+                                transition: 'all 0.2s'
+                            }}
+                            onClick={handleFollowToggle}
+                            disabled={followLoading}
+                        >
+                            {isFollowing ? <UserCheck size={16} /> : <UserPlus size={16} />}
+                            {followLoading ? 'A processar...' : (isFollowing ? 'A Seguir' : 'Seguir')}
                         </button>
                     )}
                 </div>
@@ -232,12 +291,24 @@ const ProfileView = ({ userId }) => {
             )}
 
             {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px', marginBottom: '24px' }}>
                 <div className="glass-panel" style={{ padding: '24px', textAlign: 'center' }}>
                     <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
                         {stats?.postsCount || 0}
                     </div>
                     <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Posts</div>
+                </div>
+                <div className="glass-panel" style={{ padding: '24px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+                        {stats?.followersCount || 0}
+                    </div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Seguidores</div>
+                </div>
+                <div className="glass-panel" style={{ padding: '24px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+                        {stats?.followingCount || 0}
+                    </div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>A Seguir</div>
                 </div>
                 <div className="glass-panel" style={{ padding: '24px', textAlign: 'center' }}>
                     <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
@@ -249,7 +320,7 @@ const ProfileView = ({ userId }) => {
                     <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
                         {stats?.reactionsReceived || 0}
                     </div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Reações Recebidas</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Reações</div>
                 </div>
             </div>
 
