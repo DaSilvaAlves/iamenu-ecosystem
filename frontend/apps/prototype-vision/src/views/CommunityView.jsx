@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, Award, MoreHorizontal, Plus, Loader, User } from 'lucide-react';
+import { MessageSquare, Award, MoreHorizontal, Plus, Loader, User, Eye } from 'lucide-react';
 import { CommunityAPI, Auth } from '../services/api';
 import TextRenderer from '../components/TextRenderer';
 import MentionInput from '../components/MentionInput';
@@ -469,8 +469,16 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                         </div>
                     )}
 
-                    {!loading && posts.map(post => (
-                        <div key={post.id} className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
+                    {!loading && posts.map((post, index) => (
+                        <motion.div
+                            key={post.id}
+                            className="glass-panel"
+                            style={{ padding: '0', overflow: 'hidden' }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                            whileHover={{ y: -4, boxShadow: '0 8px 24px rgba(242, 84, 45, 0.15)' }}
+                        >
                             <div style={{ padding: '24px' }}>
                                 {/* Post Header */}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
@@ -595,8 +603,8 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                                 >
                                     <Award size={16} /> {post.reactions?.like || 0} Likes
                                 </div>
-                                <div style={{ fontSize: '0.75rem', marginLeft: 'auto' }}>
-                                    👁️ {post.views || 0} visualizações
+                                <div style={{ fontSize: '0.75rem', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)' }}>
+                                    <Eye size={14} /> {post.views || 0}
                                 </div>
                             </div>
 
@@ -688,7 +696,7 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                                     </div>
                                 </div>
                             )}
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
 
