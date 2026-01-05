@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Search, PlusCircle, MinusCircle, X } from 'lucide-react';
+import { Search, PlusCircle, MinusCircle, X, Send, Loader2 } from 'lucide-react';
 
 const RfqTab = () => {
     const [restaurantId, setRestaurantId] = useState('user-restaurante-a'); // Placeholder
@@ -17,6 +17,7 @@ const RfqTab = () => {
     const [productSearchLoading, setProductSearchLoading] = useState(false);
     const [newProductQuantity, setNewProductQuantity] = useState(1);
     const [newProductUnit, setNewProductUnit] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchProducts = useCallback(async (searchTerm) => {
         if (searchTerm.length < 2) {
@@ -83,10 +84,12 @@ const RfqTab = () => {
         e.preventDefault();
         setMessage('');
         setIsError(false);
+        setIsSubmitting(true);
 
         if (selectedProducts.length === 0) {
             setMessage('Por favor, adicione pelo menos um item ao pedido.');
             setIsError(true);
+            setIsSubmitting(false);
             return;
         }
 
@@ -127,6 +130,8 @@ const RfqTab = () => {
         } catch (error) {
             setMessage(`Erro ao criar Pedido de Orçamento: ${error.message}`);
             setIsError(true);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -320,12 +325,28 @@ const RfqTab = () => {
                         onChange={(e) => setNotes(e.target.value)}
                     ></textarea>
                 </div>
-                <button
+                <motion.button
                     type="submit"
-                    className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-lg shadow-primary/20"
+                    disabled={isSubmitting}
+                    className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 px-6 rounded-lg transition-all shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 group overflow-hidden relative"
+                    whileHover={{ scale: isSubmitting ? 1 : 1.02, boxShadow: '0 20px 40px rgba(242, 84, 45, 0.4)' }}
+                    whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
                 >
-                    Enviar Pedido de Orçamento
-                </button>
+                    <span className="relative z-10 flex items-center gap-3">
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 size={20} className="animate-spin" />
+                                Enviando...
+                            </>
+                        ) : (
+                            <>
+                                <Send size={20} className="group-hover:translate-x-1 transition-transform" />
+                                Enviar Pedido de Orçamento
+                            </>
+                        )}
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                </motion.button>
             </form>
 
             {message && (
