@@ -47,6 +47,7 @@ const VisaoEcossistemaView = () => {
         { name: 'Community', icon: 'groups', description: 'Rede social para restaurantes' },
         { name: 'Marketplace', icon: 'store', description: 'Fornecedores e cotações' },
         { name: 'Reputação Online', icon: 'star', description: 'Gestão de reviews com AI' },
+        { name: 'Escalas de Staff AI', icon: 'calendar_today', description: 'Gestão inteligente de equipas e turnos' },
         { name: 'Business Intelligence', icon: 'analytics', description: 'Dashboards e métricas' },
         { name: 'Food Cost', icon: 'restaurant', description: 'Gestão de custos e fichas técnicas' },
         { name: 'Marketing Planner', icon: 'campaign', description: 'Planeamento de marketing com AI' },
@@ -56,7 +57,7 @@ const VisaoEcossistemaView = () => {
     ];
 
     const estatisticas = [
-        { valor: '9+', label: 'Módulos Integrados' },
+        { valor: '10+', label: 'Módulos Integrados' },
         { valor: '100%', label: 'Foco em Restauração' },
         { valor: 'AI', label: 'Powered' },
         { valor: '∞', label: 'Potencial de Crescimento' },
