@@ -76,8 +76,13 @@ export const getSupplierById = async (supplierId: string) => {
 
 export const updateSupplier = async (supplierId: string, data: any) => {
   // Parse JSON strings from FormData (categories and certifications come as JSON strings)
-  const parsedCategories = typeof data.categories === 'string' ? JSON.parse(data.categories) : data.categories;
-  const parsedCertifications = typeof data.certifications === 'string' ? JSON.parse(data.certifications) : (data.certifications || []);
+  // Handle empty strings to avoid JSON.parse errors
+  const parsedCategories = typeof data.categories === 'string' && data.categories !== ''
+    ? JSON.parse(data.categories)
+    : (data.categories || []);
+  const parsedCertifications = typeof data.certifications === 'string' && data.certifications !== ''
+    ? JSON.parse(data.certifications)
+    : (data.certifications || []);
 
   // Sanitize data: convert empty strings to null for optional fields
   const sanitizedData: any = {
@@ -136,7 +141,7 @@ export const updateSupplier = async (supplierId: string, data: any) => {
   }
 
   if (data.minOrder && data.minOrder !== '') {
-    sanitizedData.minOrder = data.minOrder.toString();
+    sanitizedData.minOrder = parseFloat(data.minOrder);
   } else {
     sanitizedData.minOrder = null;
   }
