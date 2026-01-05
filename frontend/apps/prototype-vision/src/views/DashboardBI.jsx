@@ -1596,6 +1596,26 @@ const DashboardBI = ({ setView }) => {
             )}
           </div>
         </div>
+
+        {/* Categoria Vencedora - 1 col */}
+        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-3xl p-6 backdrop-blur-xl">
+          <h3 className="text-white/60 font-bold text-xs uppercase tracking-wider mb-4">🏆 Categoria Vencedora</h3>
+          <h2 className="text-2xl font-black text-white mb-6">Pratos de Peixe</h2>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <p className="text-white/60 text-xs uppercase tracking-wider mb-1">Total Receita</p>
+              <p className="text-white font-black text-lg">€18,450</p>
+            </div>
+            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <p className="text-white/60 text-xs uppercase tracking-wider mb-1">Margem Média</p>
+              <p className="text-white font-black text-lg">72%</p>
+            </div>
+            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <p className="text-white/60 text-xs uppercase tracking-wider mb-1">% Vendas</p>
+              <p className="text-white font-black text-lg">43%</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Alerts & Opportunities */}
