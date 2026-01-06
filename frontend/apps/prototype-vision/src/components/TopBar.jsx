@@ -88,7 +88,8 @@ const TopBar = () => {
     const navLinks = [
         { to: '/comunidade', label: 'Home' },
         { to: '/aulas', label: 'Cursos' },
-        { to: '/hubs', label: 'Hubs' }
+        { to: '/hubs', label: 'Hubs' },
+        { to: '/lab', label: 'Chat Comunidade' }
     ];
 
     return (
