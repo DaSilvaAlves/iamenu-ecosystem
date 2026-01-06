@@ -1,0 +1,8 @@
+{
+  "name": "iaMenu Hubs Regionais",
+  "description": "Uma plataforma de comunidade regional para donos de restaurantes partilharem dores, insights e soluções locais dentro do ecossistema iaMenu.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

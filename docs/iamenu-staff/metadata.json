@@ -1,0 +1,9 @@
+{
+  "name": "iaMenu Staff",
+  "description": "A comprehensive team management platform for the restaurant industry, featuring shift scheduling, shift swaps, onboarding, and internal communications.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
