@@ -151,7 +151,7 @@ const Sidebar = ({ selectedGroup, setSelectedGroup }) => {
             </div>
 
             <SidebarSection title="Comece por aqui">
-                <NavItem label="Onboarding iaMenu" icon={Zap} to="/onboarding" />
+                <NavItem label="Primeiros Passos iaMenu" icon={Zap} to="/onboarding" />
                 <NavItem label="Visão do Ecossistema" icon={Brain} to="/visao" />
             </SidebarSection>
 
@@ -159,10 +159,10 @@ const Sidebar = ({ selectedGroup, setSelectedGroup }) => {
                 <NavItem label="Reputação Online" icon={Star} to="/reputacao" />
                 <NavItem label="iaMenu PRO - Upgrade" icon={Zap} to="/upgrade" badge="PRO" />
                 <NavItem label="iaMenu Takeway" icon={Package} to="/takeway" badge="NOVO" />
-                <NavItem label="Food Cost & Fichas Técnicas" icon={Calculator} to="/foodcost" />
-                <NavItem label="Marketing Planner AI" icon={Target} to="/marketing" />
-                <NavItem label="GastroLens AI" icon={Camera} to="/gastrolens" badge="NOVO" />
-                <NavItem label="Dashboard Business Intel" icon={LayoutDashboard} to="/dashboard" />
+                <NavItem label="Custos & Fichas Técnica" icon={Calculator} to="/foodcost" />
+                <NavItem label="Plano de Marketing" icon={Target} to="/marketing" />
+                <NavItem label="Fotos & IA de Pratos" icon={Camera} to="/gastrolens" badge="NOVO" />
+                <NavItem label="Painel de Controlo do Negócio" icon={LayoutDashboard} to="/dashboard" />
                 <NavItem label="Escalas de Staff AI" icon={Users} to="/equipas" />
                 <NavItem label="Aulas ao VIVO" icon={Video} to="/aulas" />
             </SidebarSection>
@@ -202,9 +202,8 @@ const Sidebar = ({ selectedGroup, setSelectedGroup }) => {
             </SidebarSection>
 
             <SidebarSection title="Hub de Negócios">
-                <NavItem label="Marketplace Fornecedores" icon={ShoppingCart} to="/marketplace" />
-                <NavItem label="Hubs Regionais (Algarve)" icon={MapPin} to="/hubs" badge="5" />
-                <NavItem label="Chat Comunidade" icon={MessageSquare} to="/lab" badge="99+" />
+                <NavItem label="Rede de Fornecedores" icon={ShoppingCart} to="/marketplace" />
+                <NavItem label="Centros Regionais (Algarve)" icon={MapPin} to="/hubs" badge="5" />
             </SidebarSection>
 
             <div style={{
