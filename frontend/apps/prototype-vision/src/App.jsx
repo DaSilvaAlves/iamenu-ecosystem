@@ -47,7 +47,7 @@ const StandardPlaceholder = ({ title, icon: Icon }) => (
     </motion.div>
 );
 
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import SupplierDetail from './views/SupplierDetail';
 
 const App = () => {
@@ -56,6 +56,7 @@ const App = () => {
     const [selectedGroupId, setSelectedGroupId] = useState(null);
     const [showOnboarding, setShowOnboarding] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const onboardingCompleted = localStorage.getItem('iaMenu_onboarding_completed');
@@ -105,7 +106,7 @@ const App = () => {
                                         <Route path="/upgrade" element={<UpgradePROView />} />
                                         <Route path="/pagamentos" element={<PaymentsAutomationView />} />
                                         <Route path="/aulas" element={<Academy />} />
-                                        <Route path="/onboarding" element={<OnboardingView onComplete={() => { /* navigate to dashboard */ }} />} />
+                                        <Route path="/onboarding" element={<OnboardingView onComplete={() => navigate('/dashboard')} />} />
                                         <Route path="/visao" element={<VisaoEcossistemaView />} />
                                         <Route path="/reputacao" element={<ReputacaoOnlineView />} />
                                         <Route path="/equipas" element={<StaffAIView />} />
