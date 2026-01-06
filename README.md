@@ -181,19 +181,28 @@ iamenu-ecosystem/
 - [x] 3 PRDs completos (54 páginas)
 - [x] Railway account criado
 
-### 🚧 Fase 1: Hub Comunidade (Semanas 1-2)
-- [ ] Backend: Posts, Comentários, Grupos
-- [ ] Frontend: Dashboard, Feed, Grupos
-- [ ] Deploy staging Railway
-- [ ] Beta: 5 restauradores
+### ✅ Fase 1: Hub Comunidade (COMPLETO)
+- [x] Backend: Posts, Comentários, Grupos, Notificações
+- [x] Frontend: Dashboard, Feed, Grupos, Perfis
+- [x] Sistema de seguidores e reações
+- [x] Upload de imagens em posts
+- [x] Feed em tempo real
 
-### 📅 Fase 2: Marketplace (Semanas 3-4)
-- [ ] Backend: Fornecedores, Reviews, Comparação Preços
-- [ ] Frontend: Search, Perfil Fornecedor, Compare
-- [ ] Seed 20-30 fornecedores
-- [ ] Beta: Negociação coletiva
+### ✅ Fase 2: Marketplace (COMPLETO)
+- [x] Backend: Fornecedores, Reviews, RFQ System
+- [x] Frontend: Search, Perfil Fornecedor, RFQ
+- [x] Sistema de cotações (Request for Quote)
+- [x] Perfis públicos de fornecedores
+- [x] Upload de imagens (logo, header)
 
-### 📅 Fase 3: Academia (Semanas 5-6)
+### 🚧 Fase 3: Business Intelligence (EM DESENVOLVIMENTO)
+- [x] Backend: Dashboard, Analytics, Onboarding
+- [x] Frontend: Dashboard BI, Onboarding
+- [x] Métricas e insights de negócio
+- [ ] Integração completa com módulos
+- [ ] Relatórios avançados
+
+### 📅 Fase 4: Academia (PLANEADO)
 - [ ] Backend: Cursos, Progress Tracking, Certificados
 - [ ] Frontend: Player, Dashboard Cursos
 - [ ] Gravar 3 cursos (iaMenu 101, Negociação, Marketing)
@@ -204,6 +213,57 @@ iamenu-ecosystem/
 - [ ] Public launch redes sociais
 - [ ] Primeiros 3 clientes pagam €88/mês
 - [ ] Upgrade Railway Hobby Plan (€5-10/mês)
+
+---
+
+## 🔌 APIs Disponíveis
+
+### Portas dos Serviços:
+| Serviço | Porta | Base URL |
+|---------|-------|----------|
+| **Community API** | 3004 | http://localhost:3004/api/v1/community |
+| **Marketplace API** | 3005 | http://localhost:3005/api/v1/marketplace |
+| **Business API** | 3002 | http://localhost:3002/api/v1/business |
+| **Frontend** | 5173 | http://localhost:5173 |
+
+### Endpoints Principais:
+
+#### Community API (Porta 3004)
+```
+GET    /api/v1/community/posts              # Listar posts
+POST   /api/v1/community/posts              # Criar post
+GET    /api/v1/community/posts/:id          # Detalhes do post
+POST   /api/v1/community/posts/:id/like     # Dar like
+GET    /api/v1/community/groups             # Listar grupos
+GET    /api/v1/community/profiles/:userId   # Ver perfil
+GET    /api/v1/community/notifications      # Notificações
+```
+
+#### Marketplace API (Porta 3005)
+```
+GET    /api/v1/marketplace/suppliers        # Listar fornecedores
+GET    /api/v1/marketplace/suppliers/:id    # Detalhes fornecedor
+POST   /api/v1/marketplace/quotes/request   # Criar RFQ
+GET    /api/v1/marketplace/quotes/:id       # Detalhes cotação
+GET    /api/v1/marketplace/products         # Pesquisar produtos
+```
+
+#### Business API (Porta 3002)
+```
+GET    /api/v1/business/onboarding/status   # Status onboarding
+POST   /api/v1/business/onboarding/setup    # Configurar restaurante
+GET    /api/v1/business/dashboard/stats     # Estatísticas
+GET    /api/v1/business/dashboard/alerts    # Alertas
+GET    /api/v1/business/dashboard/top-products  # Top produtos
+```
+
+### Autenticação:
+Todos os endpoints protegidos requerem header:
+```
+Authorization: Bearer <token>
+```
+
+Token de desenvolvimento disponível em `frontend/apps/prototype-vision/src/config/devToken.js`
 
 ---
 
@@ -303,6 +363,6 @@ Proprietary - Todos direitos reservados © 2025 iaMenu
 
 ---
 
-**Status:** 🚧 Development (Semana 0 - Setup)
-**Última atualização:** 2025-12-18
-**Próximo milestone:** Hub Comunidade MVP (Semana 1-2)
+**Status:** 🚧 Development - Protótipo Funcional
+**Última atualização:** 2025-01-06
+**Próximo milestone:** Refinamento e Testes Beta
