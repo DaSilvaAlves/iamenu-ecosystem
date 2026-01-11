@@ -4,7 +4,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
     plugins: [react()],
     server: {
-        allowedHosts: 'all'
+        allowedHosts: ['prototype-vision-production.up.railway.app']
+    },
+    preview: {
+        allowedHosts: ['prototype-vision-production.up.railway.app']
     }
 
 })
