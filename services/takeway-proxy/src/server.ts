@@ -12,6 +12,17 @@ const port = process.env.PORT || 3006;
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.json({ 
+    status: "online",
+    message: "iaMenu Takeway Proxy is running",
+    endpoints: {
+      test: "/api/test-proxy",
+      supabase: "/api/supabase"
+    }
+  });
+});
+
 app.get("/api/test-proxy", (req, res) => {
   res.json({ message: "Proxy is working!" });
 });
