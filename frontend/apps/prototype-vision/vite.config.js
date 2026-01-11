@@ -4,6 +4,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
     plugins: [react()],
     server: {
-        allowedHosts: ['prototype-vision-production.up.railway.app']
+        allowedHosts: true
     }
 })
