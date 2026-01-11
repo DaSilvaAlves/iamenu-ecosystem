@@ -153,12 +153,133 @@ router.delete("/categories/:id", async (req, res) => {
             // Se existirem, retorne um erro informando que a categoria está em uso
             return res.status(409).json({ error: "Esta categoria não pode ser eliminada porque está a ser utilizada por um ou mais itens do menu." });
         }
-        
+
         // Se não houver itens de menu a usar a categoria, pode eliminá-la
         const { error: deleteError } = await supabase.from("categories").delete().eq("id", id);
         if (deleteError) throw deleteError;
 
         res.status(204).send();
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== DAILY SPECIALS ROUTES ====================
+
+// GET all daily specials
+// Returns items marked as daily specials, optionally filtered by date
+router.get("/daily-specials", async (req, res) => {
+    try {
+        const { date } = req.query;
+
+        let query = supabase
+            .from("menu_items")
+            .select("*, categories(name)")
+            .eq("is_daily_special", true)
+            .eq("available", true);
+
+        // Se uma data for fornecida, filtra por essa data
+        if (date) {
+            query = query.eq("special_date", date);
+        } else {
+            // Se não for fornecida data, retorna os pratos do dia de hoje
+            const today = new Date().toISOString().split('T')[0];
+            query = query.eq("special_date", today);
+        }
+
+        const { data, error } = await query.order("name");
+
+        if (error) throw error;
+        res.json(data);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// POST mark menu item as daily special
+// Body: { special_date: "2026-01-11", special_price?: 10.50 }
+router.post("/menu-items/:id/set-daily-special", async (req, res) => {
+    const { id } = req.params;
+    const { special_date, special_price } = req.body;
+
+    try {
+        // Validar que special_date foi fornecida
+        if (!special_date) {
+            return res.status(400).json({ error: "O campo 'special_date' é obrigatório." });
+        }
+
+        // Verificar se o item existe
+        const { data: item, error: fetchError } = await supabase
+            .from("menu_items")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+        if (fetchError || !item) {
+            return res.status(404).json({ error: "Item de menu não encontrado." });
+        }
+
+        // Atualizar o item para ser prato do dia
+        const updateData: any = {
+            is_daily_special: true,
+            special_date: special_date
+        };
+
+        // Se special_price for fornecido, adiciona ao update
+        if (special_price !== undefined) {
+            updateData.special_price = parseFloat(special_price);
+        }
+
+        const { data, error } = await supabase
+            .from("menu_items")
+            .update(updateData)
+            .eq("id", id)
+            .select();
+
+        if (error) throw error;
+
+        res.json({
+            message: "Prato marcado como prato do dia com sucesso.",
+            data: data[0]
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// DELETE remove menu item from daily specials
+router.delete("/menu-items/:id/remove-daily-special", async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Verificar se o item existe
+        const { data: item, error: fetchError } = await supabase
+            .from("menu_items")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+        if (fetchError || !item) {
+            return res.status(404).json({ error: "Item de menu não encontrado." });
+        }
+
+        // Remover flags de prato do dia
+        const { data, error } = await supabase
+            .from("menu_items")
+            .update({
+                is_daily_special: false,
+                special_date: null,
+                special_price: null
+            })
+            .eq("id", id)
+            .select();
+
+        if (error) throw error;
+
+        res.json({
+            message: "Prato removido dos pratos do dia com sucesso.",
+            data: data[0]
+        });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
