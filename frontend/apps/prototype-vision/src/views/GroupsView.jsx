@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import CommunityAPI from '../services/api';
+import CommunityAPI, { Auth, getMockGroups } from '../services/api';
+import { mockData } from '../services/mockData';
 
 const GroupsView = ({ onViewGroup }) => {
     const [groups, setGroups] = useState([]);
@@ -15,7 +16,7 @@ const GroupsView = ({ onViewGroup }) => {
     const [error, setError] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
-    const currentUserId = 'test-user-001';
+    const currentUserId = Auth.getUserId() || 'demo-user';
 
     useEffect(() => {
         fetchGroups();
@@ -24,13 +25,12 @@ const GroupsView = ({ onViewGroup }) => {
 
     const fetchGroups = async () => {
         try {
-            const response = await fetch('http://localhost:3004/api/v1/community/groups');
-            const data = await response.json();
-            if (data.success) {
-                setGroups(data.data);
-            }
+            const data = await CommunityAPI.getGroups();
+            setGroups(data.data || []);
         } catch (error) {
-            console.error('Erro ao carregar grupos:', error);
+            console.warn('API unavailable, using mock groups:', error.message);
+            // Fallback to mock data
+            setGroups(mockData.groups || []);
         } finally {
             setLoading(false);
         }
@@ -38,13 +38,15 @@ const GroupsView = ({ onViewGroup }) => {
 
     const fetchUserGroups = async () => {
         try {
-            const response = await fetch(`http://localhost:3004/api/v1/community/groups/user/${currentUserId}`);
-            const data = await response.json();
-            if (data.success) {
-                setUserGroups(data.data.map(g => g.id));
+            if (!currentUserId || currentUserId === 'demo-user') {
+                setUserGroups([]);
+                return;
             }
+            const data = await CommunityAPI.getUserGroups(currentUserId);
+            setUserGroups((data.data || []).map(g => g.id));
         } catch (error) {
-            console.error('Erro ao carregar grupos do utilizador:', error);
+            console.warn('Could not fetch user groups:', error.message);
+            setUserGroups([]);
         }
     };
 

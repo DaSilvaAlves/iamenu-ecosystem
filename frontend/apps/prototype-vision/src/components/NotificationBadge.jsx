@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
+import { CommunityAPI } from '../services/api';
 
 /**
  * NotificationBadge Component
@@ -9,21 +10,15 @@ const NotificationBadge = ({ onClick, className = '' }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Fetch unread count
+  // Fetch unread count using CommunityAPI
   const fetchUnreadCount = async () => {
     try {
-      const response = await fetch('http://localhost:3004/api/v1/community/notifications', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUnreadCount(data.unreadCount || 0);
-      }
+      const data = await CommunityAPI.getNotifications({ limit: 1 });
+      setUnreadCount(data.unreadCount || 0);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      // Silently fail - notifications are non-critical
+      console.warn('Could not fetch notifications:', error.message);
+      setUnreadCount(0);
     } finally {
       setLoading(false);
     }

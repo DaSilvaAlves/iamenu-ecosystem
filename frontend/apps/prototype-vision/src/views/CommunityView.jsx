@@ -1,9 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare, Award, MoreHorizontal, Plus, Loader, User, Eye } from 'lucide-react';
-import { CommunityAPI, Auth } from '../services/api';
+import { CommunityAPI, Auth, getImageUrl, isUsingMockData } from '../services/api';
+import { mockData } from '../services/mockData';
 import TextRenderer from '../components/TextRenderer';
 import MentionInput from '../components/MentionInput';
+
+// Helper to generate upcoming events based on current date
+const getUpcomingEvents = () => {
+    const now = new Date();
+    const events = [
+        { daysFromNow: 5, title: 'Webinar: IA na Gestão de Stocks', time: '15:00 WET' },
+        { daysFromNow: 12, title: 'Networking Algarve: Restauradores 4.0', time: '11:00 WET' },
+        { daysFromNow: 19, title: 'Workshop: Marketing Digital para Restaurantes', time: '10:00 WET' }
+    ];
+
+    return events.map(event => {
+        const eventDate = new Date(now);
+        eventDate.setDate(now.getDate() + event.daysFromNow);
+        const day = eventDate.getDate();
+        const months = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+        const month = months[eventDate.getMonth()];
+        return {
+            date: `${day} ${month}`,
+            title: event.title,
+            time: event.time
+        };
+    });
+};
+
+// Trending tags from mock data or defaults
+const getTrendingTags = () => {
+    return ['#DigitalGastro', '#Sustentabilidade', '#FoodCost', '#Inovação', '#StaffRetention'];
+};
 
 const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
     const [posts, setPosts] = useState([]);
@@ -24,6 +53,10 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
     const [feedTab, setFeedTab] = useState('all'); // 'all' ou 'mygroups'
     const [userGroups, setUserGroups] = useState([]);
     const [loadingGroups, setLoadingGroups] = useState(false);
+
+    // Cached sidebar data
+    const upcomingEvents = getUpcomingEvents();
+    const trendingTags = getTrendingTags();
 
     // Debounce search input
     useEffect(() => {
@@ -363,10 +396,7 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                         type="text"
                         placeholder="Pesquisar posts..."
                         value={searchInput}
-                        onChange={(e) => {
-                            console.log('Input changed:', e.target.value);
-                            setSearchInput(e.target.value);
-                        }}
+                        onChange={(e) => setSearchInput(e.target.value)}
                         style={{
                             width: '100%',
                             padding: '12px',
@@ -377,9 +407,6 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                             fontSize: '0.9rem'
                         }}
                     />
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                        Debug: "{searchInput}"
-                    </div>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
@@ -437,7 +464,7 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                     <div className="glass-panel" style={{ padding: '24px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-muted)', marginBottom: '16px' }}>
                             <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--border)' }}></div>
-                            <span style={{ fontSize: '0.9rem' }}>Vais partilhar algo hoje, Eurico?</span>
+                            <span style={{ fontSize: '0.9rem' }}>Vais partilhar algo hoje?</span>
                         </div>
                     </div>
 
@@ -496,13 +523,14 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                                         }}>
                                             {post.author?.profilePhoto ? (
                                                 <img
-                                                    src={`http://localhost:3004${post.author.profilePhoto}`}
+                                                    src={getImageUrl(post.author.profilePhoto)}
                                                     alt={post.author.displayName || 'User'}
                                                     style={{
                                                         width: '100%',
                                                         height: '100%',
                                                         objectFit: 'cover'
                                                     }}
+                                                    onError={(e) => { e.target.style.display = 'none'; }}
                                                 />
                                             ) : (
                                                 <User size={24} />
@@ -534,7 +562,7 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                                 {post.imageUrl && (
                                     <div style={{ marginBottom: '20px' }}>
                                         <img
-                                            src={`http://localhost:3004${post.imageUrl}`}
+                                            src={post.imageUrl.startsWith('http') ? post.imageUrl : getImageUrl(post.imageUrl)}
                                             alt={post.title}
                                             style={{
                                                 width: '100%',
@@ -543,6 +571,7 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                                                 borderRadius: '12px',
                                                 border: '1px solid var(--border)'
                                             }}
+                                            onError={(e) => { e.target.style.display = 'none'; }}
                                         />
                                     </div>
                                 )}
@@ -638,7 +667,9 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                                                         }}>
                                                             👤
                                                         </div>
-                                                        <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>Restaurador</span>
+                                                        <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>
+                                                            {comment.author?.displayName || 'Utilizador'}
+                                                        </span>
                                                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                                                             {formatTimeAgo(comment.createdAt)}
                                                         </span>
@@ -706,10 +737,7 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                     <div className="glass-panel" style={{ padding: '24px' }}>
                         <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '16px' }}>Eventos Próximos</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            {[
-                                { date: '28 JAN', title: 'Webinar: IA na Gestão de Stocks', time: '15:00 WET' },
-                                { date: '12 FEV', title: 'Networking Algarve: Restauradores 4.0', time: '11:00 WET' }
-                            ].map(event => (
+                            {upcomingEvents.map(event => (
                                 <div key={event.title} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                                     <div style={{
                                         backgroundColor: 'rgba(255,255,255,0.05)',
@@ -734,15 +762,22 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
                     <div className="glass-panel" style={{ padding: '24px' }}>
                         <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '16px' }}>Tendências</h3>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                            {['#DigitalGastro', '#EcoEfficiency', '#StaffRetention', '#MarketAI'].map(tag => (
-                                <span key={tag} style={{
-                                    fontSize: '0.75rem',
-                                    backgroundColor: 'rgba(255,255,255,0.05)',
-                                    padding: '4px 10px',
-                                    borderRadius: '12px',
-                                    color: 'var(--text-muted)',
-                                    cursor: 'pointer'
-                                }}>{tag}</span>
+                            {trendingTags.map(tag => (
+                                <span
+                                    key={tag}
+                                    onClick={() => setSearchInput(tag.replace('#', ''))}
+                                    style={{
+                                        fontSize: '0.75rem',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        padding: '4px 10px',
+                                        borderRadius: '12px',
+                                        color: 'var(--text-muted)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--primary)'}
+                                    onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.05)'}
+                                >{tag}</span>
                             ))}
                         </div>
                     </div>

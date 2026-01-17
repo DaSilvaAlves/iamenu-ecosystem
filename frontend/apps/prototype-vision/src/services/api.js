@@ -1,7 +1,15 @@
 // ===== COMMUNITY API CLIENT =====
-// Connects Prototype-Vision to Community API Backend (localhost:3004)
+// Connects Prototype-Vision to Community API Backend
+// Uses API_CONFIG for dynamic URL resolution (production vs development)
 
-const API_BASE = 'http://localhost:3004/api/v1/community';
+import { API_CONFIG } from '../config/api';
+import { mockData } from './mockData';
+
+const API_BASE = API_CONFIG.COMMUNITY_API;
+const API_BASE_URL = API_CONFIG.COMMUNITY_BASE;
+
+// Flag to track if we're in offline/mock mode
+let useMockData = false;
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {
@@ -92,6 +100,7 @@ export const CommunityAPI = {
 
   /**
    * Get all posts (paginated with search and filters)
+   * Falls back to mock data if API is unavailable
    * @param {Object} params - Query parameters
    * @param {number} params.limit - Items per page (default: 20)
    * @param {number} params.offset - Offset for pagination (default: 0)
@@ -103,15 +112,26 @@ export const CommunityAPI = {
    * @returns {Promise<Object>} Posts data with pagination
    */
   getPosts: async ({ limit = 20, offset = 0, groupId, userGroupIds, search, category, sortBy } = {}) => {
-    let url = `${API_BASE}/posts?limit=${limit}&offset=${offset}`;
-    if (groupId) url += `&groupId=${groupId}`;
-    if (userGroupIds) url += `&userGroupIds=${encodeURIComponent(userGroupIds)}`;
-    if (search) url += `&search=${encodeURIComponent(search)}`;
-    if (category) url += `&category=${encodeURIComponent(category)}`;
-    if (sortBy) url += `&sortBy=${sortBy}`;
+    // If we're in mock mode or API is unavailable, return mock data
+    if (useMockData) {
+      return getMockPosts({ limit, offset, search, category, sortBy });
+    }
 
-    const response = await authorizedFetch(url);
-    return handleResponse(response);
+    try {
+      let url = `${API_BASE}/posts?limit=${limit}&offset=${offset}`;
+      if (groupId) url += `&groupId=${groupId}`;
+      if (userGroupIds) url += `&userGroupIds=${encodeURIComponent(userGroupIds)}`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+      if (category) url += `&category=${encodeURIComponent(category)}`;
+      if (sortBy) url += `&sortBy=${sortBy}`;
+
+      const response = await authorizedFetch(url);
+      return handleResponse(response);
+    } catch (error) {
+      console.warn('API unavailable, falling back to mock data:', error.message);
+      useMockData = true;
+      return getMockPosts({ limit, offset, search, category, sortBy });
+    }
   },
 
   /**
@@ -702,6 +722,113 @@ export const Auth = {
   isAuthenticated: CommunityAPI.isAuthenticated,
   logout: CommunityAPI.logout,
   getTestToken: CommunityAPI.getTestToken
+};
+
+// ===== MOCK DATA HELPERS =====
+
+/**
+ * Get mock posts with filtering and sorting
+ */
+const getMockPosts = ({ limit = 20, offset = 0, search, category, sortBy } = {}) => {
+  let posts = [...mockData.posts];
+
+  // Apply search filter
+  if (search) {
+    const query = search.toLowerCase();
+    posts = posts.filter(p =>
+      p.title.toLowerCase().includes(query) ||
+      p.body.toLowerCase().includes(query)
+    );
+  }
+
+  // Apply category filter
+  if (category) {
+    posts = posts.filter(p => p.category === category);
+  }
+
+  // Apply sorting
+  if (sortBy === 'popular') {
+    posts.sort((a, b) => (b.reactions?.like || 0) - (a.reactions?.like || 0));
+  } else if (sortBy === 'commented') {
+    posts.sort((a, b) => (b._count?.comments || 0) - (a._count?.comments || 0));
+  }
+  // Default is 'recent' which is already the order
+
+  // Apply pagination
+  const paginatedPosts = posts.slice(offset, offset + limit);
+
+  return {
+    data: paginatedPosts,
+    pagination: {
+      total: posts.length,
+      limit,
+      offset,
+      hasMore: offset + limit < posts.length
+    }
+  };
+};
+
+/**
+ * Get mock comments for a post
+ */
+export const getMockComments = (postId) => {
+  const comments = mockData.comments[postId] || [];
+  return {
+    data: comments,
+    pagination: { total: comments.length }
+  };
+};
+
+/**
+ * Get mock groups
+ */
+export const getMockGroups = () => {
+  return {
+    data: mockData.groups,
+    pagination: { total: mockData.groups.length }
+  };
+};
+
+/**
+ * Get mock profile
+ */
+export const getMockProfile = () => {
+  return {
+    data: mockData.profile
+  };
+};
+
+// ===== IMAGE URL HELPERS =====
+
+/**
+ * Construct full image URL from relative path
+ * Handles both production (empty base) and development (localhost)
+ * @param {string} path - Relative path to image (e.g., /uploads/image.jpg)
+ * @returns {string} Full URL or empty string if no path
+ */
+export const getImageUrl = (path) => {
+  if (!path) return '';
+  // If it's already a full URL (https:// or http://), return as-is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  // If we're in mock mode or no base URL, return empty
+  if (useMockData || !API_BASE_URL) {
+    return '';
+  }
+  return `${API_BASE_URL}${path}`;
+};
+
+/**
+ * Check if we're currently using mock data
+ */
+export const isUsingMockData = () => useMockData;
+
+/**
+ * Force switch to mock data mode (for testing)
+ */
+export const enableMockMode = () => {
+  useMockData = true;
 };
 
 export default CommunityAPI;
