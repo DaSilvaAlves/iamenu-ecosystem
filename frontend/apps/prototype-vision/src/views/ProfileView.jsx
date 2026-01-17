@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Briefcase, Calendar, Edit, Camera, X, UserPlus, UserCheck } from 'lucide-react';
 import { CommunityAPI, Auth } from '../services/api';
+import { mockData } from '../services/mockData';
 
 const ProfileView = ({ userId }) => {
     const [profile, setProfile] = useState(null);
@@ -51,8 +52,13 @@ const ProfileView = ({ userId }) => {
 
             setError(null);
         } catch (err) {
-            console.error('Error loading profile:', err);
-            setError(err.message);
+            console.warn('API unavailable, using mock profile:', err.message);
+            // Fallback to mock data
+            setProfile(mockData.profile);
+            setStats(mockData.profile.stats);
+            setPosts(mockData.posts.slice(0, 5));
+            setIsOwnProfile(true);
+            setError(null);
         } finally {
             setLoading(false);
         }
