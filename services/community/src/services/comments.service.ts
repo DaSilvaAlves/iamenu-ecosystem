@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client-community';
+import { PrismaClient } from '../../prisma/generated/client';
 import { notificationsService } from './notifications.service';
 import { reactionsService } from './reactions.service';
 import { extractMentions, resolveMentions } from '../utils/mention.utils';
