@@ -88,7 +88,7 @@ export class OnboardingController {
       }
 
       // Usar PrismaClient diretamente
-      const { PrismaClient } = await import('@prisma/client-business');
+      const { PrismaClient } = await import('../../prisma/generated/client');
       const prisma = new PrismaClient();
 
       const restaurant = await prisma.restaurant.findUnique({

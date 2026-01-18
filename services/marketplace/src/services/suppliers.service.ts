@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client-marketplace'; // Use the generated client with the specific client name
+import { PrismaClient } from '../../prisma/generated/client'; // Use the generated client with the specific client name
 
 const prisma = new PrismaClient();
 
@@ -75,99 +75,133 @@ export const getSupplierById = async (supplierId: string) => {
 };
 
 export const updateSupplier = async (supplierId: string, data: any) => {
-  // Parse JSON strings from FormData (categories and certifications come as JSON strings)
-  // Handle empty strings to avoid JSON.parse errors
-  const parsedCategories = typeof data.categories === 'string' && data.categories !== ''
-    ? JSON.parse(data.categories)
-    : (data.categories || []);
-  const parsedCertifications = typeof data.certifications === 'string' && data.certifications !== ''
-    ? JSON.parse(data.certifications)
-    : (data.certifications || []);
+  try {
+    // Parse JSON strings from FormData (categories and certifications come as JSON strings)
+    // Handle empty strings to avoid JSON.parse errors
+    let parsedCategories: string[] = [];
+    let parsedCertifications: string[] = [];
 
-  // Sanitize data: convert empty strings to null for optional fields
-  const sanitizedData: any = {
-    companyName: data.companyName,
-    description: data.description,
-    categories: parsedCategories,
-    locationCity: data.locationCity,
-    locationRegion: data.locationRegion,
-    nationalDelivery: data.nationalDelivery === 'true' || data.nationalDelivery === true,
-    updatedAt: new Date(),
-  };
+    try {
+      parsedCategories = typeof data.categories === 'string' && data.categories !== ''
+        ? JSON.parse(data.categories)
+        : (Array.isArray(data.categories) ? data.categories : []);
+    } catch (e) {
+      console.error('Error parsing categories:', e);
+      parsedCategories = [];
+    }
 
-  // Handle logo and header images
-  if (data.logoUrl && data.logoUrl !== '') {
-    sanitizedData.logoUrl = data.logoUrl;
-  }
+    try {
+      parsedCertifications = typeof data.certifications === 'string' && data.certifications !== ''
+        ? JSON.parse(data.certifications)
+        : (Array.isArray(data.certifications) ? data.certifications : []);
+    } catch (e) {
+      console.error('Error parsing certifications:', e);
+      parsedCertifications = [];
+    }
 
-  if (data.headerImageUrl && data.headerImageUrl !== '') {
-    sanitizedData.headerImageUrl = data.headerImageUrl;
-  }
+    // Sanitize data: convert empty strings to null for optional fields
+    const sanitizedData: any = {
+      updatedAt: new Date(),
+    };
 
-  // Handle certifications (always set as array, even if empty)
-  sanitizedData.certifications = parsedCertifications;
+    // Only update fields that are provided and not empty
+    if (data.companyName && data.companyName !== '') {
+      sanitizedData.companyName = data.companyName;
+    }
 
-  // Only include optional fields if they have values
-  if (data.contactPhone && data.contactPhone !== '') {
-    sanitizedData.contactPhone = data.contactPhone;
-  } else {
-    sanitizedData.contactPhone = null;
-  }
+    if (data.description !== undefined) {
+      sanitizedData.description = data.description || null;
+    }
 
-  if (data.contactEmail && data.contactEmail !== '') {
-    sanitizedData.contactEmail = data.contactEmail;
-  } else {
-    sanitizedData.contactEmail = null;
-  }
+    if (parsedCategories.length > 0) {
+      sanitizedData.categories = parsedCategories;
+    }
 
-  if (data.contactWebsite && data.contactWebsite !== '') {
-    sanitizedData.contactWebsite = data.contactWebsite;
-  } else {
-    sanitizedData.contactWebsite = null;
-  }
+    if (data.locationCity && data.locationCity !== '') {
+      sanitizedData.locationCity = data.locationCity;
+    }
 
-  if (data.deliveryCost && data.deliveryCost !== '') {
-    sanitizedData.deliveryCost = data.deliveryCost;
-  } else {
-    sanitizedData.deliveryCost = null;
-  }
+    if (data.locationRegion && data.locationRegion !== '') {
+      sanitizedData.locationRegion = data.locationRegion;
+    }
 
-  if (data.deliveryFrequency && data.deliveryFrequency !== '') {
-    sanitizedData.deliveryFrequency = data.deliveryFrequency;
-  } else {
-    sanitizedData.deliveryFrequency = null;
-  }
+    // Handle boolean - check if it was explicitly set
+    if (data.nationalDelivery !== undefined) {
+      sanitizedData.nationalDelivery = data.nationalDelivery === 'true' || data.nationalDelivery === true;
+    }
 
-  if (data.minOrder && data.minOrder !== '') {
-    sanitizedData.minOrder = parseFloat(data.minOrder);
-  } else {
-    sanitizedData.minOrder = null;
-  }
+    // Handle logo and header images
+    if (data.logoUrl && data.logoUrl !== '') {
+      sanitizedData.logoUrl = data.logoUrl;
+    }
 
-  if (data.paymentTerms && data.paymentTerms !== '') {
-    sanitizedData.paymentTerms = data.paymentTerms;
-  } else {
-    sanitizedData.paymentTerms = null;
-  }
+    if (data.headerImageUrl && data.headerImageUrl !== '') {
+      sanitizedData.headerImageUrl = data.headerImageUrl;
+    }
 
-  // certifications already handled via parsedCertifications (line 109)
+    // Handle certifications (only update if provided)
+    if (data.certifications !== undefined) {
+      sanitizedData.certifications = parsedCertifications;
+    }
 
-  // Update supplier in database
-  const updatedSupplier = await prisma.supplier.update({
-    where: { id: supplierId },
-    data: sanitizedData,
-    include: {
-      reviews: {
-        orderBy: { createdAt: 'desc' },
+    // Handle optional string fields
+    if (data.contactPhone !== undefined) {
+      sanitizedData.contactPhone = data.contactPhone && data.contactPhone !== '' ? data.contactPhone : null;
+    }
+
+    if (data.contactEmail !== undefined) {
+      sanitizedData.contactEmail = data.contactEmail && data.contactEmail !== '' ? data.contactEmail : null;
+    }
+
+    if (data.contactWebsite !== undefined) {
+      sanitizedData.contactWebsite = data.contactWebsite && data.contactWebsite !== '' ? data.contactWebsite : null;
+    }
+
+    if (data.deliveryCost !== undefined) {
+      sanitizedData.deliveryCost = data.deliveryCost && data.deliveryCost !== '' ? data.deliveryCost : null;
+    }
+
+    if (data.deliveryFrequency !== undefined) {
+      sanitizedData.deliveryFrequency = data.deliveryFrequency && data.deliveryFrequency !== '' ? data.deliveryFrequency : null;
+    }
+
+    // Handle minOrder - must be a valid number or null
+    if (data.minOrder !== undefined) {
+      if (data.minOrder && data.minOrder !== '') {
+        const parsedMinOrder = parseFloat(data.minOrder);
+        // Only set if it's a valid number (not NaN)
+        sanitizedData.minOrder = !isNaN(parsedMinOrder) ? parsedMinOrder.toString() : null;
+      } else {
+        sanitizedData.minOrder = null;
+      }
+    }
+
+    if (data.paymentTerms !== undefined) {
+      sanitizedData.paymentTerms = data.paymentTerms && data.paymentTerms !== '' ? data.paymentTerms : null;
+    }
+
+    console.log('Updating supplier with data:', JSON.stringify(sanitizedData, null, 2));
+
+    // Update supplier in database
+    const updatedSupplier = await prisma.supplier.update({
+      where: { id: supplierId },
+      data: sanitizedData,
+      include: {
+        reviews: {
+          orderBy: { createdAt: 'desc' },
+        },
+        supplierProducts: {
+          include: { product: true },
+          orderBy: { updatedAt: 'desc' },
+        },
       },
-      supplierProducts: {
-        include: { product: true },
-        orderBy: { updatedAt: 'desc' },
-      },
-    },
-  });
+    });
 
-  return updatedSupplier;
+    return updatedSupplier;
+  } catch (error) {
+    console.error('Error updating supplier:', error);
+    throw error;
+  }
 };
 
 // TODO: Implement createSupplier, deleteSupplier

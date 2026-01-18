@@ -1,0 +1,165 @@
+// Prisma Schema - Community API - SQLite (Local Development)
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "./generated/client"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["community"]
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  authorId  String
+  groupId   String?
+  title     String
+  body      String
+  category  String
+  tags      String
+  imageUrl  String?
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  views     Int      @default(0)
+  likes     Int      @default(0)
+  useful    Int      @default(0)
+  thanks    Int      @default(0)
+
+  author   Profile   @relation("PostAuthor", fields: [authorId], references: [userId], onDelete: Cascade)
+  comments Comment[]
+  group    Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+  @@map("posts")
+  @@schema("community")
+}
+
+model Comment {
+  id              String   @id @default(uuid())
+  postId          String
+  authorId        String
+  parentCommentId String?
+  body            String
+  status          String   @default("active")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  likes           Int      @default(0)
+
+  post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parentComment Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies       Comment[] @relation("CommentReplies")
+
+  @@map("comments")
+  @@schema("community")
+}
+
+model Group {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  type        String   @default("public")
+  category    String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+  coverImage  String?
+
+  posts       Post[]
+  memberships GroupMembership[]
+
+  @@map("groups")
+  @@schema("community")
+}
+
+model GroupMembership {
+  groupId  String
+  userId   String
+  joinedAt DateTime @default(now())
+  role     String   @default("member")
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, userId])
+  @@map("group_memberships")
+  @@schema("community")
+}
+
+model Profile {
+  userId         String   @id
+  username       String?  @unique
+  restaurantName String?
+  locationCity   String?
+  locationRegion String?
+  restaurantType String?
+  bio            String?
+  profilePhoto   String?
+  coverPhoto     String?
+  badges         String?
+  role           String?  @default("user")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  posts Post[] @relation("PostAuthor")
+
+  @@map("profiles")
+  @@schema("community")
+}
+
+model Reaction {
+  id           String   @id @default(uuid())
+  userId       String
+  targetType   String
+  targetId     String
+  reactionType String
+  createdAt    DateTime @default(now())
+
+  @@unique([userId, targetType, targetId, reactionType])
+  @@map("reactions")
+  @@schema("community")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  body      String?
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+  @@schema("community")
+}
+
+model Report {
+  id         String    @id @default(uuid())
+  reporterId String
+  targetType String
+  targetId   String
+  reason     String
+  details    String?
+  status     String    @default("pending")
+  reviewedBy String?
+  reviewedAt DateTime?
+  notes      String?
+  createdAt  DateTime  @default(now())
+
+  @@map("reports")
+  @@schema("community")
+}
+
+model Follower {
+  id          String   @id @default(uuid())
+  followerId  String // User who is following
+  followingId String // User being followed
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("followers")
+  @@schema("community")
+}
