@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../prisma/generated/client';
+import { PrismaClient } from '@prisma/client';
 import { notificationsService } from './notifications.service';
 
 const prisma = new PrismaClient();

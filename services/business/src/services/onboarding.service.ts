@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../prisma/generated/client';
+import { PrismaClient } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import * as ExcelJS from 'exceljs';
 import fs from 'fs';
