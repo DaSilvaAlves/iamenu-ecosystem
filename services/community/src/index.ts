@@ -25,8 +25,6 @@ import { errorHandler } from './middleware/errorHandler';
 const app: Application = express();
 const PORT = process.env.PORT || 3004;
 
-console.log('🔄 [STARTUP] Loading Community API with UPDATED middleware v3...');
-
 // ===================================
 // Middleware
 // ===================================
@@ -45,11 +43,11 @@ app.use(cors({
 // Serve static files (uploaded images)
 app.use('/uploads', express.static('uploads'));
 
-// ⚠️ IMPORTANTE: Rota de profiles VEM ANTES do body-parser global
-// porque usa multer para file uploads (multipart/form-data)
+// Profiles router MUST come before body-parser because it uses
+// multer for file uploads (multipart/form-data)
 app.use('/api/v1/community/profiles', profilesRouter);
 
-// Body parsing global (para todas as outras rotas)
+// Body parsing global (for all other routes)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

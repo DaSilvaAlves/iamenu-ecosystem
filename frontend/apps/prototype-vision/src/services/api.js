@@ -23,8 +23,12 @@ const handleResponse = async (response) => {
 // Authorized fetch - automatically adds JWT token to requests
 const authorizedFetch = async (url, options = {}) => {
   const token = getToken();
+
+  // Don't set Content-Type for FormData - browser will set it with boundary
+  const isFormData = options.body instanceof FormData;
+
   const headers = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...options.headers,
   };
 

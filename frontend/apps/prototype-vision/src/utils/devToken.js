@@ -17,7 +17,8 @@ export const setDevToken = async () => {
   } catch (error) {
     console.warn('⚠️ DEV: Não foi possível obter token do backend. Usando fallback.');
     // Fallback token (caso backend não esteja rodando)
-    const FALLBACK_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LXVzZXItMDAxIiwiZW1haWwiOiJldXJpY29AaWFtZW51LnB0Iiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzY2ODkwNDc5LCJleHAiOjE3NjY5NzY4Nzl9.RjSe-BIyAxvBmMzO7tTDizfvfpZeiPtXsK5hlH-kFOY';
+    // Gerado com JWT_SECRET=T9NTWid03o5sBTtL, válido por 7 dias
+    const FALLBACK_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LXVzZXItMDAxIiwiZW1haWwiOiJldXJpY29AaWFtZW51LnB0Iiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzY4NzA3NzI1LCJleHAiOjE3NjkzMTI1MjV9.1THvsqVMIplZZEj4crTc5aqWFX_8w0ErQpBJqBAqWiQ';
     localStorage.setItem('auth_token', FALLBACK_TOKEN);
   }
 };
