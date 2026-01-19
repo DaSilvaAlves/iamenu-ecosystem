@@ -921,8 +921,8 @@ export class DashboardService {
     };
 
     // Classificação geral de performance
-    const scores = Object.values(comparisons).map(c => c.status === 'good' ? 1 : 0);
-    const totalScore = scores.reduce((sum, s) => sum + s, 0);
+    const scores = Object.values(comparisons).map(c => c.status === 'good' ? 1 : 0) as number[];
+    const totalScore = scores.reduce((sum: number, s: number) => sum + s, 0);
     const scorePercentage = (totalScore / scores.length) * 100;
 
     let performanceRating: 'excellent' | 'good' | 'average' | 'below' = 'average';

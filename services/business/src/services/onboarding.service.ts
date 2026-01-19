@@ -85,7 +85,7 @@ export class OnboardingService {
     });
 
     // Process menu
-    let products = [];
+    let products: any[] = [];
     if (data.menuUploadType === 'excel' && data.menuFile) {
       products = await this.processExcelMenu(restaurant.id, data.menuFile);
     } else if (data.menuItems && data.menuItems.length > 0) {
