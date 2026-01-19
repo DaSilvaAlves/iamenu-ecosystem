@@ -1,6 +1,7 @@
-import { PrismaClient } from '../../prisma/generated/client';
+import { PrismaClient, Prisma } from '../../prisma/generated/client';
 
 const prisma = new PrismaClient();
+const QueryMode = Prisma.QueryMode;
 
 // Helper function to calculate price trend
 function calculatePriceTrend(priceHistory: { date: Date; price: number }[]): string {
@@ -47,13 +48,13 @@ export const compareProducts = async (params: CompareProductsParams) => {
     where: {
       name: {
         contains: search.trim(),
-        mode: 'insensitive',
+        mode: QueryMode.insensitive,
       },
       AND: [
         ...(filtersArray.length > 0 ? [{
           OR: [
-            { category: { in: filtersArray, mode: 'insensitive' } },
-            { subcategory: { in: filtersArray, mode: 'insensitive' } },
+            { category: { in: filtersArray, mode: QueryMode.insensitive } },
+            { subcategory: { in: filtersArray, mode: QueryMode.insensitive } },
           ],
         }] : []),
         {
@@ -65,7 +66,7 @@ export const compareProducts = async (params: CompareProductsParams) => {
               ...(deliveryIncluded !== undefined && { deliveryIncluded: deliveryIncluded }),
               ...(paymentTerms && {
                 Supplier: {
-                  paymentTerms: { contains: paymentTerms, mode: 'insensitive' }
+                  paymentTerms: { contains: paymentTerms, mode: QueryMode.insensitive }
                 }
               })
             }
@@ -86,11 +87,11 @@ export const compareProducts = async (params: CompareProductsParams) => {
     take: 20,
   });
 
-  const comparativeProducts = products.map(product => {
-    const offers = product.supplierProducts.map(sp => {
-      const priceHistoryForOffer = product.priceHistory
-        .filter(ph => ph.supplierId === sp.supplierId)
-        .map(ph => ({ date: ph.date, price: ph.price.toNumber() }));
+  const comparativeProducts = products.map((product: any) => {
+    const offers = (product.supplierProducts || []).map((sp: any) => {
+      const priceHistoryForOffer = (product.priceHistory || [])
+        .filter((ph: any) => ph.supplierId === sp.supplierId)
+        .map((ph: any) => ({ date: ph.date, price: ph.price?.toNumber?.() || ph.price }));
 
       const priceTrend = calculatePriceTrend(priceHistoryForOffer);
 
@@ -130,11 +131,11 @@ export const getProducts = async (search?: string, category?: string, limit: num
   const where: any = {};
 
   if (search) {
-    where.name = { contains: search, mode: 'insensitive' };
+    where.name = { contains: search, mode: QueryMode.insensitive };
   }
 
   if (category) {
-    where.category = { contains: category, mode: 'insensitive' };
+    where.category = { contains: category, mode: QueryMode.insensitive };
   }
 
   const products = await prisma.product.findMany({
