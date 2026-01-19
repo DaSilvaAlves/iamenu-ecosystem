@@ -6,7 +6,7 @@ import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import path from 'path';
-import { PrismaClient } from '../../prisma/generated/client';
+import { PrismaClient } from '../prisma/generated/client';
 import { authenticateJWT } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
 
