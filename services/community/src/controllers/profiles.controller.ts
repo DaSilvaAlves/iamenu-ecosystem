@@ -12,7 +12,7 @@ export class ProfilesController {
    */
   async searchProfiles(req: Request, res: Response) {
     try {
-      const { q } = req.query;
+      const q = req.query.q as string | undefined;
 
       if (!q || q.length < 1) {
         return res.status(400).json({
@@ -21,7 +21,7 @@ export class ProfilesController {
         });
       }
 
-      const profiles = await profilesService.searchProfiles(q as string, 10);
+      const profiles = await profilesService.searchProfiles(q, 10);
 
       res.status(200).json({
         success: true,

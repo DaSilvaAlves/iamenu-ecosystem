@@ -247,7 +247,7 @@ export class PostsService {
         title: data.title,
         body: data.body,
         category: data.category,
-        tags: data.tags,
+        tags: Array.isArray(data.tags) ? JSON.stringify(data.tags) : data.tags,
       },
     });
 
