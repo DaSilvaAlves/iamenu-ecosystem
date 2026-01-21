@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import {
   ACHIEVEMENTS,
   calculateLevel,
@@ -10,8 +10,6 @@ import {
   type Achievement,
   type UserStats
 } from '../config/achievements';
-
-const prisma = new PrismaClient();
 
 /**
  * Gamification Service

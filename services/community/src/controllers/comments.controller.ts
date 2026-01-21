@@ -3,7 +3,6 @@ import { commentsService } from '../services/comments.service';
 import { notificationsService } from '../services/notifications.service';
 import { postsService } from '../services/posts.service';
 import { reactionsService } from '../services/reactions.service';
-import { PrismaClient } from '@prisma/client';
 
 /**
  * Comments Controller

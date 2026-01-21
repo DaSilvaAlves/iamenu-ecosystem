@@ -3,8 +3,7 @@ import { Check, Package, Smartphone, DollarSign, Clock, Zap, TrendingUp, Externa
 
 const TakewayLandingView = () => {
     const handleActivateTakeway = () => {
-        // Temporariamente desativado até a landing page de vendas estar pronta
-        alert('🚀 Em breve!\n\nA página do iaMenu Takeway está em desenvolvimento.\n\nSerás notificado quando estiver disponível.');
+        window.open('https://iamenu-takeway.vercel.app/', '_blank');
     };
 
     const benefits = [
@@ -107,7 +106,7 @@ const TakewayLandingView = () => {
                         color: 'rgba(255,255,255,0.4)',
                         marginTop: '15px'
                     }}>
-                        Produto independente do iaMenu PRO • A partir de 48€/mês
+                        Produto independente do iaMenu PRO
                     </p>
                 </div>
 
@@ -262,17 +261,6 @@ const TakewayLandingView = () => {
                         margin: '0 auto 30px'
                     }}>
                         Modelo de preço fixo mensal. Cada pedido que recebes, o lucro é 100% teu.
-                    </p>
-                    <div style={{
-                        fontSize: '4rem',
-                        fontWeight: '900',
-                        color: '#ff4d00',
-                        marginBottom: '10px'
-                    }}>
-                        A partir de 48€
-                    </div>
-                    <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '30px' }}>
-                        por mês • sem comissões por pedido
                     </p>
                     <button
                         onClick={handleActivateTakeway}

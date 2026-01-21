@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 export const getCollectiveBargains = async () => {
   const collectiveBargains = await prisma.collectiveBargain.findMany({

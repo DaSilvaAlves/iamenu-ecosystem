@@ -6,14 +6,13 @@ import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import path from 'path';
-import { PrismaClient } from '@prisma/client';
+import prisma from './lib/prisma';
 import { authenticateJWT } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
 
 const app: Application = express();
-const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3002;
 
 // Middleware

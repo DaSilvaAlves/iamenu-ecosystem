@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import { notificationsService } from './notifications.service';
 import { reactionsService } from './reactions.service';
 import { extractMentions, resolveMentions } from '../utils/mention.utils';
-
-const prisma = new PrismaClient();
 
 interface CreateCommentDto {
   postId: string;

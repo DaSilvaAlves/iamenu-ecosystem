@@ -1,6 +1,5 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import prisma, { Prisma } from '../lib/prisma';
 
-const prisma = new PrismaClient();
 const QueryMode = Prisma.QueryMode;
 
 // Helper function to calculate price trend

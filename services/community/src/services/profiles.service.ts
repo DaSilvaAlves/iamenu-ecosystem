@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import { gamificationService } from './gamification.service';
 import { followersService } from './followers.service';
-
-const prisma = new PrismaClient();
 
 export interface UpdateProfileDto {
   restaurantName?: string;

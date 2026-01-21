@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 
 /**
  * Extrair usernames mencionados do texto

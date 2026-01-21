@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 interface QuoteRequestData {
   restaurantId: string; // Will come from auth token in a real app
