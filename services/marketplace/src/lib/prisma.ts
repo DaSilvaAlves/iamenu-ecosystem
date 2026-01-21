@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '../../node_modules/.prisma-marketplace/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
