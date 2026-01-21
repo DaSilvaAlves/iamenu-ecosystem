@@ -18,14 +18,14 @@ const isProductionWithoutBackend = import.meta.env.PROD && !import.meta.env.VITE
 export const API_CONFIG = {
   // Backend API URLs
   // In production without env vars, use an invalid URL that will trigger the mock data fallback
-  COMMUNITY_API: import.meta.env.VITE_COMMUNITY_API_URL || (import.meta.env.PROD ? '/api/v1/community' : 'http://localhost:3004/api/v1/community'),
+  COMMUNITY_API: import.meta.env.VITE_COMMUNITY_API_URL || (import.meta.env.PROD ? 'https://iamenucommunity-api-production.up.railway.app/api/v1/community' : 'http://localhost:3004/api/v1/community'),
   MARKETPLACE_API: import.meta.env.VITE_MARKETPLACE_API_URL || (import.meta.env.PROD ? '/api/v1/marketplace' : 'http://localhost:3005/api/v1/marketplace'),
   BUSINESS_API: import.meta.env.VITE_BUSINESS_API_URL || (import.meta.env.PROD ? '/api/v1/business' : 'http://localhost:3002/api/v1/business'),
   ACADEMY_API: import.meta.env.VITE_ACADEMY_API_URL || (import.meta.env.PROD ? '/api/v1/academy' : 'http://localhost:3003/api/v1/academy'),
 
   // Base URLs without /api/v1 prefix
   // In production, we return empty string for base if no URL is provided, to avoid localhost mixed content
-  COMMUNITY_BASE: import.meta.env.VITE_COMMUNITY_API_URL?.replace('/api/v1/community', '') || (import.meta.env.PROD ? '' : 'http://localhost:3004'),
+  COMMUNITY_BASE: import.meta.env.VITE_COMMUNITY_API_URL?.replace('/api/v1/community', '') || (import.meta.env.PROD ? 'https://iamenucommunity-api-production.up.railway.app' : 'http://localhost:3004'),
   MARKETPLACE_BASE: import.meta.env.VITE_MARKETPLACE_API_URL?.replace('/api/v1/marketplace', '') || (import.meta.env.PROD ? '' : 'http://localhost:3005'),
 
   // Helper flag to check if we're in demo mode
