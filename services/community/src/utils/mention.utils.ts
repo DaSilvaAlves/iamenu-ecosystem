@@ -1,4 +1,4 @@
-import prisma from '../lib/prisma';
+import prisma, { PrismaClient } from '../lib/prisma';
 
 /**
  * Extrair usernames mencionados do texto
@@ -40,7 +40,7 @@ export async function resolveMentions(
   });
 
   const mentionMap = new Map<string, string>();
-  profiles.forEach(p => {
+  profiles.forEach((p: { username: string | null; userId: string }) => {
     if (p.username) {
       mentionMap.set(p.username, p.userId);
     }

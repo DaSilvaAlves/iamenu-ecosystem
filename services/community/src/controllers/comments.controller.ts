@@ -3,6 +3,7 @@ import { commentsService } from '../services/comments.service';
 import { notificationsService } from '../services/notifications.service';
 import { postsService } from '../services/posts.service';
 import { reactionsService } from '../services/reactions.service';
+import prisma from '../lib/prisma';
 
 /**
  * Comments Controller
@@ -186,7 +187,6 @@ export class CommentsController {
       // Create notification if reaction was added
       if (result.action === 'added') {
         try {
-          const prisma = new PrismaClient();
           // Get the comment to find the author
           const comment = await prisma.comment.findUnique({
             where: { id },
