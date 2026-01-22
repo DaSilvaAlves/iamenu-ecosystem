@@ -1,15 +1,10 @@
-/**
- * DEV ONLY - Token de teste para desenvolvimento
- * Remove em produção!
- */
+import { API_CONFIG } from '../config/api';
 
 export const setDevToken = async () => {
   // Buscar token fresco do backend (funciona em dev e produção)
   try {
-    // Em produção, usar Railway API; em dev, usar localhost
-    const apiUrl = import.meta.env.PROD
-      ? 'https://iamenucommunity-api-production.up.railway.app/api/v1/community/auth/test-token'
-      : 'http://localhost:3004/api/v1/community/auth/test-token';
+    // Usar a configuração centralizada que já trata dev vs prod corretamente
+    const apiUrl = `${API_CONFIG.COMMUNITY_API}/auth/test-token`;
 
     const response = await fetch(apiUrl);
     const data = await response.json();
