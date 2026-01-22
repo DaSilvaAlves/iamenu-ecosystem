@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, Bell, MessageSquare, Bookmark, User, X } from 'lucide-react';
 import { CommunityAPI, Auth } from '../services/api';
+import { getImageUrl } from '../utils/imageUtils';
 
 const TopBar = () => {
     const [showNotifications, setShowNotifications] = useState(false);
@@ -165,7 +166,7 @@ const TopBar = () => {
                 <div style={{ display: 'flex', gap: '16px', color: 'var(--text-muted)' }}>
                     {/* Notifications Dropdown - Code remains the same */}
                     <div ref={dropdownRef} style={{ position: 'relative' }}>
-                         <div
+                        <div
                             onClick={() => setShowNotifications(!showNotifications)}
                             style={{ position: 'relative', cursor: 'pointer' }}
                             className="hover:text-white"
@@ -207,7 +208,7 @@ const TopBar = () => {
                             }}>
                                 <div style={{ padding: '16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <h3 style={{ fontWeight: '600', fontSize: '1rem' }}>Notificações</h3>
-                                    {unreadCount > 0 && ( <button onClick={handleMarkAllAsRead} style={{ fontSize: '0.75rem', color: 'var(--primary)', cursor: 'pointer', background: 'none', border: 'none' }}> Marcar todas como lidas </button> )}
+                                    {unreadCount > 0 && (<button onClick={handleMarkAllAsRead} style={{ fontSize: '0.75rem', color: 'var(--primary)', cursor: 'pointer', background: 'none', border: 'none' }}> Marcar todas como lidas </button>)}
                                 </div>
                                 <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                                     {notifications.length === 0 ? (
@@ -217,9 +218,9 @@ const TopBar = () => {
                                             <div key={notif.id} onClick={() => !notif.read && handleMarkAsRead(notif.id)} style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', cursor: 'pointer', backgroundColor: notif.read ? 'transparent' : 'rgba(255,255,255,0.03)', transition: 'background-color 0.2s' }} className="hover:bg-white/5" >
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '4px' }}>
                                                     <span style={{ fontSize: '0.85rem', fontWeight: '600', color: notif.read ? 'var(--text-muted)' : 'white' }}> {notif.title} </span>
-                                                    {!notif.read && ( <div style={{ width: '8px', height: '8px', backgroundColor: 'var(--primary)', borderRadius: '50%', marginTop: '4px' }}></div> )}
+                                                    {!notif.read && (<div style={{ width: '8px', height: '8px', backgroundColor: 'var(--primary)', borderRadius: '50%', marginTop: '4px' }}></div>)}
                                                 </div>
-                                                {notif.body && ( <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px', lineHeight: '1.4' }}> {notif.body} </p> )}
+                                                {notif.body && (<p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px', lineHeight: '1.4' }}> {notif.body} </p>)}
                                                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}> {formatTimeAgo(notif.createdAt)} </span>
                                             </div>
                                         ))
@@ -250,7 +251,7 @@ const TopBar = () => {
                     >
                         {userProfile?.profilePhoto ? (
                             <img
-                                src={`http://localhost:3004${userProfile.profilePhoto}`}
+                                src={getImageUrl(userProfile.profilePhoto)}
                                 alt="Profile"
                                 style={{
                                     width: '100%',

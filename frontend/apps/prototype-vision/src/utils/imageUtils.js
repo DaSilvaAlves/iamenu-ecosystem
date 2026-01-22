@@ -1,3 +1,4 @@
+import { API_CONFIG } from '../config/api';
 
 /**
  * Image URL Helper
@@ -9,14 +10,8 @@ export const getImageUrl = (path) => {
     // If it's already a full URL, return it
     if (path.startsWith('http')) return path;
 
-    // In production, force a placeholder if the path likely came from a local upload
-    // or if we don't have a configured backend
-    if (import.meta.env.PROD) {
-        // If you had a CDN, you'd use it here. For now, use a placeholder
-        // or a static asset if you have one.
-        return 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1074';
-    }
-
-    // In development, use local backend
-    return `http://localhost:3004/uploads/${path}`;
+    // Use the configured base URL (Railway in prod, localhost in dev)
+    // Remove leading slash from path if base also ends with slash (though API_CONFIG.COMMUNITY_BASE usually doesn't)
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${API_CONFIG.COMMUNITY_BASE}${cleanPath}`;
 };

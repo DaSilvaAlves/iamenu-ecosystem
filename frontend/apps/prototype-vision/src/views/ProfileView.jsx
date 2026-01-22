@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Briefcase, Calendar, Edit, Camera, X, UserPlus, UserCheck } from 'lucide-react';
 import { CommunityAPI, Auth } from '../services/api';
 import { mockData } from '../services/mockData';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ProfileView = ({ userId }) => {
     const [profile, setProfile] = useState(null);
@@ -118,7 +119,7 @@ const ProfileView = ({ userId }) => {
                 <div style={{
                     height: '240px',
                     background: profile?.coverPhoto
-                        ? `url(http://localhost:3004${profile.coverPhoto}) center/cover`
+                        ? `url(${getImageUrl(profile.coverPhoto)}) center/cover`
                         : 'linear-gradient(135deg, var(--primary) 0%, #667eea 100%)',
                     position: 'relative'
                 }}>
@@ -179,7 +180,7 @@ const ProfileView = ({ userId }) => {
                             borderRadius: '50%',
                             border: '4px solid var(--bg-primary)',
                             background: profile?.profilePhoto
-                                ? `url(http://localhost:3004${profile.profilePhoto}) center/cover`
+                                ? `url(${getImageUrl(profile.profilePhoto)}) center/cover`
                                 : 'var(--border)',
                             display: 'flex',
                             alignItems: 'center',
@@ -230,10 +231,10 @@ const ProfileView = ({ userId }) => {
                         </p>
                     )}
                 </div>
-            </div>
+            </div >
 
             {/* Level & XP */}
-            <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px' }}>
+            < div className="glass-panel" style={{ padding: '24px', marginBottom: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <div>
                         <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Nível {stats?.level || 1}</span>
@@ -259,42 +260,44 @@ const ProfileView = ({ userId }) => {
                         transition: 'width 0.5s ease'
                     }} />
                 </div>
-            </div>
+            </div >
 
             {/* Badges */}
-            {stats?.unlockedBadges && stats.unlockedBadges.length > 0 && (
-                <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px' }}>
-                    <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '16px' }}>
-                        Badges Desbloqueados ({stats.unlockedBadges.length})
-                    </h3>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                        {stats.unlockedBadges.map(badge => (
-                            <div
-                                key={badge.id}
-                                className="glass-panel"
-                                style={{
-                                    padding: '12px 16px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '10px',
-                                    borderRadius: '12px',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    cursor: 'help'
-                                }}
-                                title={badge.description}
-                            >
-                                <span style={{ fontSize: '1.5rem' }}>{badge.icon}</span>
-                                <div>
-                                    <div style={{ fontSize: '0.9rem', fontWeight: '600' }}>{badge.name}</div>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                        +{badge.xpReward} XP
+            {
+                stats?.unlockedBadges && stats.unlockedBadges.length > 0 && (
+                    <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '16px' }}>
+                            Badges Desbloqueados ({stats.unlockedBadges.length})
+                        </h3>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                            {stats.unlockedBadges.map(badge => (
+                                <div
+                                    key={badge.id}
+                                    className="glass-panel"
+                                    style={{
+                                        padding: '12px 16px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px',
+                                        borderRadius: '12px',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        cursor: 'help'
+                                    }}
+                                    title={badge.description}
+                                >
+                                    <span style={{ fontSize: '1.5rem' }}>{badge.icon}</span>
+                                    <div>
+                                        <div style={{ fontSize: '0.9rem', fontWeight: '600' }}>{badge.name}</div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                            +{badge.xpReward} XP
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Stats */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px', marginBottom: '24px' }}>
@@ -362,19 +365,21 @@ const ProfileView = ({ userId }) => {
             </div>
 
             {/* Edit Modal */}
-            {showEditModal && (
-                <EditProfileModal
-                    profile={profile}
-                    onClose={() => setShowEditModal(false)}
-                    onSave={(updatedProfile) => {
-                        setProfile(updatedProfile);
-                        setShowEditModal(false);
-                        loadProfile(); // Reload to get fresh data
-                    }}
-                    userId={currentUserId}
-                />
-            )}
-        </motion.div>
+            {
+                showEditModal && (
+                    <EditProfileModal
+                        profile={profile}
+                        onClose={() => setShowEditModal(false)}
+                        onSave={(updatedProfile) => {
+                            setProfile(updatedProfile);
+                            setShowEditModal(false);
+                            loadProfile(); // Reload to get fresh data
+                        }}
+                        userId={currentUserId}
+                    />
+                )
+            }
+        </motion.div >
     );
 };
 
