@@ -32,6 +32,9 @@ COPY --from=builder --chown=appuser:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=appuser:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=appuser:nodejs /app/package.json ./package.json
 
+# Copy uploads directory
+COPY --chown=appuser:nodejs uploads ./uploads
+
 USER appuser
 
 EXPOSE 3001

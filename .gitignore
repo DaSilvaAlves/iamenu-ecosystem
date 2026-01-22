@@ -181,7 +181,7 @@ service-account.json
 # Custom iaMenu
 # ===================================
 # Upload directories (user content)
-uploads/
+# uploads/
 public/uploads/
 
 # Generated certificates (Academia)
