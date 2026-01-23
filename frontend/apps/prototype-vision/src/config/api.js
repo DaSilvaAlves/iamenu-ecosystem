@@ -16,18 +16,31 @@
 const isProductionWithoutBackend = import.meta.env.PROD && !import.meta.env.VITE_COMMUNITY_API_URL;
 
 // Check if we're in production based on URL to avoid build env issues
-const isVercel = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
+const isVercel = typeof window !== 'undefined' && (
+  window.location.hostname.includes('vercel.app') ||
+  window.location.hostname.includes('prototype-vision')
+);
 const isProd = import.meta.env.PROD || isVercel;
+
+console.log('🌐 Truth Seeker: Environment Detection ->', { isProd, isVercel, hostname: typeof window !== 'undefined' ? window.location.hostname : 'node' });
 
 export const API_CONFIG = {
   // Backend API URLs
-  COMMUNITY_API: import.meta.env.VITE_COMMUNITY_API_URL || (isProd ? 'https://iamenucommunity-api-production.up.railway.app/api/v1/community' : 'http://localhost:3004/api/v1/community'),
-  MARKETPLACE_API: import.meta.env.VITE_MARKETPLACE_API_URL || (isProd ? '/api/v1/marketplace' : 'http://localhost:3005/api/v1/marketplace'),
-  BUSINESS_API: import.meta.env.VITE_BUSINESS_API_URL || (isProd ? '/api/v1/business' : 'http://localhost:3002/api/v1/business'),
-  ACADEMY_API: import.meta.env.VITE_ACADEMY_API_URL || (isProd ? '/api/v1/academy' : 'http://localhost:3003/api/v1/academy'),
+  COMMUNITY_API: isVercel
+    ? 'https://iamenucommunity-api-production.up.railway.app/api/v1/community'
+    : (import.meta.env.VITE_COMMUNITY_API_URL || (isProd ? 'https://iamenucommunity-api-production.up.railway.app/api/v1/community' : 'http://localhost:3004/api/v1/community')),
+
+  MARKETPLACE_API: isVercel
+    ? 'https://iamenumarketplace-api-production.up.railway.app/api/v1/marketplace' // Assuming similar pattern
+    : (import.meta.env.VITE_MARKETPLACE_API_URL || (isProd ? '/api/v1/marketplace' : 'http://localhost:3005/api/v1/marketplace')),
+
+  BUSINESS_API: isProd ? '/api/v1/business' : 'http://localhost:3002/api/v1/business',
+  ACADEMY_API: isProd ? '/api/v1/academy' : 'http://localhost:3003/api/v1/academy',
 
   // Base URLs without /api/v1 prefix
-  COMMUNITY_BASE: import.meta.env.VITE_COMMUNITY_API_URL?.replace('/api/v1/community', '') || (isProd ? 'https://iamenucommunity-api-production.up.railway.app' : 'http://localhost:3004'),
+  COMMUNITY_BASE: isVercel
+    ? 'https://iamenucommunity-api-production.up.railway.app'
+    : (import.meta.env.VITE_COMMUNITY_API_URL?.replace('/api/v1/community', '') || (isProd ? 'https://iamenucommunity-api-production.up.railway.app' : 'http://localhost:3004')),
   MARKETPLACE_BASE: import.meta.env.VITE_MARKETPLACE_API_URL?.replace('/api/v1/marketplace', '') || (isProd ? '' : 'http://localhost:3005'),
 
   // Helper flag to check if we're in demo mode
