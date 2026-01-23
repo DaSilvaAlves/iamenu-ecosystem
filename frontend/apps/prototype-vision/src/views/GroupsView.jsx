@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import CommunityAPI, { Auth, getMockGroups } from '../services/api';
+import CommunityAPI, { Auth } from '../services/api';
+import { API_CONFIG } from '../config/api';
 import { mockData } from '../services/mockData';
 
 const GroupsView = ({ onViewGroup }) => {
@@ -149,9 +150,9 @@ const GroupsView = ({ onViewGroup }) => {
 
     const joinGroup = async (groupId) => {
         try {
-            const token = localStorage.getItem('auth_token') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LXVzZXItMDAxIiwiZW1haWwiOiJldXJpY29AaWFtZW51LnB0Iiwicm9sZSI6InJlc3RhdXJhZG9yIiwiaWF0IjoxNzY2NjM2MzU1LCJleHAiOjE3NjY3MjI3NTV9.7PG9LRK7y8UkhU1zpc7vHe1Zsf748NMp0cLFS2-vFLU';
+            const token = localStorage.getItem('auth_token');
 
-            const response = await fetch(`http://localhost:3004/api/v1/community/groups/${groupId}/join`, {
+            const response = await fetch(`${API_CONFIG.COMMUNITY_BASE}/api/v1/community/groups/${groupId}/join`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -177,9 +178,9 @@ const GroupsView = ({ onViewGroup }) => {
         if (!confirm('Tens a certeza que queres sair deste grupo?')) return;
 
         try {
-            const token = localStorage.getItem('auth_token') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LXVzZXItMDAxIiwiZW1haWwiOiJldXJpY29AaWFtZW51LnB0Iiwicm9sZSI6InJlc3RhdXJhZG9yIiwiaWF0IjoxNzY2NjM2MzU1LCJleHAiOjE3NjY3MjI3NTV9.7PG9LRK7y8UkhU1zpc7vHe1Zsf748NMp0cLFS2-vFLU';
+            const token = localStorage.getItem('auth_token');
 
-            const response = await fetch(`http://localhost:3004/api/v1/community/groups/${groupId}/leave`, {
+            const response = await fetch(`${API_CONFIG.COMMUNITY_BASE}/api/v1/community/groups/${groupId}/leave`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

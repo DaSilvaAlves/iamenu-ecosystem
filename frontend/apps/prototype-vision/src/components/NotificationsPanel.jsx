@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Bell, MessageCircle, Heart, Users, X, Check, Trash2 } from 'lucide-react';
+import { API_CONFIG } from '../config/api';
 
 /**
  * NotificationsPanel Component
@@ -10,12 +9,14 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(true);
   const panelRef = useRef(null);
 
+  const API_URL = `${API_CONFIG.COMMUNITY_BASE}/api/v1/community/notifications`;
+
   // Fetch notifications
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('http://localhost:3004/api/v1/community/notifications?limit=20', {
+      const response = await fetch(`${API_URL}?limit=20`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -33,10 +34,10 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
   // Mark notification as read
   const markAsRead = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3004/api/v1/community/notifications/${id}/read`, {
+      const response = await fetch(`${API_URL}/${id}/read`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -53,10 +54,10 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
   // Mark all as read
   const markAllAsRead = async () => {
     try {
-      const response = await fetch('http://localhost:3004/api/v1/community/notifications/read-all', {
+      const response = await fetch(`${API_URL}/read-all`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -73,10 +74,10 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
   // Delete notification
   const deleteNotification = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3004/api/v1/community/notifications/${id}`, {
+      const response = await fetch(`${API_URL}/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -181,9 +182,8 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
             {notifications.map((notif) => (
               <div
                 key={notif.id}
-                className={`p-4 hover:bg-gray-50 transition-colors ${
-                  !notif.read ? 'bg-blue-50' : ''
-                }`}
+                className={`p-4 hover:bg-gray-50 transition-colors ${!notif.read ? 'bg-blue-50' : ''
+                  }`}
               >
                 <div className="flex items-start gap-3">
                   {/* Icon */}

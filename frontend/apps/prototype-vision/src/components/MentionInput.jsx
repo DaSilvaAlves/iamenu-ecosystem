@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
 import { CommunityAPI } from '../services/api';
+import { API_CONFIG } from '../config/api';
 
 const MentionInput = ({
   value,
@@ -183,7 +183,7 @@ const MentionInput = ({
             >
               {user.profilePhoto && (
                 <img
-                  src={`http://localhost:3004${user.profilePhoto}`}
+                  src={`${API_CONFIG.COMMUNITY_BASE}${user.profilePhoto}`}
                   alt={user.username}
                   style={{
                     width: '32px',
