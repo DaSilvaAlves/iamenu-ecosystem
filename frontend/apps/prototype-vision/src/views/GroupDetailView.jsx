@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     ArrowLeft, Users, MapPin, Crown, Shield, UserPlus, UserMinus,
     Heart, MessageCircle, Eye, Send, X, Plus, MoreVertical, Edit2, Trash2
