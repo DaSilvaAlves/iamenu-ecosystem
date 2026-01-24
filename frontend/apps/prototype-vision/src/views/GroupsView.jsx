@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import CommunityAPI, { Auth } from '../services/api';
 import { API_CONFIG } from '../config/api';
 import { mockData } from '../services/mockData';

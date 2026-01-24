@@ -1,3 +1,5 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Bell, MessageCircle, Heart, Users, X, Check, Trash2 } from 'lucide-react';
 import { API_CONFIG } from '../config/api';
 
 /**

@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { CommunityAPI } from '../services/api';
 import { API_CONFIG } from '../config/api';
 
