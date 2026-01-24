@@ -31,20 +31,40 @@ export const API_CONFIG = {
     : (import.meta.env.VITE_COMMUNITY_API_URL || (isProd ? 'https://iamenucommunity-api-production.up.railway.app/api/v1/community' : 'http://localhost:3004/api/v1/community')),
 
   MARKETPLACE_API: isVercel
-    ? 'https://iamenumarketplace-api-production.up.railway.app/api/v1/marketplace' // Assuming similar pattern
-    : (import.meta.env.VITE_MARKETPLACE_API_URL || (isProd ? '/api/v1/marketplace' : 'http://localhost:3005/api/v1/marketplace')),
+    ? 'https://iamenumarketplace-api-production.up.railway.app/api/v1/marketplace'
+    : (import.meta.env.VITE_MARKETPLACE_API_URL || (isProd ? 'https://iamenumarketplace-api-production.up.railway.app/api/v1/marketplace' : 'http://localhost:3005/api/v1/marketplace')),
 
-  BUSINESS_API: isProd ? '/api/v1/business' : 'http://localhost:3002/api/v1/business',
-  ACADEMY_API: isProd ? '/api/v1/academy' : 'http://localhost:3003/api/v1/academy',
+  BUSINESS_API: isVercel
+    ? 'https://iamenubusiness-api-production.up.railway.app/api/v1/business'
+    : (import.meta.env.VITE_BUSINESS_API_URL || (isProd ? 'https://iamenubusiness-api-production.up.railway.app/api/v1/business' : 'http://localhost:3002/api/v1/business')),
+
+  ACADEMY_API: isVercel
+    ? 'https://iamenuacademy-api-production.up.railway.app/api/v1/academy'
+    : (import.meta.env.VITE_ACADEMY_API_URL || (isProd ? 'https://iamenuacademy-api-production.up.railway.app/api/v1/academy' : 'http://localhost:3003/api/v1/academy')),
+
+  TAKEAWAY_API: isVercel
+    ? 'https://takeway-proxy-production.up.railway.app/api/supabase'
+    : (import.meta.env.VITE_TAKEAWAY_API_URL || (isProd ? 'https://takeway-proxy-production.up.railway.app/api/supabase' : 'http://localhost:3006/api/supabase')),
 
   // Base URLs without /api/v1 prefix
   COMMUNITY_BASE: isVercel
     ? 'https://iamenucommunity-api-production.up.railway.app'
     : (import.meta.env.VITE_COMMUNITY_API_URL?.replace('/api/v1/community', '') || (isProd ? 'https://iamenucommunity-api-production.up.railway.app' : 'http://localhost:3004')),
-  MARKETPLACE_BASE: import.meta.env.VITE_MARKETPLACE_API_URL?.replace('/api/v1/marketplace', '') || (isProd ? '' : 'http://localhost:3005'),
+
+  MARKETPLACE_BASE: isVercel
+    ? 'https://iamenumarketplace-api-production.up.railway.app'
+    : (import.meta.env.VITE_MARKETPLACE_API_URL?.replace('/api/v1/marketplace', '') || (isProd ? 'https://iamenumarketplace-api-production.up.railway.app' : 'http://localhost:3005')),
 
   // Helper flag to check if we're in demo mode
   IS_DEMO_MODE: isProductionWithoutBackend
 };
+
+console.log('🔗 API URLs ->', {
+  Community: API_CONFIG.COMMUNITY_API,
+  Marketplace: API_CONFIG.MARKETPLACE_API,
+  Business: API_CONFIG.BUSINESS_API,
+  Academy: API_CONFIG.ACADEMY_API,
+  Takeaway: API_CONFIG.TAKEAWAY_API
+});
 
 export default API_CONFIG;

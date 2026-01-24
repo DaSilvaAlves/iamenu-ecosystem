@@ -225,7 +225,7 @@ const CommunityView = ({ selectedGroup, setSelectedGroup }) => {
         return labels[category] || category;
     };
 
-    
+
     const parseTags = (tags) => {
         if (!tags) return [];
         if (Array.isArray(tags)) return tags;

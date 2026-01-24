@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast'; // Import react-hot-toast
+import { API_CONFIG } from '../config/api';
 
 const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
     const { rfqId: paramRfqId } = useParams(); // Get rfqId from URL params
@@ -79,7 +80,7 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`http://localhost:3005/api/v1/marketplace/quotes/requests/${currentRfqId}/responses`);
+            const response = await fetch(`${API_CONFIG.MARKETPLACE_API}/quotes/requests/${currentRfqId}/responses`);
             if (!response.ok) {
                 const errorBody = await response.text();
                 console.error('API Error Response:', response.status, errorBody);
@@ -118,7 +119,7 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
                 return;
             }
 
-            const response = await fetch(`http://localhost:3005/api/v1/marketplace/quotes/${quoteId}/status`, {
+            const response = await fetch(`${API_CONFIG.MARKETPLACE_API}/quotes/${quoteId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -163,7 +164,7 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
                 return;
             }
 
-            const response = await fetch(`http://localhost:3005/api/v1/marketplace/quotes/${quoteId}/status`, {
+            const response = await fetch(`${API_CONFIG.MARKETPLACE_API}/quotes/${quoteId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -391,8 +392,8 @@ const ResponsesTab = ({ rfqId: propRfqId }) => { // Accept rfqId as a prop
                                         <td className="px-6 py-5 text-center">
                                             <span className={`inline-flex items-center gap-1.5 rounded px-2 py-1 text-xs font-bold uppercase tracking-wide
                                                         ${quote.status === 'sent' ? 'bg-yellow-900/20 border border-yellow-700/30 text-yellow-500' :
-                                                            quote.status === 'negotiation' ? 'bg-blue-900/20 border border-blue-700/30 text-blue-400' :
-                                                                'bg-gray-800 border border-gray-700 text-gray-400'}`}>
+                                                    quote.status === 'negotiation' ? 'bg-blue-900/20 border border-blue-700/30 text-blue-400' :
+                                                        'bg-gray-800 border border-gray-700 text-gray-400'}`}>
                                                 {quote.status}
                                             </span>
                                         </td>

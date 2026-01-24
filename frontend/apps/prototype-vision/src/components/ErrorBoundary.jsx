@@ -21,11 +21,11 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('ErrorBoundary caught:', error, errorInfo);
-    this.state = {
+    this.setState({
       hasError: true,
       error,
       errorInfo
-    };
+    });
   }
 
   handleReset = () => {
@@ -40,63 +40,84 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
+      console.error('CRITICAL RENDER ERROR:', this.state.error);
       return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 max-w-lg w-full border border-white/20">
-            {/* Icon */}
-            <div className="flex justify-center mb-6">
-              <div className="bg-red-500/20 p-4 rounded-full">
-                <AlertTriangle className="w-12 h-12 text-red-400" />
-              </div>
-            </div>
-
-            {/* Title */}
-            <h1 className="text-2xl font-bold text-white text-center mb-3">
-              Oops! Algo correu mal
-            </h1>
-            <p className="text-gray-300 text-center mb-6">
-              Encontrámos um erro inesperado. Não te preocupes, os teus dados estão seguros.
+        <div style={{
+          minHeight: '100vh',
+          backgroundColor: '#0a0a0a',
+          color: 'white',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          fontFamily: 'sans-serif'
+        }}>
+          <div style={{
+            backgroundColor: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            padding: '40px',
+            borderRadius: '20px',
+            maxWidth: '500px',
+            width: '100%',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '4rem', marginBottom: '20px' }}>⚠️</div>
+            <h1 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>Erro de Interface</h1>
+            <p style={{ color: '#a0a0a0', marginBottom: '30px' }}>
+              Encontrámos um problema ao desenhar a página no Vercel.
+              Os teus dados no servidor estão seguros.
             </p>
 
-            {/* Error details (dev only) */}
-            {import.meta.env.DEV && this.state.error && (
-              <div className="bg-black/40 rounded-lg p-4 mb-6 border border-red-500/30">
-                <p className="text-xs font-mono text-red-300 mb-2">
-                  {this.state.error.toString()}
-                </p>
-                {this.state.errorInfo && (
-                  <details className="text-xs font-mono text-gray-400">
-                    <summary className="cursor-pointer hover:text-gray-300">Stack trace</summary>
-                    <pre className="mt-2 whitespace-pre-wrap">
-                      {this.state.errorInfo.componentStack}
-                    </pre>
-                  </details>
-                )}
+            {this.state.error && (
+              <div style={{
+                textAlign: 'left',
+                backgroundColor: 'rgba(255,0,0,0.1)',
+                padding: '15px',
+                borderRadius: '10px',
+                marginBottom: '20px',
+                fontSize: '0.8rem',
+                color: '#ff6b6b',
+                whiteSpace: 'pre-wrap',
+                overflow: 'auto',
+                maxHeight: '200px'
+              }}>
+                <strong>Erro:</strong> {this.state.error.toString()}
               </div>
             )}
 
-            {/* Actions */}
-            <div className="flex gap-3">
+            <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={this.handleReset}
-                className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: '#ff4d00',
+                  border: 'none',
+                  borderRadius: '10px',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
               >
-                <RefreshCw className="w-5 h-5" />
                 Recarregar
               </button>
               <button
                 onClick={this.handleGoHome}
-                className="flex-1 bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-4 rounded-lg transition-colors border border-white/20 flex items-center justify-center gap-2"
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '10px',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
               >
-                <Home className="w-5 h-5" />
                 Início
               </button>
             </div>
-
-            {/* Footer */}
-            <p className="text-xs text-gray-400 text-center mt-6">
-              Se o problema persistir, contacta o suporte: suporte@iamenu.pt
-            </p>
           </div>
         </div>
       );

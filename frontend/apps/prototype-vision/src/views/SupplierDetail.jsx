@@ -16,6 +16,7 @@ import {
   Phone,
   Globe
 } from 'lucide-react';
+import { API_CONFIG } from '../config/api';
 
 function SupplierDetail() {
   const { id } = useParams();
@@ -28,7 +29,7 @@ function SupplierDetail() {
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
-        const response = await fetch(`http://localhost:3005/api/v1/marketplace/suppliers/${id}`);
+        const response = await fetch(`${API_CONFIG.MARKETPLACE_API}/suppliers/${id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -127,7 +128,7 @@ function SupplierDetail() {
               className="h-56 bg-cover bg-center relative"
               style={{
                 backgroundImage: supplier.headerImageUrl
-                  ? `url(http://localhost:3005${supplier.headerImageUrl})`
+                  ? `url(${API_CONFIG.MARKETPLACE_BASE}${supplier.headerImageUrl})`
                   : 'linear-gradient(135deg, #1a4d2e 0%, #2d5a3d 100%)'
               }}
             >
@@ -138,7 +139,7 @@ function SupplierDetail() {
                 <div className="size-28 rounded-xl bg-surface p-3 shadow-2xl border border-border flex items-center justify-center shrink-0">
                   {supplier.logoUrl ? (
                     <img
-                      src={`http://localhost:3005${supplier.logoUrl}`}
+                      src={`${API_CONFIG.MARKETPLACE_BASE}${supplier.logoUrl}`}
                       alt={supplier.companyName}
                       className="w-full h-full object-contain rounded-lg"
                     />
@@ -214,11 +215,10 @@ function SupplierDetail() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
-                    activeTab === tab.id
+                  className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === tab.id
                       ? 'border-primary text-primary'
                       : 'border-transparent text-text-muted hover:text-white'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                   {tab.badge !== undefined && (
@@ -486,9 +486,8 @@ function SupplierDetail() {
             <div className="pt-4 border-t border-border flex items-center justify-center relative z-10">
               <button
                 onClick={() => setIsFavorite(!isFavorite)}
-                className={`flex items-center gap-2 text-sm font-medium group transition-colors ${
-                  isFavorite ? 'text-red-500' : 'text-text-muted hover:text-red-500'
-                }`}
+                className={`flex items-center gap-2 text-sm font-medium group transition-colors ${isFavorite ? 'text-red-500' : 'text-text-muted hover:text-red-500'
+                  }`}
               >
                 <Heart
                   size={18}

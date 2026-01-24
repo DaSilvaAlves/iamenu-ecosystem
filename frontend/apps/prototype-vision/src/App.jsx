@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import DashboardBI from './views/DashboardBI';
@@ -18,12 +19,13 @@ import UpgradePROView from './views/UpgradePROView';
 import TourRapidoView from './views/TourRapidoView';
 import OnboardingView from './views/OnboardingView';
 import Marketplace from './views/Marketplace';
-import ResponsesTab from './views/ResponsesTab'; // Adicionar import para ResponsesTab
+import ResponsesTab from './views/ResponsesTab';
 import TakewayLandingView from './views/TakewayLandingView';
 import ReputacaoOnlineView from './views/ReputacaoOnlineView';
 import HubsRegionaisView from './views/HubsRegionaisView';
 import VisaoEcossistemaView from './views/VisaoEcossistemaView';
 import StaffAIView from './views/StaffAIView';
+import SupplierDetail from './views/SupplierDetail';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -47,10 +49,8 @@ const StandardPlaceholder = ({ title, icon: Icon }) => (
     </motion.div>
 );
 
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
-import SupplierDetail from './views/SupplierDetail';
-
 const App = () => {
+    console.log('📱 App: Render Cycle Start');
     // State for features not yet migrated to router state
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [selectedGroupId, setSelectedGroupId] = useState(null);

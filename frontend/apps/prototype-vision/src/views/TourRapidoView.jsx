@@ -117,13 +117,12 @@ const OnboardingView = ({ onComplete, onSkip }) => {
             <button
               key={step.id}
               onClick={() => setCurrentStep(index)}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                index === currentStep
-                  ? 'w-12 bg-[#10b981]'
-                  : index < currentStep
+              className={`h-2 rounded-full transition-all duration-300 ${index === currentStep
+                ? 'w-12 bg-[#10b981]'
+                : index < currentStep
                   ? 'w-8 bg-[#10b981]/50'
                   : 'w-8 bg-white/20'
-              }`}
+                }`}
             />
           ))}
         </div>
@@ -139,9 +138,13 @@ const OnboardingView = ({ onComplete, onSkip }) => {
             className="text-center"
           >
             {/* Emoji Icon */}
-            <div className="text-8xl mb-6 animate-bounce-slow">
+            <motion.div
+              className="text-8xl mb-6"
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
               {currentStepData.emoji}
-            </div>
+            </motion.div>
 
             {/* Title */}
             <h1 className="text-5xl font-black text-white mb-3 tracking-tight">
@@ -209,20 +212,6 @@ const OnboardingView = ({ onComplete, onSkip }) => {
           </motion.div>
         </AnimatePresence>
       </div>
-
-      <style jsx>{`
-        @keyframes bounce-slow {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-        .animate-bounce-slow {
-          animation: bounce-slow 2s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 };
