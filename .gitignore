@@ -176,6 +176,8 @@ service-account.json
 *.backup
 *.old
 *.tmp
+.env.*.backup
+.env.*.bak
 
 # ===================================
 # Custom iaMenu
