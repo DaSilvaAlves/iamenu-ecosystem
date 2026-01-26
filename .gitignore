@@ -205,3 +205,6 @@ take-away-express-order/
 !.gitkeep
 !.env.example
 !README.md
+
+# AIOS Framework
+.aios-core/
