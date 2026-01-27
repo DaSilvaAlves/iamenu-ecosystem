@@ -202,4 +202,131 @@ export const updateSupplier = async (supplierId: string, data: any) => {
   }
 };
 
-// TODO: Implement createSupplier, deleteSupplier
+// ===================================
+// Create Supplier
+// ===================================
+
+interface CreateSupplierData {
+  userId: string;
+  companyName: string;
+  description?: string;
+  categories?: string[];
+  locationCity?: string;
+  locationRegion?: string;
+  nationalDelivery?: boolean;
+  contactPhone?: string;
+  contactEmail?: string;
+  contactWebsite?: string;
+  logoUrl?: string;
+  headerImageUrl?: string;
+  productsDescription?: string;
+  certifications?: string[];
+  deliveryZones?: string[];
+  deliveryCost?: string;
+  deliveryFrequency?: string;
+  minOrder?: number;
+  paymentTerms?: string;
+}
+
+export const createSupplier = async (data: CreateSupplierData) => {
+  // Validate required fields
+  if (!data.userId || !data.companyName) {
+    throw new Error('userId and companyName are required');
+  }
+
+  // Check if user already has a supplier profile
+  const existingSupplier = await prisma.supplier.findFirst({
+    where: { userId: data.userId },
+  });
+
+  if (existingSupplier) {
+    throw new Error('User already has a supplier profile');
+  }
+
+  const supplier = await prisma.supplier.create({
+    data: {
+      userId: data.userId,
+      companyName: data.companyName,
+      description: data.description || null,
+      categories: data.categories || [],
+      locationCity: data.locationCity || null,
+      locationRegion: data.locationRegion || null,
+      nationalDelivery: data.nationalDelivery || false,
+      contactPhone: data.contactPhone || null,
+      contactEmail: data.contactEmail || null,
+      contactWebsite: data.contactWebsite || null,
+      logoUrl: data.logoUrl || null,
+      headerImageUrl: data.headerImageUrl || null,
+      productsDescription: data.productsDescription || null,
+      certifications: data.certifications || [],
+      deliveryZones: data.deliveryZones || [],
+      deliveryCost: data.deliveryCost || null,
+      deliveryFrequency: data.deliveryFrequency || null,
+      minOrder: data.minOrder || null,
+      paymentTerms: data.paymentTerms || null,
+    },
+    include: {
+      reviews: true,
+      supplierProducts: {
+        include: { product: true },
+      },
+    },
+  });
+
+  return supplier;
+};
+
+// ===================================
+// Delete Supplier
+// ===================================
+
+export const deleteSupplier = async (supplierId: string, userId?: string) => {
+  // Check if supplier exists
+  const supplier = await prisma.supplier.findUnique({
+    where: { id: supplierId },
+    include: {
+      reviews: true,
+      supplierProducts: true,
+      quotes: true,
+    },
+  });
+
+  if (!supplier) {
+    return null;
+  }
+
+  // If userId is provided, verify ownership
+  if (userId && supplier.userId !== userId) {
+    throw new Error('Unauthorized: You can only delete your own supplier profile');
+  }
+
+  // Delete related records first (cascade)
+  await prisma.$transaction(async (tx) => {
+    // Delete reviews
+    await tx.review.deleteMany({
+      where: { supplierId },
+    });
+
+    // Delete supplier products
+    await tx.supplierProduct.deleteMany({
+      where: { supplierId },
+    });
+
+    // Delete quotes
+    await tx.quote.deleteMany({
+      where: { supplierId },
+    });
+
+    // Delete price history
+    await tx.priceHistory.deleteMany({
+      where: { supplierId },
+    });
+
+    // Finally delete the supplier
+    await tx.supplier.delete({
+      where: { id: supplierId },
+    });
+  });
+
+  return { deleted: true, supplierId };
+};
