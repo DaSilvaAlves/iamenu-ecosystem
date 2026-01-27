@@ -18,7 +18,7 @@ import dashboardRouter from './routes/dashboard';
 import { authenticateJWT } from './middleware/auth';
 
 const app: Application = express();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3004;
 
 // ===================================
 // Middleware

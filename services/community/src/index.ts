@@ -23,7 +23,7 @@ import { authenticateJWT } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
 
 const app: Application = express();
-const PORT = process.env.PORT || 3004;
+const PORT = process.env.PORT || 3001;
 
 // ===================================
 // Middleware

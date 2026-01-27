@@ -61,7 +61,7 @@ services:
       NODE_ENV: development
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/iamenu?schema=community
       JWT_SECRET: dev-secret-change-in-production
-      CORS_ORIGIN: http://localhost:3000
+      CORS_ORIGIN: http://localhost:5173
     depends_on:
       postgres:
         condition: service_healthy
@@ -84,7 +84,7 @@ services:
       NODE_ENV: development
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/iamenu?schema=marketplace
       JWT_SECRET: dev-secret-change-in-production
-      CORS_ORIGIN: http://localhost:3000
+      CORS_ORIGIN: http://localhost:5173
     depends_on:
       postgres:
         condition: service_healthy
@@ -107,7 +107,30 @@ services:
       NODE_ENV: development
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/iamenu?schema=academy
       JWT_SECRET: dev-secret-change-in-production
-      CORS_ORIGIN: http://localhost:3000
+      CORS_ORIGIN: http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+      core:
+        condition: service_started
+
+  # ===================================
+  # Business API (Node.js)
+  # ===================================
+  business:
+    build:
+      context: ./services/business
+      dockerfile: Dockerfile
+    container_name: iamenu-business
+    restart: unless-stopped
+    ports:
+      - '3004:3004'
+    environment:
+      PORT: 3004
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/iamenu?schema=business
+      JWT_SECRET: dev-secret-change-in-production
+      CORS_ORIGIN: http://localhost:5173
     depends_on:
       postgres:
         condition: service_healthy
