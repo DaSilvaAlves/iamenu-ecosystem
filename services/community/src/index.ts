@@ -173,7 +173,32 @@ const server = app.listen(Number(PORT), '0.0.0.0', () => {
   `);
 });
 
-// Graceful shutdown
+// ===================================
+// Error Handling
+// ===================================
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason: Error | any, promise: Promise<any>) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error(reason instanceof Error ? reason.stack : reason);
+  // Log to external service (Sentry, etc) in production
+  // Gracefully exit to allow process manager to restart
+  process.exit(1);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error: Error) => {
+  console.error('❌ Uncaught Exception:', error.message);
+  console.error(error.stack);
+  // Log to external service (Sentry, etc) in production
+  // Gracefully exit to allow process manager to restart
+  process.exit(1);
+});
+
+// ===================================
+// Graceful Shutdown
+// ===================================
+
 process.on('SIGTERM', () => {
   console.log('SIGTERM signal received: closing HTTP server');
   server.close(() => {

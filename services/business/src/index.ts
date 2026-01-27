@@ -128,7 +128,7 @@ app.use((req: Request, res: Response) => {
 // Start Server
 // ===================================
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`
 ╔══════════════════════════════════════════╗
 ║   iaMenu Business Intelligence API       ║
@@ -138,6 +138,31 @@ app.listen(PORT, () => {
 ╚══════════════════════════════════════════╝
   `);
 });
+
+// ===================================
+// Error Handling
+// ===================================
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason: Error | any, promise: Promise<any>) => {
+  console.error('❌ Unhandled Rejection:', reason instanceof Error ? reason.message : reason);
+  if (reason instanceof Error) console.error(reason.stack);
+  process.exit(1);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error: Error) => {
+  console.error('❌ Uncaught Exception:', error.message);
+  console.error(error.stack);
+  process.exit(1);
+});
+
+// ===================================
+// Graceful Shutdown
+// ===================================
+
+process.on('SIGTERM', () => server.close(() => process.exit(0)));
+process.on('SIGINT', () => server.close(() => process.exit(0)));
 
 export default app;
 // Railway rebuild Mon, Jan 19, 2026  9:46:56 PM
