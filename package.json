@@ -15,7 +15,11 @@
     "dev:academy": "npm run dev --workspace=@iamenu/academy-api",
     "dev:frontend": "npm run dev --workspace=prototype-vision",
     "build": "npm run build --workspaces",
-    "test": "npm run test --workspaces",
+    "test": "npm run test --workspaces --if-present",
+    "test:community": "npm run test --workspace=@iamenu/community-api",
+    "test:marketplace": "npm run test --workspace=@iamenu/marketplace-api",
+    "lint": "eslint services/*/src --ext .ts --fix",
+    "lint:check": "eslint services/*/src --ext .ts",
     "prisma:generate": "npm run prisma:generate --workspaces",
     "prisma:migrate": "npm run prisma:migrate --workspaces",
     "prisma:seed": "npm run prisma:seed --workspaces",
@@ -23,7 +27,8 @@
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
     "clean": "npm run clean --workspaces && rm -rf node_modules",
-    "setup": "npm install && npm run prisma:generate"
+    "setup": "npm install && npm run prisma:generate",
+    "aios": "node .aios-core/cli-runner.js"
   },
   "keywords": [
     "iamenu",
@@ -36,8 +41,12 @@
   "author": "Eurico Alves <euricojsalves@gmail.com>",
   "license": "UNLICENSED",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
     "concurrently": "^8.2.2",
-    "cross-env": "^10.1.0"
+    "cross-env": "^10.1.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -48,6 +57,7 @@
     "url": "https://github.com/DaSilvaAlves/iamenu-ecosystem.git"
   },
   "dependencies": {
+    "ajv-formats": "^3.0.1",
     "node-fetch": "^3.3.2"
   }
 }
