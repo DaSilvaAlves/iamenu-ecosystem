@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { onboardingService, OnboardingData } from '../services/onboarding.service';
+import prisma from '../lib/prisma';
 
 export class OnboardingController {
   /**
@@ -86,10 +87,6 @@ export class OnboardingController {
           error: 'Authentication required'
         });
       }
-
-      // Usar PrismaClient diretamente
-      const { PrismaClient } = await import('@prisma/client');
-      const prisma = new PrismaClient();
 
       const restaurant = await prisma.restaurant.findUnique({
         where: { userId: req.user.userId },

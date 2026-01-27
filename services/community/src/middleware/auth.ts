@@ -24,14 +24,11 @@ export const authenticateJWT = (
   res: Response,
   next: NextFunction
 ): void => {
-  console.log('DEBUG: authenticateJWT called for URL:', req.originalUrl); // New debug log
   try {
     // Get token from header: "Authorization: Bearer <token>"
     const authHeader = req.headers.authorization;
-    console.log('DEBUG: Authorization Header:', authHeader); // New debug log
 
     if (!authHeader) {
-      console.log('DEBUG: No token provided, returning 401'); // New debug log
       res.status(401).json({
         error: 'Unauthorized',
         message: 'No token provided',
@@ -43,7 +40,6 @@ export const authenticateJWT = (
     const parts = authHeader.split(' ');
 
     if (parts.length !== 2 || parts[0] !== 'Bearer') {
-      console.log('DEBUG: Token malformatted, returning 401'); // New debug log
       res.status(401).json({
         error: 'Unauthorized',
         message: 'Token malformatted',
@@ -53,14 +49,12 @@ export const authenticateJWT = (
     }
 
     const token = parts[1];
-    console.log('DEBUG: Token extracted:', token ? token.substring(0, 10) + '...' : 'N/A'); // New debug log
 
     // Validate token
     const JWT_SECRET = process.env.JWT_SECRET;
-    // console.log('DEBUG: JWT_SECRET used for verification:', JWT_SECRET); // Avoid logging sensitive secret
 
     if (!JWT_SECRET) {
-      console.error('DEBUG: JWT_SECRET is undefined inside authenticateJWT, throwing error'); // New debug log
+      console.error('JWT_SECRET not configured');
       throw new Error('JWT_SECRET not configured in environment variables');
     }
 
@@ -72,7 +66,6 @@ export const authenticateJWT = (
       iat: number;
       exp: number;
     };
-    console.log('DEBUG: Token decoded:', decoded); // New debug log
 
     // Attach user info to request
     req.user = {
@@ -80,13 +73,10 @@ export const authenticateJWT = (
       email: decoded.email,
       role: decoded.role
     };
-    console.log('DEBUG: req.user set:', req.user); // New debug log
 
     // Continue to next middleware/route
-    console.log('DEBUG: authenticateJWT passing to next()'); // New debug log
     next();
   } catch (error) {
-    console.error('DEBUG: Error caught in authenticateJWT:', error); // New debug log
     if (error instanceof jwt.JsonWebTokenError) {
       res.status(403).json({
         error: 'Forbidden',

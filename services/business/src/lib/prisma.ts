@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 // Singleton pattern to prevent multiple PrismaClient instances
 const globalForPrisma = globalThis as unknown as {
@@ -13,5 +13,4 @@ if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 
-export { PrismaClient, Prisma };
 export default prisma;

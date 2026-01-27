@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import * as XLSX from 'xlsx';
 import * as ExcelJS from 'exceljs';
 import fs from 'fs';
-
-const prisma = new PrismaClient();
 
 export interface OnboardingData {
   userId: string;

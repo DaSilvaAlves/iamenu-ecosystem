@@ -50,15 +50,27 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Multer setup for file uploads (Excel)
+// Allowed MIME types for Excel files
+const ALLOWED_EXCEL_MIMES = [
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+  'application/vnd.ms-excel', // .xls
+  'application/octet-stream', // Some browsers send this for Excel files
+];
+
 const upload = multer({
   dest: 'uploads/',
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    if (ext === '.xlsx' || ext === '.xls') {
+    const isValidExt = ext === '.xlsx' || ext === '.xls';
+    const isValidMime = ALLOWED_EXCEL_MIMES.includes(file.mimetype);
+
+    if (isValidExt && isValidMime) {
       cb(null, true);
-    } else {
+    } else if (!isValidExt) {
       cb(new Error('Only Excel files (.xlsx, .xls) are allowed'));
+    } else {
+      cb(new Error(`Invalid file type. Received: ${file.mimetype}`));
     }
   }
 });
