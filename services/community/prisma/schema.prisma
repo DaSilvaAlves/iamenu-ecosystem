@@ -32,6 +32,10 @@ model Post {
   comments Comment[]
   group    Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
+  @@index([authorId])
+  @@index([groupId])
+  @@index([category])
+  @@index([createdAt(sort: Desc)])
   @@map("posts")
   @@schema("community")
 }
@@ -51,6 +55,9 @@ model Comment {
   parentComment Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
   replies       Comment[] @relation("CommentReplies")
 
+  @@index([postId])
+  @@index([authorId])
+  @@index([createdAt(sort: Desc)])
   @@map("comments")
   @@schema("community")
 }
@@ -129,6 +136,9 @@ model Notification {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 
+  @@index([userId])
+  @@index([userId, read])
+  @@index([createdAt(sort: Desc)])
   @@map("notifications")
   @@schema("community")
 }
@@ -146,6 +156,9 @@ model Report {
   notes      String?
   createdAt  DateTime  @default(now())
 
+  @@index([status])
+  @@index([targetType, targetId])
+  @@index([createdAt(sort: Desc)])
   @@map("reports")
   @@schema("community")
 }
