@@ -9,10 +9,11 @@
     "frontend/packages/*"
   ],
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 concurrently \"npm run dev:community\" \"npm run dev:marketplace\" \"npm run dev:academy\" \"npm run dev:frontend\"",
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 concurrently \"npm run dev:community\" \"npm run dev:marketplace\" \"npm run dev:academy\" \"npm run dev:business\" \"npm run dev:frontend\"",
     "dev:community": "npm run dev --workspace=@iamenu/community-api",
     "dev:marketplace": "npm run dev --workspace=@iamenu/marketplace-api",
     "dev:academy": "npm run dev --workspace=@iamenu/academy-api",
+    "dev:business": "npm run dev --workspace=@iamenu/business-api",
     "dev:frontend": "npm run dev --workspace=prototype-vision",
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces --if-present",
