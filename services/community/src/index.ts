@@ -1,4 +1,5 @@
 import express, { Application, Request, Response } from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -21,6 +22,9 @@ import moderationRouter from './routes/moderation';
 // Import middleware
 import { authenticateJWT } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
+
+// Import WebSocket service
+import { websocketService } from './services/websocket.service';
 
 const app: Application = express();
 const PORT = process.env.PORT || 3001;
@@ -99,7 +103,11 @@ app.get('/health', (req: Request, res: Response) => {
     service: 'community-api',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    websocket: {
+      enabled: true,
+      onlineUsers: websocketService.getOnlineCount()
+    }
   });
 });
 
@@ -156,7 +164,13 @@ app.use(errorHandler);
 // Server Start
 // ===================================
 
-const server = app.listen(Number(PORT), '0.0.0.0', () => {
+// Create HTTP server (needed for Socket.io)
+const httpServer = createServer(app);
+
+// Initialize WebSocket
+websocketService.initialize(httpServer);
+
+const server = httpServer.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`
 ╔═══════════════════════════════════════════════════╗
 ║                                                   ║
@@ -166,6 +180,7 @@ const server = app.listen(Number(PORT), '0.0.0.0', () => {
 ║   Env:     ${process.env.NODE_ENV || 'development'}                    ║
 ║   Health:  http://localhost:${PORT}/health           ║
 ║   API:     http://localhost:${PORT}/api/v1/community ║
+║   WebSocket: ws://localhost:${PORT}                  ║
 ║                                                   ║
 ║   Status:  ✅ Running                            ║
 ║                                                   ║

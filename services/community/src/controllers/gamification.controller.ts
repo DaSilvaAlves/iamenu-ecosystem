@@ -28,24 +28,115 @@ export class GamificationController {
   }
 
   /**
-   * GET /api/v1/community/gamification/:userId
+   * GET /api/v1/community/gamification/leaderboard
+   * Get global leaderboard
+   */
+  async getLeaderboard(req: Request, res: Response) {
+    try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      const leaderboard = await gamificationService.getLeaderboard(limit, offset);
+
+      res.status(200).json({
+        success: true,
+        data: leaderboard,
+        pagination: {
+          limit,
+          offset,
+          hasMore: leaderboard.length === limit,
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch leaderboard',
+      });
+    }
+  }
+
+  /**
+   * GET /api/v1/community/gamification/user/:userId
    * Get gamification data for a user
    */
   async getUserGamification(req: Request, res: Response) {
     try {
       const { userId } = req.params;
 
-      const data = await gamificationService.getGamificationData(userId);
+      const [data, rank, history] = await Promise.all([
+        gamificationService.getGamificationData(userId),
+        gamificationService.getUserRank(userId),
+        gamificationService.getPointsHistory(userId, 10),
+      ]);
 
       res.status(200).json({
         success: true,
-        data,
+        data: {
+          ...data,
+          rank,
+          recentPoints: history,
+        },
       });
     } catch (error) {
       console.error('Error fetching user gamification:', error);
       res.status(500).json({
         success: false,
         error: 'Failed to fetch user gamification data',
+      });
+    }
+  }
+
+  /**
+   * GET /api/v1/community/gamification/user/:userId/history
+   * Get points history for a user
+   */
+  async getPointsHistory(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+      const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
+
+      const history = await gamificationService.getPointsHistory(userId, limit);
+
+      res.status(200).json({
+        success: true,
+        data: history,
+      });
+    } catch (error) {
+      console.error('Error fetching points history:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch points history',
+      });
+    }
+  }
+
+  /**
+   * GET /api/v1/community/gamification/user/:userId/rank
+   * Get user's rank and nearby users
+   */
+  async getUserRank(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+      const range = Math.min(parseInt(req.query.range as string) || 5, 10);
+
+      const [rank, nearby] = await Promise.all([
+        gamificationService.getUserRank(userId),
+        gamificationService.getLeaderboardAroundUser(userId, range),
+      ]);
+
+      res.status(200).json({
+        success: true,
+        data: {
+          rank,
+          nearby,
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching user rank:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch user rank',
       });
     }
   }

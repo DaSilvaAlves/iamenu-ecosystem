@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma';
+import { websocketService } from './websocket.service';
 
 export interface CreateNotificationDto {
   userId: string;
@@ -11,10 +12,11 @@ export interface CreateNotificationDto {
 /**
  * Notifications Service
  * Handles all database operations for notifications
+ * Now with real-time WebSocket delivery
  */
 export class NotificationsService {
   /**
-   * Create a new notification
+   * Create a new notification and send via WebSocket
    */
   async createNotification(data: CreateNotificationDto) {
     const notification = await prisma.notification.create({
@@ -25,6 +27,16 @@ export class NotificationsService {
         body: data.body,
         link: data.link,
       },
+    });
+
+    // Send real-time notification via WebSocket
+    websocketService.sendNotification(data.userId, {
+      id: notification.id,
+      type: notification.type,
+      title: notification.title,
+      body: notification.body || undefined,
+      link: notification.link || undefined,
+      createdAt: notification.createdAt
     });
 
     return notification;

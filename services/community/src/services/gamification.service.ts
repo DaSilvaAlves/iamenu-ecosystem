@@ -11,9 +11,18 @@ import {
   type UserStats
 } from '../config/achievements';
 
+// Points awarded for different actions
+const POINTS_CONFIG = {
+  POST_CREATED: 10,
+  COMMENT_ADDED: 2,
+  REACTION_RECEIVED: 5,
+  STREAK_BONUS_7: 50,   // 7-day streak bonus
+  STREAK_BONUS_30: 200, // 30-day streak bonus
+};
+
 /**
  * Gamification Service
- * Handles badges, levels, and XP calculations
+ * Handles badges, levels, XP, points, and streaks
  */
 export class GamificationService {
   /**
@@ -163,6 +172,246 @@ export class GamificationService {
    */
   getAllAchievements(): Achievement[] {
     return ACHIEVEMENTS;
+  }
+
+  // ============================================
+  // POINTS SYSTEM
+  // ============================================
+
+  /**
+   * Award points to a user for an action
+   */
+  async awardPoints(
+    userId: string,
+    points: number,
+    reason: string,
+    referenceId?: string
+  ): Promise<void> {
+    // Record in points history
+    await prisma.pointsHistory.create({
+      data: {
+        userId,
+        points,
+        reason,
+        referenceId,
+      },
+    });
+
+    // Update user points cache
+    await this.updateUserPointsCache(userId);
+
+    // Update streak
+    await this.updateStreak(userId);
+  }
+
+  /**
+   * Award points when a post is created
+   */
+  async onPostCreated(userId: string, postId: string): Promise<void> {
+    await this.awardPoints(userId, POINTS_CONFIG.POST_CREATED, 'post_created', postId);
+    await this.checkAndAwardBadges(userId);
+  }
+
+  /**
+   * Award points when a comment is added
+   */
+  async onCommentAdded(userId: string, commentId: string): Promise<void> {
+    await this.awardPoints(userId, POINTS_CONFIG.COMMENT_ADDED, 'comment_added', commentId);
+    await this.checkAndAwardBadges(userId);
+  }
+
+  /**
+   * Award points when a reaction is received
+   */
+  async onReactionReceived(userId: string, reactionId: string): Promise<void> {
+    await this.awardPoints(userId, POINTS_CONFIG.REACTION_RECEIVED, 'reaction_received', reactionId);
+    await this.checkAndAwardBadges(userId);
+  }
+
+  /**
+   * Update the cached user points
+   */
+  private async updateUserPointsCache(userId: string): Promise<void> {
+    // Calculate total XP from history
+    const totalPoints = await prisma.pointsHistory.aggregate({
+      where: { userId },
+      _sum: { points: true },
+    });
+
+    const totalXP = totalPoints._sum.points || 0;
+    const level = calculateLevel(totalXP);
+
+    // Upsert user points
+    await prisma.userPoints.upsert({
+      where: { userId },
+      update: {
+        totalXP,
+        level,
+        lastActiveAt: new Date(),
+      },
+      create: {
+        userId,
+        totalXP,
+        level,
+        currentStreak: 0,
+        longestStreak: 0,
+      },
+    });
+  }
+
+  /**
+   * Update user streak
+   */
+  private async updateStreak(userId: string): Promise<void> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Record today's activity
+    await prisma.userStreak.upsert({
+      where: {
+        userId_date: { userId, date: today },
+      },
+      update: {
+        actionsCount: { increment: 1 },
+      },
+      create: {
+        userId,
+        date: today,
+        actionsCount: 1,
+      },
+    });
+
+    // Calculate current streak
+    const streaks = await prisma.userStreak.findMany({
+      where: { userId },
+      orderBy: { date: 'desc' },
+      take: 60, // Check last 60 days max
+    });
+
+    let currentStreak = 0;
+    const checkDate = new Date(today);
+
+    for (const streak of streaks) {
+      const streakDate = new Date(streak.date);
+      streakDate.setHours(0, 0, 0, 0);
+
+      if (streakDate.getTime() === checkDate.getTime()) {
+        currentStreak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    // Update user points with streak
+    const userPoints = await prisma.userPoints.findUnique({
+      where: { userId },
+    });
+
+    const longestStreak = Math.max(currentStreak, userPoints?.longestStreak || 0);
+
+    await prisma.userPoints.update({
+      where: { userId },
+      data: {
+        currentStreak,
+        longestStreak,
+      },
+    });
+
+    // Award streak bonuses
+    if (currentStreak === 7) {
+      await this.awardPoints(userId, POINTS_CONFIG.STREAK_BONUS_7, 'streak_bonus_7');
+    } else if (currentStreak === 30) {
+      await this.awardPoints(userId, POINTS_CONFIG.STREAK_BONUS_30, 'streak_bonus_30');
+    }
+  }
+
+  /**
+   * Get points history for a user
+   */
+  async getPointsHistory(userId: string, limit = 50) {
+    return prisma.pointsHistory.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+  }
+
+  // ============================================
+  // LEADERBOARD
+  // ============================================
+
+  /**
+   * Get global leaderboard
+   */
+  async getLeaderboard(limit = 50, offset = 0) {
+    const users = await prisma.userPoints.findMany({
+      orderBy: { totalXP: 'desc' },
+      take: limit,
+      skip: offset,
+    });
+
+    // Get profiles for these users
+    const userIds = users.map(u => u.userId);
+    const profiles = await prisma.profile.findMany({
+      where: { userId: { in: userIds } },
+      select: {
+        userId: true,
+        username: true,
+        restaurantName: true,
+        profilePhoto: true,
+        badges: true,
+      },
+    });
+
+    const profileMap = new Map(profiles.map(p => [p.userId, p]));
+
+    return users.map((user, index) => {
+      const profile = profileMap.get(user.userId);
+      const badgeCount = profile?.badges ? JSON.parse(profile.badges).length : 0;
+
+      return {
+        rank: offset + index + 1,
+        userId: user.userId,
+        username: profile?.username || 'Anonymous',
+        restaurantName: profile?.restaurantName,
+        profilePhoto: profile?.profilePhoto,
+        totalXP: user.totalXP,
+        level: user.level,
+        currentStreak: user.currentStreak,
+        badgeCount,
+      };
+    });
+  }
+
+  /**
+   * Get user's rank in leaderboard
+   */
+  async getUserRank(userId: string): Promise<number> {
+    const userPoints = await prisma.userPoints.findUnique({
+      where: { userId },
+    });
+
+    if (!userPoints) return 0;
+
+    const rank = await prisma.userPoints.count({
+      where: {
+        totalXP: { gt: userPoints.totalXP },
+      },
+    });
+
+    return rank + 1;
+  }
+
+  /**
+   * Get users around a specific user in leaderboard
+   */
+  async getLeaderboardAroundUser(userId: string, range = 5) {
+    const userRank = await this.getUserRank(userId);
+    if (userRank === 0) return [];
+
+    const offset = Math.max(0, userRank - range - 1);
+    return this.getLeaderboard(range * 2 + 1, offset);
   }
 }
 

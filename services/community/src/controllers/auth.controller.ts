@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { refreshTokenService } from '../services/refreshToken.service';
 
 /**
  * Auth Controller
@@ -16,10 +17,8 @@ export class AuthController {
   async generateTestToken(req: Request, res: Response) {
     try {
       const JWT_SECRET = process.env.JWT_SECRET;
-      console.log('DEBUG: JWT_SECRET from env:', JWT_SECRET); // New debug log
 
       if (!JWT_SECRET) {
-        console.error('DEBUG: JWT_SECRET is undefined, returning 500'); // New debug log
         return res.status(500).json({
           success: false,
           error: 'JWT_SECRET not configured in environment variables'
@@ -41,30 +40,177 @@ export class AuthController {
         role: 'admin'
       };
 
-      // Generate JWT token (expires in 24 hours)
-      const token = jwt.sign(
+      // Generate token pair (access + refresh)
+      const userAgent = req.headers['user-agent'];
+      const ipAddress = req.ip || req.socket.remoteAddress;
+
+      const tokens = await refreshTokenService.createTokenPair(
         testUser,
-        JWT_SECRET,
-        { expiresIn: '24h' }
+        userAgent,
+        ipAddress
       );
 
       res.status(200).json({
         success: true,
-        message: 'Test JWT token generated (valid for 24h)',
+        message: 'Test tokens generated',
         warning: '⚠️ Este endpoint é apenas para DEVELOPMENT! Remover em produção.',
-        token: token,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresIn: tokens.expiresIn,
         user: testUser,
         usage: {
-          header: 'Authorization: Bearer <token>',
-          example: `curl -H "Authorization: Bearer ${token}" http://localhost:3001/api/v1/community/posts`
+          header: 'Authorization: Bearer <accessToken>',
+          refresh: 'POST /api/v1/community/auth/refresh with { "refreshToken": "<token>" }'
         }
       });
     } catch (error) {
       console.error('Error generating test token:', error);
-      console.error('DEBUG Error details in generateTestToken:', error); // New debug log
       res.status(500).json({
         success: false,
         error: 'Failed to generate test token'
+      });
+    }
+  }
+
+  /**
+   * POST /api/v1/community/auth/refresh
+   * Refresh access token using refresh token
+   * Implements token rotation for security
+   */
+  async refresh(req: Request, res: Response) {
+    try {
+      const { refreshToken } = req.body;
+
+      if (!refreshToken) {
+        return res.status(400).json({
+          success: false,
+          error: 'Refresh token is required',
+          hint: 'Send { "refreshToken": "<your-refresh-token>" } in request body'
+        });
+      }
+
+      const userAgent = req.headers['user-agent'];
+      const ipAddress = req.ip || req.socket.remoteAddress;
+
+      const tokens = await refreshTokenService.refreshTokens(
+        refreshToken,
+        userAgent,
+        ipAddress
+      );
+
+      if (!tokens) {
+        return res.status(401).json({
+          success: false,
+          error: 'Invalid or expired refresh token',
+          hint: 'Please login again to get new tokens'
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresIn: tokens.expiresIn
+      });
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to refresh token'
+      });
+    }
+  }
+
+  /**
+   * POST /api/v1/community/auth/logout
+   * Revoke refresh token (logout current session)
+   */
+  async logout(req: Request, res: Response) {
+    try {
+      const { refreshToken } = req.body;
+
+      if (!refreshToken) {
+        return res.status(400).json({
+          success: false,
+          error: 'Refresh token is required'
+        });
+      }
+
+      await refreshTokenService.revokeToken(refreshToken);
+
+      res.status(200).json({
+        success: true,
+        message: 'Logged out successfully'
+      });
+    } catch (error) {
+      console.error('Error logging out:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to logout'
+      });
+    }
+  }
+
+  /**
+   * POST /api/v1/community/auth/logout-all
+   * Revoke all refresh tokens for user (logout all devices)
+   * Requires authentication
+   */
+  async logoutAll(req: Request, res: Response) {
+    try {
+      if (!req.user?.userId) {
+        return res.status(401).json({
+          success: false,
+          error: 'Authentication required'
+        });
+      }
+
+      const count = await refreshTokenService.revokeAllUserTokens(req.user.userId);
+
+      res.status(200).json({
+        success: true,
+        message: `Logged out from ${count} device(s)`
+      });
+    } catch (error) {
+      console.error('Error logging out all:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to logout from all devices'
+      });
+    }
+  }
+
+  /**
+   * GET /api/v1/community/auth/sessions
+   * Get active sessions for current user
+   * Requires authentication
+   */
+  async getSessions(req: Request, res: Response) {
+    try {
+      if (!req.user?.userId) {
+        return res.status(401).json({
+          success: false,
+          error: 'Authentication required'
+        });
+      }
+
+      const sessions = await refreshTokenService.getUserSessions(req.user.userId);
+
+      res.status(200).json({
+        success: true,
+        sessions: sessions.map(s => ({
+          id: s.id,
+          device: s.userAgent || 'Unknown device',
+          ip: s.ipAddress || 'Unknown',
+          createdAt: s.createdAt,
+          expiresAt: s.expiresAt
+        }))
+      });
+    } catch (error) {
+      console.error('Error getting sessions:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get sessions'
       });
     }
   }

@@ -175,3 +175,128 @@ model Follower {
   @@map("followers")
   @@schema("community")
 }
+
+// Refresh Tokens for JWT rotation
+model RefreshToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revoked   Boolean   @default(false)
+  revokedAt DateTime?
+  userAgent String?   // Browser/device info
+  ipAddress String?   // IP for security auditing
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+  @@schema("community")
+}
+
+// ============================================
+// GAMIFICATION SYSTEM
+// ============================================
+
+// User Points - cached XP totals for leaderboard performance
+model UserPoints {
+  userId       String   @id
+  totalXP      Int      @default(0)
+  level        Int      @default(1)
+  currentStreak Int     @default(0)
+  longestStreak Int     @default(0)
+  lastActiveAt DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([totalXP(sort: Desc)])
+  @@index([level(sort: Desc)])
+  @@map("user_points")
+  @@schema("community")
+}
+
+// Points History - log of all points earned
+model PointsHistory {
+  id          String   @id @default(uuid())
+  userId      String
+  points      Int
+  reason      String   // 'post_created', 'comment_added', 'reaction_received', 'badge_earned', 'streak_bonus'
+  referenceId String?  // ID of post/comment/badge that triggered this
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([reason])
+  @@map("points_history")
+  @@schema("community")
+}
+
+// User Streaks - daily activity tracking
+model UserStreak {
+  id           String   @id @default(uuid())
+  userId       String
+  date         DateTime @db.Date
+  actionsCount Int      @default(1)  // Number of actions that day
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date(sort: Desc)])
+  @@map("user_streaks")
+  @@schema("community")
+}
+
+// ============================================
+// MODERATION SYSTEM
+// ============================================
+
+// User Warnings/Strikes - track user violations
+model UserWarning {
+  id          String    @id @default(uuid())
+  userId      String
+  issuedBy    String    // Moderator who issued the warning
+  reason      String    // 'spam', 'harassment', 'inappropriate', etc.
+  severity    Int       @default(1)  // 1=warning, 2=temp_ban, 3=permanent_ban
+  details     String?
+  reportId    String?   // Link to report that triggered this
+  expiresAt   DateTime? // For temporary bans
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([severity])
+  @@map("user_warnings")
+  @@schema("community")
+}
+
+// Moderation Action Log - audit trail
+model ModerationLog {
+  id          String   @id @default(uuid())
+  moderatorId String
+  action      String   // 'report_approved', 'report_rejected', 'content_removed', 'content_restored', 'user_warned', 'user_banned'
+  targetType  String   // 'post', 'comment', 'user', 'report'
+  targetId    String
+  reason      String?
+  metadata    String?  // JSON with extra details
+  createdAt   DateTime @default(now())
+
+  @@index([moderatorId])
+  @@index([action])
+  @@index([targetType, targetId])
+  @@index([createdAt(sort: Desc)])
+  @@map("moderation_logs")
+  @@schema("community")
+}
+
+// User Ban Status - quick lookup for banned users
+model UserBan {
+  userId      String    @id
+  bannedBy    String
+  reason      String
+  type        String    @default("permanent")  // 'temporary', 'permanent'
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([expiresAt])
+  @@map("user_bans")
+  @@schema("community")
+}
