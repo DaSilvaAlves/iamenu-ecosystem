@@ -1,9 +1,9 @@
 /**
  * Business Intelligence API Client
- * Conecta-se ao backend Business API (porta 3002)
+ * Conecta-se ao backend Business API (porta 3004)
  */
 
-const API_BASE = 'http://localhost:3002/api/v1/business';
+const API_BASE = 'http://localhost:3004/api/v1/business';
 
 // Helper para obter token (assumindo que está no localStorage)
 const getToken = () => {

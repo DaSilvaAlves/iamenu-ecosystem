@@ -6,14 +6,14 @@ const content = `/**
 
 export const API_CONFIG = {
   // Backend API URLs
-  COMMUNITY_API: import.meta.env.VITE_COMMUNITY_API_URL || 'http://localhost:3004/api/v1/community',
-  MARKETPLACE_API: import.meta.env.VITE_MARKETPLACE_API_URL || 'http://localhost:3005/api/v1/marketplace',
-  BUSINESS_API: import.meta.env.VITE_BUSINESS_API_URL || 'http://localhost:3002/api/v1/business',
+  COMMUNITY_API: import.meta.env.VITE_COMMUNITY_API_URL || 'http://localhost:3001/api/v1/community',
+  MARKETPLACE_API: import.meta.env.VITE_MARKETPLACE_API_URL || 'http://localhost:3002/api/v1/marketplace',
+  BUSINESS_API: import.meta.env.VITE_BUSINESS_API_URL || 'http://localhost:3004/api/v1/business',
   ACADEMY_API: import.meta.env.VITE_ACADEMY_API_URL || 'http://localhost:3003/api/v1/academy',
 
   // Base URLs without /api/v1 prefix (for static assets like images)
-  COMMUNITY_BASE: import.meta.env.VITE_COMMUNITY_API_URL?.replace('/api/v1/community', '') || 'http://localhost:3004',
-  MARKETPLACE_BASE: import.meta.env.VITE_MARKETPLACE_API_URL?.replace('/api/v1/marketplace', '') || 'http://localhost:3005',
+  COMMUNITY_BASE: import.meta.env.VITE_COMMUNITY_API_URL?.replace('/api/v1/community', '') || 'http://localhost:3001',
+  MARKETPLACE_BASE: import.meta.env.VITE_MARKETPLACE_API_URL?.replace('/api/v1/marketplace', '') || 'http://localhost:3002',
 };
 
 // Helper function to build full URL for static assets (images, uploads, etc.)

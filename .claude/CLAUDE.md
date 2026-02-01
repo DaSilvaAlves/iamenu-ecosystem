@@ -36,7 +36,7 @@ iaMenu Ecosystem is a platform for Portuguese restaurants combining: Community H
 # Install all dependencies (npm workspaces)
 npm install
 
-# Start all services (community:3004, marketplace:3005, business:3002, academy:3003, frontend:5173)
+# Start all services (community:3001, marketplace:3002, academy:3003, business:3004, frontend:5173)
 npm run dev
 
 # Run individual services
@@ -71,10 +71,10 @@ npm run lint:check            # Check only (no fix)
 ### Service Structure
 ```
 services/
-├── community/     # Port 3004 - Posts, Groups, Followers, Gamification, Moderation
-├── marketplace/   # Port 3005 - Suppliers, Reviews, RFQ (Request for Quote), Price History
-├── business/      # Port 3002 - Dashboard, Analytics, Onboarding
+├── community/     # Port 3001 - Posts, Groups, Followers, Gamification, Moderation
+├── marketplace/   # Port 3002 - Suppliers, Reviews, RFQ (Request for Quote), Price History
 ├── academy/       # Port 3003 - Courses, Progress Tracking, Certificates
+├── business/      # Port 3004 - Dashboard, Analytics, Onboarding
 └── takeway-proxy/ # External proxy service
 
 frontend/apps/prototype-vision/  # React 18 + Vite + Tailwind
@@ -100,10 +100,10 @@ PostgreSQL 16 with **separate schemas** per service (community, marketplace, aca
 Custom JWT shared across services. Development token available in `frontend/apps/prototype-vision/src/config/devToken.js`. All protected endpoints require `Authorization: Bearer <token>` header.
 
 ### API Base URLs (Development)
-- Community: `http://localhost:3004/api/v1/community`
-- Marketplace: `http://localhost:3005/api/v1/marketplace`
-- Business: `http://localhost:3002/api/v1/business`
+- Community: `http://localhost:3001/api/v1/community`
+- Marketplace: `http://localhost:3002/api/v1/marketplace`
 - Academy: `http://localhost:3003/api/v1/academy`
+- Business: `http://localhost:3004/api/v1/business`
 
 ### Production URLs (Railway + Vercel)
 - Community: `https://iamenucommunity-api-production.up.railway.app`

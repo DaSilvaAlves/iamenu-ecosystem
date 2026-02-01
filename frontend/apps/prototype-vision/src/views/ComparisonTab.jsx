@@ -196,7 +196,7 @@ const ComparisonTab = () => {
             if (advancedFilters.deliveryIncluded) advancedFiltersQuery += `&deliveryIncluded=true`;
             if (advancedFilters.paymentTerms) advancedFiltersQuery += `&paymentTerms=${encodeURIComponent(advancedFilters.paymentTerms)}`;
 
-            const response = await fetch(`http://localhost:3005/api/v1/marketplace/products/compare?search=${encodeURIComponent(searchTerm.trim())}${filtersQueryParam}${advancedFiltersQuery}`);
+            const response = await fetch(`http://localhost:3002/api/v1/marketplace/products/compare?search=${encodeURIComponent(searchTerm.trim())}${filtersQueryParam}${advancedFiltersQuery}`);
             if (!response.ok) {
                 const errData = await response.json();
                 throw new Error(errData.error || `HTTP error! status: ${response.status}`);

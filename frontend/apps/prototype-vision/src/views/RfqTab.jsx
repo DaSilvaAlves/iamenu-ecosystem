@@ -26,7 +26,7 @@ const RfqTab = () => {
         }
         setProductSearchLoading(true);
         try {
-            const response = await fetch(`http://localhost:3005/api/v1/marketplace/products?search=${encodeURIComponent(searchTerm)}`);
+            const response = await fetch(`http://localhost:3002/api/v1/marketplace/products?search=${encodeURIComponent(searchTerm)}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
             setProductSearchResults(data.products || []);
@@ -108,7 +108,7 @@ const RfqTab = () => {
                 notes,
             };
 
-            const response = await fetch('http://localhost:3005/api/v1/marketplace/quotes/request', {
+            const response = await fetch('http://localhost:3002/api/v1/marketplace/quotes/request', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

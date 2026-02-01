@@ -15,17 +15,17 @@ O ecossistema iaMenu segue uma **arquitetura de microserviços** com 4 serviços
 ### Estrutura de Diretórios dos Serviços
 ```
 services/
-├── community/          # Porta 3004 - Hub da Comunidade
-├── marketplace/        # Porta 3005 - Marketplace de Fornecedores
+├── community/          # Porta 3001 - Hub da Comunidade
+├── marketplace/        # Porta 3002 - Marketplace de Fornecedores
 ├── academy/            # Porta 3003 - Academia de Cursos
-├── business/           # Porta 3002 - Business Intelligence
+├── business/           # Porta 3004 - Business Intelligence
 └── takeway-proxy/      # Serviço proxy (externo)
 ```
 
 ### Serviços Individuais
 
 #### **Community API** (`@iamenu/community-api`)
-- **Porta:** 3004
+- **Porta:** 3001
 - **Responsabilidades:**
   - Fórum & Discussões (Posts, Comentários)
   - Gestão de Grupos & Membros
@@ -48,7 +48,7 @@ services/
 - **Características Únicas:** Único serviço com capacidades real-time (Socket.io)
 
 #### **Marketplace API** (`@iamenu/marketplace-api`)
-- **Porta:** 3005
+- **Porta:** 3002
 - **Responsabilidades:**
   - Gestão de Fornecedores/Vendedores
   - Catálogo de Produtos
@@ -68,7 +68,7 @@ services/
 - **Características Únicas:** Campos JSON complexos para itens de cotação
 
 #### **Business Intelligence API** (`@iamenu/business-api`)
-- **Porta:** 3002
+- **Porta:** 3004
 - **Responsabilidades:**
   - Fluxo de onboarding de restaurantes
   - Dashboard & Analytics
@@ -109,7 +109,7 @@ services/
              │          │          │          │
      ┌───────▼──┐ ┌─────▼────┐ ┌───▼───┐ ┌────▼────┐
      │Community │ │Marketplace│ │Academy│ │Business │
-     │  :3004   │ │   :3005   │ │ :3003 │ │  :3002  │
+     │  :3001   │ │   :3002   │ │ :3003 │ │  :3004  │
      └────┬─────┘ └─────┬─────┘ └───┬───┘ └────┬────┘
           │             │           │          │
           └─────────────┴─────┬─────┴──────────┘
@@ -321,10 +321,10 @@ Route (Controller) → Service (Lógica de Negócio) → Prisma (Acesso a Dados)
 
 ### Endpoints Base
 ```
-Community:   http://localhost:3004/api/v1/community
-Marketplace: http://localhost:3005/api/v1/marketplace
+Community:   http://localhost:3001/api/v1/community
+Marketplace: http://localhost:3002/api/v1/marketplace
 Academy:     http://localhost:3003/api/v1/academy
-Business:    http://localhost:3002/api/v1/business
+Business:    http://localhost:3004/api/v1/business
 ```
 
 ### Convenção de Verbos HTTP
@@ -390,7 +390,7 @@ CORS_ORIGIN=http://localhost:5173
 
 | Prioridade | Problema | Impacto |
 |------------|----------|---------|
-| 🔴 Alta | Conflitos de portas na documentação vs código | Confusão no dev |
+| ✅ Resolvido | ~~Conflitos de portas na documentação vs código~~ | ~~Confusão no dev~~ |
 | 🟡 Média | Sem comunicação inter-serviços | Workflows limitados |
 | 🟡 Média | Falta specs Swagger/OpenAPI | Fricção no onboarding |
 | 🟡 Média | Tokens de auth criados externamente | Dependência pouco clara |
@@ -446,7 +446,7 @@ CORS_ORIGIN=http://localhost:5173
 | **Real-time** | Socket.io (apenas Community) |
 | **Armazenamento de Ficheiros** | Diretório local /uploads |
 | **Deploy** | Railway (backend), Vercel (frontend) |
-| **Portas de Desenvolvimento** | 3002-3005 (serviços), 5173 (frontend), 5432 (DB) |
+| **Portas de Desenvolvimento** | 3001-3004 (serviços), 5173 (frontend), 5432 (DB) |
 | **Total de Entidades** | 38 modelos de base de dados |
 | **Total de Rotas** | 100+ endpoints REST |
 | **Total de Vistas Frontend** | 41+ componentes |

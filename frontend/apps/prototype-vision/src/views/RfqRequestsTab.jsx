@@ -19,7 +19,7 @@ const RfqRequestsTab = () => {
                     return;
                 }
 
-                const response = await fetch(`http://localhost:3005/api/v1/marketplace/quotes/requests?restaurantId=${restaurantId}`);
+                const response = await fetch(`http://localhost:3002/api/v1/marketplace/quotes/requests?restaurantId=${restaurantId}`);
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
