@@ -36,13 +36,14 @@ iaMenu Ecosystem is a platform for Portuguese restaurants combining: Community H
 # Install all dependencies (npm workspaces)
 npm install
 
-# Start all services (community:3004, marketplace:3005, business:3002, academy, frontend:5173)
+# Start all services (community:3004, marketplace:3005, business:3002, academy:3003, frontend:5173)
 npm run dev
 
 # Run individual services
 npm run dev:community
 npm run dev:marketplace
 npm run dev:business
+npm run dev:academy
 npm run dev:frontend
 
 # Database (Docker required)
@@ -57,6 +58,8 @@ npx prisma studio  # GUI for database
 npm test                      # All services
 npm run test:community        # Single service
 npm run test:marketplace
+npm run test:academy
+npm run test:business
 
 # Linting & Type Checking
 npm run lint                  # ESLint with auto-fix
@@ -71,10 +74,16 @@ services/
 ├── community/     # Port 3004 - Posts, Groups, Followers, Gamification, Moderation
 ├── marketplace/   # Port 3005 - Suppliers, Reviews, RFQ (Request for Quote), Price History
 ├── business/      # Port 3002 - Dashboard, Analytics, Onboarding
-└── academy/       # Courses, Progress Tracking, Certificates
+├── academy/       # Port 3003 - Courses, Progress Tracking, Certificates
+└── takeway-proxy/ # External proxy service
 
 frontend/apps/prototype-vision/  # React 18 + Vite + Tailwind
 ```
+
+### Architecture Stats
+- **38 database models** across 4 schemas
+- **100+ REST endpoints**
+- **41+ frontend components**
 
 ### Backend Pattern (Node.js Services)
 Each service follows: `src/{controllers, services, routes, middleware, lib}/`
@@ -90,10 +99,18 @@ PostgreSQL 16 with **separate schemas** per service (community, marketplace, aca
 ### Authentication
 Custom JWT shared across services. Development token available in `frontend/apps/prototype-vision/src/config/devToken.js`. All protected endpoints require `Authorization: Bearer <token>` header.
 
-### API Base URLs
+### API Base URLs (Development)
 - Community: `http://localhost:3004/api/v1/community`
 - Marketplace: `http://localhost:3005/api/v1/marketplace`
 - Business: `http://localhost:3002/api/v1/business`
+- Academy: `http://localhost:3003/api/v1/academy`
+
+### Production URLs (Railway + Vercel)
+- Community: `https://iamenucommunity-api-production.up.railway.app`
+- Marketplace: `https://iamenumarketplace-api-production.up.railway.app`
+- Business: `https://iamenubusiness-api-production.up.railway.app`
+- Academy: `https://iamenuacademy-api-production.up.railway.app`
+- Frontend: `https://prototype-vision.vercel.app`
 
 ## Testing
 
