@@ -1,0 +1,545 @@
+openapi: 3.0.3
+info:
+  title: iaMenu Academy API
+  description: |
+    API da Academia iaMenu - Cursos, Inscrições e Certificados.
+
+    ## Autenticação
+    Endpoints protegidos requerem header `Authorization: Bearer <token>`.
+  version: 1.0.0
+  contact:
+    name: iaMenu Team
+
+servers:
+  - url: http://localhost:3003/api/v1/academy
+    description: Development
+  - url: https://iamenuacademy-api-production.up.railway.app/api/v1/academy
+    description: Production
+
+tags:
+  - name: Courses
+    description: Catálogo de cursos
+  - name: Enrollments
+    description: Inscrições e progresso
+  - name: Certificates
+    description: Certificados de conclusão
+
+paths:
+  # ============================================
+  # COURSES
+  # ============================================
+  /courses:
+    get:
+      tags: [Courses]
+      summary: Listar cursos publicados
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: level
+          in: query
+          schema:
+            type: string
+            enum: [beginner, intermediate, advanced]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de cursos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+
+    post:
+      tags: [Courses]
+      summary: Criar curso (admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                slug:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                level:
+                  type: string
+                  enum: [beginner, intermediate, advanced]
+                durationMinutes:
+                  type: integer
+                price:
+                  type: number
+                thumbnailUrl:
+                  type: string
+                published:
+                  type: boolean
+                  default: false
+              required: [title, category, level]
+      responses:
+        '201':
+          description: Curso criado
+
+  /courses/categories:
+    get:
+      tags: [Courses]
+      summary: Listar categorias
+      responses:
+        '200':
+          description: Lista de categorias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /courses/{idOrSlug}:
+    get:
+      tags: [Courses]
+      summary: Obter curso por ID ou slug
+      parameters:
+        - name: idOrSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalhes do curso com módulos e lições
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetail'
+        '404':
+          description: Curso não encontrado
+
+    patch:
+      tags: [Courses]
+      summary: Atualizar curso (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: idOrSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                level:
+                  type: string
+                price:
+                  type: number
+                published:
+                  type: boolean
+      responses:
+        '200':
+          description: Curso atualizado
+
+    delete:
+      tags: [Courses]
+      summary: Eliminar curso (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: idOrSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Curso eliminado
+
+  /courses/{id}/modules:
+    post:
+      tags: [Courses]
+      summary: Adicionar módulo ao curso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                order:
+                  type: integer
+              required: [title]
+      responses:
+        '201':
+          description: Módulo criado
+
+  /courses/modules/{moduleId}/lessons:
+    post:
+      tags: [Courses]
+      summary: Adicionar lição ao módulo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                videoUrl:
+                  type: string
+                durationMinutes:
+                  type: integer
+                order:
+                  type: integer
+              required: [title]
+      responses:
+        '201':
+          description: Lição criada
+
+  # ============================================
+  # ENROLLMENTS
+  # ============================================
+  /enrollments/courses/{courseId}:
+    post:
+      tags: [Enrollments]
+      summary: Inscrever-se num curso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Inscrito com sucesso
+        '409':
+          description: Já inscrito neste curso
+
+  /enrollments/users/{userId}:
+    get:
+      tags: [Enrollments]
+      summary: Listar inscrições do utilizador
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de inscrições
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Enrollment'
+
+  /enrollments/users/{userId}/courses/{courseId}:
+    get:
+      tags: [Enrollments]
+      summary: Detalhes de inscrição específica
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalhes da inscrição com progresso
+
+    delete:
+      tags: [Enrollments]
+      summary: Cancelar inscrição
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Inscrição cancelada
+
+  /enrollments/users/{userId}/courses/{courseId}/complete:
+    post:
+      tags: [Enrollments]
+      summary: Marcar curso como concluído
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Curso marcado como concluído
+
+  # ============================================
+  # CERTIFICATES
+  # ============================================
+  /certificates:
+    post:
+      tags: [Certificates]
+      summary: Emitir certificado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                courseId:
+                  type: string
+              required: [userId, courseId]
+      responses:
+        '201':
+          description: Certificado emitido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
+
+  /certificates/users/{userId}:
+    get:
+      tags: [Certificates]
+      summary: Listar certificados do utilizador
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de certificados
+
+  /certificates/verify/{code}:
+    get:
+      tags: [Certificates]
+      summary: Verificar certificado (público)
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Código de verificação do certificado
+      responses:
+        '200':
+          description: Certificado válido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateVerification'
+        '404':
+          description: Certificado não encontrado
+
+  /certificates/{id}:
+    get:
+      tags: [Certificates]
+      summary: Obter certificado por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalhes do certificado
+
+components:
+  schemas:
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        level:
+          type: string
+        durationMinutes:
+          type: integer
+        price:
+          type: number
+        thumbnailUrl:
+          type: string
+        published:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    CourseDetail:
+      allOf:
+        - $ref: '#/components/schemas/Course'
+        - type: object
+          properties:
+            modules:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+                  order:
+                    type: integer
+                  lessons:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        videoUrl:
+                          type: string
+                        durationMinutes:
+                          type: integer
+                        order:
+                          type: integer
+
+    Enrollment:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        courseId:
+          type: string
+        enrolledAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        course:
+          $ref: '#/components/schemas/Course'
+
+    Certificate:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        courseId:
+          type: string
+        issuedAt:
+          type: string
+          format: date-time
+        verificationCode:
+          type: string
+
+    CertificateVerification:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        userName:
+          type: string
+        courseTitle:
+          type: string
+        issuedAt:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

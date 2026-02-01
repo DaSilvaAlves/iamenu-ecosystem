@@ -1,0 +1,491 @@
+openapi: 3.0.3
+info:
+  title: iaMenu Business Intelligence API
+  description: |
+    API de Business Intelligence iaMenu - Dashboard, Analytics e Onboarding.
+
+    ## Autenticação
+    Todos os endpoints (exceto template) requerem header `Authorization: Bearer <token>`.
+  version: 1.0.0
+  contact:
+    name: iaMenu Team
+
+servers:
+  - url: http://localhost:3004/api/v1/business
+    description: Development
+  - url: https://iamenubusiness-api-production.up.railway.app/api/v1/business
+    description: Production
+
+tags:
+  - name: Onboarding
+    description: Setup inicial do restaurante
+  - name: Dashboard
+    description: Analytics e métricas
+
+paths:
+  # ============================================
+  # ONBOARDING
+  # ============================================
+  /onboarding/setup:
+    post:
+      tags: [Onboarding]
+      summary: Setup inicial do restaurante
+      description: |
+        Configura o restaurante com informações básicas e opcionalmente importa menu via Excel.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Nome do restaurante
+                address:
+                  type: string
+                cuisine:
+                  type: string
+                  description: Tipo de cozinha
+                tables:
+                  type: integer
+                  description: Número de mesas
+                openingHours:
+                  type: string
+                  description: Horário de funcionamento
+                revenueGoal:
+                  type: number
+                  description: Meta de faturamento mensal
+                foodCostTarget:
+                  type: number
+                  description: Meta de food cost (%)
+                menuFile:
+                  type: string
+                  format: binary
+                  description: Ficheiro Excel com menu (.xlsx, .xls)
+              required: [name]
+      responses:
+        '201':
+          description: Restaurante configurado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  restaurant:
+                    $ref: '#/components/schemas/Restaurant'
+                  productsImported:
+                    type: integer
+
+  /onboarding/template:
+    get:
+      tags: [Onboarding]
+      summary: Download template Excel
+      description: Template para importação do menu
+      responses:
+        '200':
+          description: Ficheiro Excel
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+  /onboarding/status:
+    get:
+      tags: [Onboarding]
+      summary: Status do onboarding
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Status atual
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  completed:
+                    type: boolean
+                  currentStep:
+                    type: integer
+                  restaurant:
+                    $ref: '#/components/schemas/Restaurant'
+
+  # ============================================
+  # DASHBOARD
+  # ============================================
+  /dashboard/stats:
+    get:
+      tags: [Dashboard]
+      summary: Estatísticas gerais
+      description: KPIs principais do restaurante
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [today, week, month, year]
+            default: today
+      responses:
+        '200':
+          description: Estatísticas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  revenue:
+                    type: number
+                  revenueChange:
+                    type: number
+                  customers:
+                    type: integer
+                  customersChange:
+                    type: number
+                  avgTicket:
+                    type: number
+                  avgTicketChange:
+                    type: number
+                  foodCostPct:
+                    type: number
+
+  /dashboard/top-products:
+    get:
+      tags: [Dashboard]
+      summary: Top produtos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [sales, revenue, profit]
+            default: sales
+      responses:
+        '200':
+          description: Lista de top produtos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    category:
+                      type: string
+                    sales:
+                      type: integer
+                    revenue:
+                      type: number
+                    profit:
+                      type: number
+                    margin:
+                      type: number
+
+  /dashboard/alerts:
+    get:
+      tags: [Dashboard]
+      summary: Alertas críticos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de alertas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: [warning, danger, info]
+                    title:
+                      type: string
+                    message:
+                      type: string
+                    actionUrl:
+                      type: string
+
+  /dashboard/opportunities:
+    get:
+      tags: [Dashboard]
+      summary: Oportunidades de melhoria
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de oportunidades
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    potentialImpact:
+                      type: number
+                    priority:
+                      type: string
+                      enum: [high, medium, low]
+
+  /dashboard/sales-trends:
+    get:
+      tags: [Dashboard]
+      summary: Tendências de vendas
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [hourly, daily, weekly, monthly]
+            default: daily
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 7
+      responses:
+        '200':
+          description: Dados de tendência
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                    revenue:
+                      type: number
+                    orders:
+                      type: integer
+
+  /dashboard/ai-prediction:
+    get:
+      tags: [Dashboard]
+      summary: Previsão IA
+      description: Previsões e sugestões geradas por IA
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Previsões
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  predictedRevenue:
+                    type: number
+                  confidence:
+                    type: number
+                  suggestions:
+                    type: array
+                    items:
+                      type: string
+
+  /dashboard/menu-engineering:
+    get:
+      tags: [Dashboard]
+      summary: Matriz de engenharia de menu
+      description: Classificação de produtos (Stars, Plowhorses, Puzzles, Dogs)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Matriz de produtos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stars:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MenuProduct'
+                  plowhorses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MenuProduct'
+                  puzzles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MenuProduct'
+                  dogs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MenuProduct'
+
+  /dashboard/demand-forecast:
+    get:
+      tags: [Dashboard]
+      summary: Previsão de demanda (7 dias)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Previsão por dia
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                    predictedRevenue:
+                      type: number
+                    predictedCustomers:
+                      type: integer
+                    confidence:
+                      type: number
+
+  /dashboard/peak-hours-heatmap:
+    get:
+      tags: [Dashboard]
+      summary: Mapa de calor de horários de pico
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dados do heatmap
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    dayOfWeek:
+                      type: integer
+                      minimum: 0
+                      maximum: 6
+                    hour:
+                      type: integer
+                      minimum: 0
+                      maximum: 23
+                    intensity:
+                      type: number
+                      description: Valor normalizado 0-1
+
+  /dashboard/benchmark:
+    get:
+      tags: [Dashboard]
+      summary: Benchmark vs. Setor
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Comparação com médias do setor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  avgTicket:
+                    type: object
+                    properties:
+                      yours:
+                        type: number
+                      sector:
+                        type: number
+                      percentile:
+                        type: integer
+                  foodCost:
+                    type: object
+                    properties:
+                      yours:
+                        type: number
+                      sector:
+                        type: number
+                      percentile:
+                        type: integer
+                  tableRotation:
+                    type: object
+                    properties:
+                      yours:
+                        type: number
+                      sector:
+                        type: number
+                      percentile:
+                        type: integer
+
+components:
+  schemas:
+    Restaurant:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        cuisine:
+          type: string
+        tables:
+          type: integer
+        openingHours:
+          type: string
+        onboardingStatus:
+          type: string
+          enum: [pending, in_progress, completed]
+        createdAt:
+          type: string
+          format: date-time
+
+    MenuProduct:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        price:
+          type: number
+        cost:
+          type: number
+        margin:
+          type: number
+        popularity:
+          type: number
+        profitability:
+          type: number
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

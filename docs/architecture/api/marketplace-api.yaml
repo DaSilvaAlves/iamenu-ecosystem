@@ -1,0 +1,542 @@
+openapi: 3.0.3
+info:
+  title: iaMenu Marketplace API
+  description: |
+    API do Marketplace iaMenu - Fornecedores, Produtos, Cotações e Negociações Coletivas.
+
+    ## Autenticação
+    Endpoints protegidos requerem header `Authorization: Bearer <token>`.
+  version: 1.0.0
+  contact:
+    name: iaMenu Team
+
+servers:
+  - url: http://localhost:3002/api/v1/marketplace
+    description: Development
+  - url: https://iamenumarketplace-api-production.up.railway.app/api/v1/marketplace
+    description: Production
+
+tags:
+  - name: Suppliers
+    description: Gestão de fornecedores
+  - name: Reviews
+    description: Reviews de fornecedores
+  - name: Products
+    description: Catálogo de produtos
+  - name: Quotes
+    description: Pedidos de cotação (RFQ)
+  - name: Bargains
+    description: Negociações coletivas
+
+paths:
+  # ============================================
+  # SUPPLIERS
+  # ============================================
+  /suppliers:
+    get:
+      tags: [Suppliers]
+      summary: Listar todos os fornecedores
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: verified
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de fornecedores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Supplier'
+
+    post:
+      tags: [Suppliers]
+      summary: Criar fornecedor
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                companyName:
+                  type: string
+                description:
+                  type: string
+                categories:
+                  type: array
+                  items:
+                    type: string
+                location:
+                  type: string
+                contactEmail:
+                  type: string
+                contactPhone:
+                  type: string
+              required: [companyName]
+      responses:
+        '201':
+          description: Fornecedor criado
+
+  /suppliers/{id}:
+    get:
+      tags: [Suppliers]
+      summary: Obter fornecedor por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalhes do fornecedor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+        '404':
+          description: Fornecedor não encontrado
+
+    patch:
+      tags: [Suppliers]
+      summary: Atualizar fornecedor
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                companyName:
+                  type: string
+                description:
+                  type: string
+                categories:
+                  type: array
+                  items:
+                    type: string
+                logoFile:
+                  type: string
+                  format: binary
+                headerFile:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Fornecedor atualizado
+
+    delete:
+      tags: [Suppliers]
+      summary: Eliminar fornecedor
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Fornecedor eliminado
+
+  # ============================================
+  # REVIEWS (nested under suppliers)
+  # ============================================
+  /suppliers/{supplierId}/reviews:
+    get:
+      tags: [Reviews]
+      summary: Listar reviews do fornecedor
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de reviews
+
+    post:
+      tags: [Reviews]
+      summary: Criar review
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                comment:
+                  type: string
+                qualityRating:
+                  type: integer
+                priceRating:
+                  type: integer
+                deliveryRating:
+                  type: integer
+                serviceRating:
+                  type: integer
+              required: [rating]
+      responses:
+        '201':
+          description: Review criado
+
+  /suppliers/{supplierId}/reviews/{reviewId}:
+    patch:
+      tags: [Reviews]
+      summary: Atualizar review
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Review atualizado
+
+    delete:
+      tags: [Reviews]
+      summary: Eliminar review
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Review eliminado
+
+  /suppliers/{supplierId}/reviews/{reviewId}/helpful:
+    post:
+      tags: [Reviews]
+      summary: Marcar review como útil
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                helpful:
+                  type: boolean
+      responses:
+        '200':
+          description: Marcado
+
+  /suppliers/{supplierId}/reviews/{reviewId}/response:
+    post:
+      tags: [Reviews]
+      summary: Resposta do fornecedor ao review
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                response:
+                  type: string
+              required: [response]
+      responses:
+        '200':
+          description: Resposta adicionada
+
+  # ============================================
+  # PRODUCTS
+  # ============================================
+  /products:
+    get:
+      tags: [Products]
+      summary: Listar todos os produtos
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: subcategory
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de produtos
+
+  /products/compare:
+    get:
+      tags: [Products]
+      summary: Comparar preços de produtos
+      parameters:
+        - name: productIds
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Comparação de preços
+
+  # ============================================
+  # QUOTES (RFQ)
+  # ============================================
+  /quotes/request:
+    post:
+      tags: [Quotes]
+      summary: Criar pedido de cotação
+      description: Restaurante cria um RFQ para fornecedores
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                suppliers:
+                  type: array
+                  items:
+                    type: string
+                  description: IDs dos fornecedores
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productName:
+                        type: string
+                      quantity:
+                        type: number
+                      unit:
+                        type: string
+                deadline:
+                  type: string
+                  format: date
+                notes:
+                  type: string
+              required: [suppliers, items]
+      responses:
+        '201':
+          description: Pedido criado
+
+  /quotes/requests:
+    get:
+      tags: [Quotes]
+      summary: Listar meus pedidos de cotação
+      description: Restaurante vê seus RFQs
+      responses:
+        '200':
+          description: Lista de pedidos
+
+  /quotes/incoming:
+    get:
+      tags: [Quotes]
+      summary: Cotações recebidas (fornecedor)
+      description: Fornecedor vê RFQs que recebeu
+      responses:
+        '200':
+          description: Lista de RFQs
+
+  /quotes/{id}/respond:
+    post:
+      tags: [Quotes]
+      summary: Responder a pedido de cotação
+      description: Fornecedor envia sua proposta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productName:
+                        type: string
+                      unitPrice:
+                        type: number
+                      quantity:
+                        type: number
+                validUntil:
+                  type: string
+                  format: date
+                notes:
+                  type: string
+      responses:
+        '201':
+          description: Resposta enviada
+
+  /quotes/requests/{id}/responses:
+    get:
+      tags: [Quotes]
+      summary: Ver respostas a um RFQ
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de propostas
+
+  /quotes/{id}/status:
+    patch:
+      tags: [Quotes]
+      summary: Atualizar status da cotação
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [pending, accepted, rejected, expired]
+      responses:
+        '200':
+          description: Status atualizado
+
+  # ============================================
+  # COLLECTIVE BARGAINS
+  # ============================================
+  /collective-bargains:
+    get:
+      tags: [Bargains]
+      summary: Listar negociações coletivas
+      responses:
+        '200':
+          description: Lista de negociações ativas
+
+components:
+  schemas:
+    Supplier:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        companyName:
+          type: string
+        description:
+          type: string
+        logoUrl:
+          type: string
+        headerUrl:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
+        location:
+          type: string
+        verified:
+          type: boolean
+        rating:
+          type: number
+        reviewCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

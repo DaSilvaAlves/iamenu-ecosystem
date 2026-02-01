@@ -1,0 +1,1135 @@
+openapi: 3.0.3
+info:
+  title: iaMenu Community API
+  description: |
+    API do Hub da Comunidade iaMenu - Fórum, Grupos, Perfis, Gamificação e Moderação.
+
+    ## Autenticação
+    Todos os endpoints protegidos requerem header `Authorization: Bearer <token>`.
+
+    ## WebSocket
+    Servidor Socket.io disponível na mesma porta para funcionalidades real-time.
+  version: 1.0.0
+  contact:
+    name: iaMenu Team
+
+servers:
+  - url: http://localhost:3001/api/v1/community
+    description: Development
+  - url: https://iamenucommunity-api-production.up.railway.app/api/v1/community
+    description: Production
+
+tags:
+  - name: Auth
+    description: Autenticação e gestão de sessões
+  - name: Posts
+    description: Posts do fórum e reações
+  - name: Comments
+    description: Comentários em posts
+  - name: Groups
+    description: Grupos de discussão
+  - name: Profiles
+    description: Perfis de utilizadores
+  - name: Followers
+    description: Sistema de seguidores
+  - name: Notifications
+    description: Notificações do utilizador
+  - name: Gamification
+    description: Pontos, badges e leaderboard
+  - name: Moderation
+    description: Denúncias e moderação de conteúdo
+
+paths:
+  # ============================================
+  # AUTH
+  # ============================================
+  /auth/test-token:
+    get:
+      tags: [Auth]
+      summary: Gerar token de teste (DEV only)
+      description: Gera um JWT e refresh token para desenvolvimento
+      responses:
+        '200':
+          description: Tokens gerados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+                  expiresIn:
+                    type: string
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Renovar access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+              required: [refreshToken]
+      responses:
+        '200':
+          description: Novo access token
+        '401':
+          description: Refresh token inválido ou expirado
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout (revogar refresh token)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+              required: [refreshToken]
+      responses:
+        '200':
+          description: Logout bem sucedido
+
+  /auth/logout-all:
+    post:
+      tags: [Auth]
+      summary: Logout de todos os dispositivos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Todas as sessões revogadas
+
+  /auth/sessions:
+    get:
+      tags: [Auth]
+      summary: Listar sessões ativas
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de sessões
+
+  # ============================================
+  # POSTS
+  # ============================================
+  /posts:
+    get:
+      tags: [Posts]
+      summary: Listar todos os posts
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: groupId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de posts
+
+    post:
+      tags: [Posts]
+      summary: Criar novo post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+                category:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+                groupId:
+                  type: string
+                image:
+                  type: string
+                  format: binary
+              required: [title, body]
+      responses:
+        '201':
+          description: Post criado
+
+  /posts/{id}:
+    get:
+      tags: [Posts]
+      summary: Obter post por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalhes do post
+        '404':
+          description: Post não encontrado
+
+    patch:
+      tags: [Posts]
+      summary: Atualizar post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+                category:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Post atualizado
+
+    delete:
+      tags: [Posts]
+      summary: Eliminar post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Post eliminado
+
+  /posts/{id}/reactions:
+    get:
+      tags: [Posts]
+      summary: Obter reações do post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contagem de reações
+
+  /posts/{id}/react:
+    post:
+      tags: [Posts]
+      summary: Toggle reação no post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reactionType:
+                  type: string
+                  enum: [like, love, laugh, angry, sad]
+      responses:
+        '200':
+          description: Reação atualizada
+
+  # ============================================
+  # COMMENTS
+  # ============================================
+  /posts/{postId}/comments:
+    get:
+      tags: [Comments]
+      summary: Listar comentários do post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de comentários
+
+    post:
+      tags: [Comments]
+      summary: Criar comentário
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  type: string
+                parentCommentId:
+                  type: string
+              required: [body]
+      responses:
+        '201':
+          description: Comentário criado
+
+  /posts/{postId}/comments/{id}:
+    delete:
+      tags: [Comments]
+      summary: Eliminar comentário
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Comentário eliminado
+
+  /posts/{postId}/comments/{id}/reactions:
+    get:
+      tags: [Comments]
+      summary: Obter reações do comentário
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contagem de reações
+
+  /posts/{postId}/comments/{id}/react:
+    post:
+      tags: [Comments]
+      summary: Toggle reação no comentário
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reação atualizada
+
+  # ============================================
+  # GROUPS
+  # ============================================
+  /groups:
+    get:
+      tags: [Groups]
+      summary: Listar todos os grupos
+      responses:
+        '200':
+          description: Lista de grupos
+
+    post:
+      tags: [Groups]
+      summary: Criar grupo
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                type:
+                  type: string
+                  enum: [public, private]
+                category:
+                  type: string
+                coverImage:
+                  type: string
+                  format: binary
+              required: [name]
+      responses:
+        '201':
+          description: Grupo criado
+
+  /groups/category/{category}:
+    get:
+      tags: [Groups]
+      summary: Grupos por categoria
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de grupos
+
+  /groups/user/{userId}:
+    get:
+      tags: [Groups]
+      summary: Grupos do utilizador
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de grupos
+
+  /groups/{id}:
+    get:
+      tags: [Groups]
+      summary: Obter grupo por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalhes do grupo
+
+    patch:
+      tags: [Groups]
+      summary: Atualizar grupo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Grupo atualizado
+
+    delete:
+      tags: [Groups]
+      summary: Eliminar grupo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Grupo eliminado
+
+  /groups/{id}/members:
+    get:
+      tags: [Groups]
+      summary: Listar membros do grupo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de membros
+
+  /groups/{id}/join:
+    post:
+      tags: [Groups]
+      summary: Juntar-se ao grupo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Juntou-se ao grupo
+
+  /groups/{id}/leave:
+    post:
+      tags: [Groups]
+      summary: Sair do grupo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Saiu do grupo
+
+  /groups/{id}/members/{userId}/role:
+    patch:
+      tags: [Groups]
+      summary: Atualizar role de membro
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Role atualizado
+
+  /groups/{id}/members/{userId}:
+    delete:
+      tags: [Groups]
+      summary: Remover membro do grupo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Membro removido
+
+  # ============================================
+  # PROFILES
+  # ============================================
+  /profiles/search:
+    get:
+      tags: [Profiles]
+      summary: Pesquisar perfis
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resultados da pesquisa
+
+  /profiles/{userId}:
+    get:
+      tags: [Profiles]
+      summary: Obter perfil
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Perfil do utilizador
+
+    patch:
+      tags: [Profiles]
+      summary: Atualizar perfil
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                bio:
+                  type: string
+                restaurantName:
+                  type: string
+                location:
+                  type: string
+                profilePhoto:
+                  type: string
+                  format: binary
+                coverPhoto:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Perfil atualizado
+
+  /profiles/{userId}/stats:
+    get:
+      tags: [Profiles]
+      summary: Estatísticas do utilizador
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stats do utilizador
+
+  /profiles/{userId}/posts:
+    get:
+      tags: [Profiles]
+      summary: Posts do utilizador
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de posts
+
+  # ============================================
+  # FOLLOWERS
+  # ============================================
+  /profiles/{userId}/followers:
+    get:
+      tags: [Followers]
+      summary: Listar seguidores
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de seguidores
+
+  /profiles/{userId}/following:
+    get:
+      tags: [Followers]
+      summary: Listar seguindo
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de utilizadores seguidos
+
+  /profiles/{userId}/follow/counts:
+    get:
+      tags: [Followers]
+      summary: Contagem de seguidores/seguindo
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contagens
+
+  /profiles/{userId}/follow/status:
+    get:
+      tags: [Followers]
+      summary: Status de seguir (se o user logado segue)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status
+
+  /profiles/{userId}/follow:
+    post:
+      tags: [Followers]
+      summary: Seguir utilizador
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A seguir
+
+    delete:
+      tags: [Followers]
+      summary: Deixar de seguir
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deixou de seguir
+
+  # ============================================
+  # NOTIFICATIONS
+  # ============================================
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: Listar notificações
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de notificações
+
+  /notifications/read-all:
+    patch:
+      tags: [Notifications]
+      summary: Marcar todas como lidas
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Todas marcadas como lidas
+
+  /notifications/{id}/read:
+    patch:
+      tags: [Notifications]
+      summary: Marcar como lida
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Marcada como lida
+
+  /notifications/{id}:
+    delete:
+      tags: [Notifications]
+      summary: Eliminar notificação
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Notificação eliminada
+
+  # ============================================
+  # GAMIFICATION
+  # ============================================
+  /gamification/achievements:
+    get:
+      tags: [Gamification]
+      summary: Listar conquistas disponíveis
+      responses:
+        '200':
+          description: Lista de achievements
+
+  /gamification/leaderboard:
+    get:
+      tags: [Gamification]
+      summary: Leaderboard global
+      responses:
+        '200':
+          description: Top utilizadores
+
+  /gamification/user/{userId}:
+    get:
+      tags: [Gamification]
+      summary: Dados de gamificação do utilizador
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pontos, level, badges
+
+  /gamification/user/{userId}/history:
+    get:
+      tags: [Gamification]
+      summary: Histórico de pontos
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transações de pontos
+
+  /gamification/user/{userId}/rank:
+    get:
+      tags: [Gamification]
+      summary: Rank do utilizador
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Posição e vizinhos
+
+  /gamification/user/{userId}/check-badges:
+    post:
+      tags: [Gamification]
+      summary: Verificar e atribuir badges
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Badges verificados
+
+  # ============================================
+  # MODERATION
+  # ============================================
+  /reports:
+    get:
+      tags: [Moderation]
+      summary: Listar denúncias (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de reports
+
+    post:
+      tags: [Moderation]
+      summary: Criar denúncia
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                targetType:
+                  type: string
+                  enum: [post, comment, user, group]
+                targetId:
+                  type: string
+                reason:
+                  type: string
+              required: [targetType, targetId, reason]
+      responses:
+        '201':
+          description: Denúncia criada
+
+  /reports/{id}:
+    get:
+      tags: [Moderation]
+      summary: Obter denúncia (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalhes da denúncia
+
+  /reports/{id}/review:
+    patch:
+      tags: [Moderation]
+      summary: Rever denúncia (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Denúncia revista
+
+  /moderation/queue:
+    get:
+      tags: [Moderation]
+      summary: Fila de moderação prioritária
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Fila ordenada
+
+  /moderation/stats:
+    get:
+      tags: [Moderation]
+      summary: Estatísticas de moderação
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard stats
+
+  /moderation/bulk-approve:
+    post:
+      tags: [Moderation]
+      summary: Aprovar denúncias em bulk
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Aprovadas
+
+  /moderation/bulk-reject:
+    post:
+      tags: [Moderation]
+      summary: Rejeitar denúncias em bulk
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Rejeitadas
+
+  /moderate/{targetType}/{id}:
+    delete:
+      tags: [Moderation]
+      summary: Remover conteúdo (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: targetType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Conteúdo removido
+
+  /moderate/{targetType}/{id}/restore:
+    post:
+      tags: [Moderation]
+      summary: Restaurar conteúdo (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: targetType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conteúdo restaurado
+
+  /moderation/users/{userId}/warn:
+    post:
+      tags: [Moderation]
+      summary: Avisar utilizador
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Aviso emitido
+
+  /moderation/users/{userId}/ban:
+    post:
+      tags: [Moderation]
+      summary: Banir utilizador
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Utilizador banido
+
+    delete:
+      tags: [Moderation]
+      summary: Desbanir utilizador
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Utilizador desbanido
+
+  /moderation/users/{userId}/history:
+    get:
+      tags: [Moderation]
+      summary: Histórico de moderação do utilizador
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Histórico
+
+  /moderation/logs:
+    get:
+      tags: [Moderation]
+      summary: Logs de ações de moderação
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Audit trail
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
