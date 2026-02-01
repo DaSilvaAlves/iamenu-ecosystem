@@ -127,9 +127,9 @@ const token = jwt.sign(testUser, JWT_SECRET, { expiresIn: '24h' });
 
 ---
 
-### TD-002: Prisma Client Generation Not in CI/CD
+### ~~TD-002: Prisma Client Generation Not in CI/CD~~ ✅ RESOLVED
 
-**Severity:** MEDIUM
+**Severity:** ~~MEDIUM~~ → RESOLVED
 **Service:** All
 **Files:** `services/*/prisma/schema.prisma`
 

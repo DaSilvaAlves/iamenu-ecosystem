@@ -29,6 +29,8 @@
     "docker:logs": "docker-compose logs -f",
     "clean": "npm run clean --workspaces && rm -rf node_modules",
     "setup": "npm install && npm run prisma:generate",
+    "postinstall": "npm run prisma:generate --workspaces --if-present",
+    "pretest": "npm run prisma:generate --workspaces --if-present",
     "aios": "node .aios-core/cli-runner.js"
   },
   "keywords": [
