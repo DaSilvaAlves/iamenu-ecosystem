@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Prerequisites
+
+- **Node.js 18+** and **npm 9+**
+- **Docker & Docker Compose** (para PostgreSQL)
+- **Windows:** WSL deve estar atualizado (`wsl --update` como admin, reiniciar PC)
+
 ## Development Guidelines
 
 ### NEVER
@@ -49,10 +55,14 @@ npm run dev:frontend
 # Database (Docker required)
 docker compose up postgres -d
 
-# Prisma migrations (run from each service directory)
+# Prisma (run from each service directory)
 cd services/<service>
+npx dotenv -e ../../.env npx prisma generate        # Regenerar cliente após pull
 npx dotenv -e ../../.env npx prisma migrate dev --name <migration_name>
 npx prisma studio  # GUI for database
+
+# Regenerar todos os clientes Prisma (após git pull)
+npm run prisma:generate
 
 # Testing
 npm test                      # All services
@@ -77,8 +87,17 @@ services/
 ├── business/      # Port 3004 - Dashboard, Analytics, Onboarding
 └── takeway-proxy/ # External proxy service
 
-frontend/apps/prototype-vision/  # React 18 + Vite + Tailwind
+frontend/apps/prototype-vision/  # React 18 + Vite + Tailwind (JavaScript, não TypeScript)
 ```
+
+### Service Features
+
+| Serviço | Característica Única |
+|---------|---------------------|
+| Community | **Socket.io** para real-time (notificações, feed) |
+| Marketplace | Campos JSON complexos (quotes, offers) |
+| Academy | Estrutura hierárquica (Course → Module → Lesson) |
+| Business | Upload Excel, cache de stats diários |
 
 ### Architecture Stats
 - **38 database models** across 4 schemas
@@ -95,6 +114,15 @@ Each service follows: `src/{controllers, services, routes, middleware, lib}/`
 
 ### Database
 PostgreSQL 16 with **separate schemas** per service (community, marketplace, academy, business). Each service has its own `prisma/schema.prisma` with `multiSchema` preview feature.
+
+### Database Schemas (38 models total)
+
+| Schema | Models | Key Entities |
+|--------|--------|--------------|
+| `community` | 16 | Post, Comment, Group, Profile, Notification, Reaction, Follower, RefreshToken, UserPoints, PointsHistory, UserStreak, UserWarning, UserBan, ModerationLog, Report, GroupMembership |
+| `marketplace` | 10 | Supplier, Review, Product, SupplierProduct, QuoteRequest, Quote, CollectiveBargain, BargainAdhesion, PriceHistory |
+| `academy` | 5 | Course, Module, Lesson, Enrollment, Certificate |
+| `business` | 6 | Restaurant, RestaurantSettings, Product, Order, OrderItem, DailyStats |
 
 ### Authentication
 Custom JWT shared across services. Development token available in `frontend/apps/prototype-vision/src/config/devToken.js`. All protected endpoints require `Authorization: Bearer <token>` header.
@@ -156,6 +184,12 @@ fix: correct RFQ status update
 
 ## Key Dependencies
 
-**Backend**: Express, Prisma ORM, jsonwebtoken, socket.io (community real-time), express-validator, multer (uploads)
+**Backend**: Express, Prisma ORM, jsonwebtoken, socket.io (community real-time), express-validator, multer (uploads), winston (logging)
 
-**Frontend**: React 18, React Router, Framer Motion, Chart.js, Tailwind CSS, Lucide icons
+**Frontend**: React 18, React Router, Framer Motion, Chart.js, Tailwind CSS, Lucide icons, date-fns, jsPDF
+
+## Architecture Documentation
+
+Para detalhes completos da arquitetura, consultar:
+- `docs/architecture/codebase-discovery-2026-01-31.md` - Relatório completo do codebase
+- `docs/handoffs/` - Handoffs de sessões anteriores
