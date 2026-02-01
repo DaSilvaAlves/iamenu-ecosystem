@@ -10,15 +10,24 @@
 | **Total Sprints** | 3 |
 | **Total Duration** | 7 semanas |
 | **Total Story Points** | 144 pts |
-| **Current Completion** | 54% |
+| **Current Completion** | 38% (55/144 pts) |
 | **Target Completion** | 95% |
+
+### Sprint Status
+
+| Sprint | Points | Status | Release |
+|--------|--------|--------|---------|
+| Sprint 1 | 55 pts | ✅ **COMPLETE** | v1.0.0 |
+| Sprint 2 | 52 pts | 🔜 In Progress | - |
+| Sprint 3 | 37 pts | ⏳ Pending | - |
 
 ---
 
-# SPRINT 1: Backend Feature Complete
+# SPRINT 1: Backend Feature Complete ✅ COMPLETED
 **Duração:** 2 semanas (10 dias úteis)
-**Story Points:** 55 pts
+**Story Points:** 55 pts ✅
 **Objetivo:** Completar todas as APIs backend e atingir 70%+ test coverage
+**Status:** ✅ **COMPLETE** - Released as v1.0.0 on 2026-02-01
 
 ---
 
@@ -32,12 +41,12 @@
 > Como developer, preciso de um schema Prisma para o Business API para que os dados sejam persistidos em vez de mock data.
 
 **Tasks:**
-- [ ] Criar `services/business/prisma/schema.prisma`
-- [ ] Definir modelos: Restaurant, Dashboard, MenuAnalysis, SalesTrend, Alert
-- [ ] Configurar multi-schema PostgreSQL (`schema = "business"`)
-- [ ] Executar `npx prisma migrate dev --name init`
-- [ ] Gerar Prisma Client
-- [ ] Criar seed data para testes
+- [x] Criar `services/business/prisma/schema.prisma`
+- [x] Definir modelos: Restaurant, RestaurantSettings, Product, Order, OrderItem, DailyStats
+- [x] Configurar multi-schema PostgreSQL (`schema = "business"`)
+- [x] Executar `npx prisma migrate dev --name init`
+- [x] Gerar Prisma Client
+- [x] Criar seed data para testes
 
 **Acceptance Criteria:**
 ```gherkin
@@ -80,10 +89,11 @@ model Dashboard {
 > Como developer, preciso que todos os Prisma Clients sejam gerados automaticamente para evitar erros 500.
 
 **Tasks:**
-- [ ] Criar script `scripts/generate-prisma.sh`
-- [ ] Adicionar npm script: `"prisma:generate": "npm run prisma:generate --workspaces"`
-- [ ] Verificar cada serviço: Community, Marketplace, Academy, Business
-- [ ] Documentar processo no README
+- [x] Criar script `scripts/generate-prisma.sh` → Implementado via npm scripts
+- [x] Adicionar npm script: `"prisma:generate": "npm run prisma:generate --workspaces"`
+- [x] Verificar cada serviço: Community, Marketplace, Academy, Business
+- [x] Documentar processo no README
+- [x] CI/CD: postinstall e pretest scripts adicionados
 
 **Acceptance Criteria:**
 ```gherkin
@@ -102,11 +112,11 @@ AND no service returns 500 errors on startup
 > Como developer, preciso de port mappings consistentes entre docker-compose e código para evitar conflitos.
 
 **Tasks:**
-- [ ] Definir standard: Community=3001, Marketplace=3002, Academy=3003, Business=3004
-- [ ] Atualizar `docker-compose.yml`
-- [ ] Atualizar cada `.env.example`
-- [ ] Atualizar `README.md` principal
-- [ ] Verificar CORS origins em cada serviço
+- [x] Definir standard: Community=3001, Marketplace=3002, Academy=3003, Business=3004
+- [x] Atualizar `docker-compose.yml` (já estava correto)
+- [x] Atualizar cada `.env.example`
+- [x] Atualizar `CLAUDE.md` e documentação
+- [x] Corrigir frontend config (11 ficheiros)
 
 **Acceptance Criteria:**
 ```gherkin
@@ -125,11 +135,12 @@ AND services start without port conflicts
 > Como utilizador, preciso de refresh tokens para manter sessão ativa sem re-login constante.
 
 **Tasks:**
-- [ ] Criar middleware `refreshToken.ts` em shared utils
-- [ ] Implementar endpoint `POST /api/v1/auth/refresh`
-- [ ] Definir TTL: Access Token = 15min, Refresh Token = 7 dias
-- [ ] Armazenar refresh tokens em database (não localStorage)
-- [ ] Implementar logout que invalida refresh token
+- [x] Criar service `refreshToken.service.ts`
+- [x] Implementar endpoint `POST /api/v1/community/auth/refresh`
+- [x] Definir TTL: Access Token = 15min, Refresh Token = 7 dias
+- [x] Armazenar refresh tokens em database (modelo RefreshToken)
+- [x] Implementar logout que invalida refresh token
+- [x] Adicionar logout-all e sessions endpoints
 
 **Acceptance Criteria:**
 ```gherkin
