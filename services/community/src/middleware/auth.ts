@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 
 // Extend Express Request type para incluir user
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: {

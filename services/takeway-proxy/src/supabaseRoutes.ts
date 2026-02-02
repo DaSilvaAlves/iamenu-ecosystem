@@ -362,7 +362,7 @@ router.get("/orders/stats/dashboard", async (req, res) => {
     };
 
     statusData?.forEach((order: any) => {
-      if (statusCounts.hasOwnProperty(order.status)) {
+      if (Object.hasOwn(statusCounts, order.status)) {
         statusCounts[order.status as keyof typeof statusCounts]++;
       }
     });

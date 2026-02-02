@@ -17,7 +17,7 @@ export class DashboardService {
 
     // Calculate date range
     const now = new Date();
-    let startDate = new Date();
+    const startDate = new Date();
 
     switch (period) {
       case 'hoje':
@@ -297,7 +297,7 @@ export class DashboardService {
     }
 
     const now = new Date();
-    let startDate = new Date();
+    const startDate = new Date();
     let groupBy: 'hour' | 'day' = 'hour';
 
     switch (period) {
