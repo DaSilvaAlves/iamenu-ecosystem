@@ -7,26 +7,27 @@
  */
 
 // Mock Prisma - must be before imports due to hoisting
+const mockPrisma = {
+  restaurant: {
+    findUnique: jest.fn(),
+  },
+  order: {
+    findMany: jest.fn(),
+  },
+  product: {
+    findMany: jest.fn(),
+  },
+};
+
 jest.mock('../src/lib/prisma', () => ({
   __esModule: true,
-  default: {
-    restaurant: {
-      findUnique: jest.fn(),
-    },
-    order: {
-      findMany: jest.fn(),
-    },
-    product: {
-      findMany: jest.fn(),
-    },
-  },
+  default: mockPrisma,
 }));
 
 import { DashboardService } from '../src/services/dashboard.service';
-import prisma from '../src/lib/prisma';
 
-// Get mock reference
-const mockPrismaClient = prisma as jest.Mocked<typeof prisma>;
+// Use the mock directly - no type casting needed
+const mockPrismaClient = mockPrisma;
 
 describe('DashboardService', () => {
   let service: DashboardService;
