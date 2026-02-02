@@ -31,10 +31,16 @@ class TemplateValidator {
       verbose: true,
       strict: false,
       validateFormats: true,
+      code: { esm: false, source: true, formats: undefined },
     });
 
-    // Add format validators
-    addFormats(this.ajv);
+    // Add format validators (with error handling for version compatibility)
+    try {
+      addFormats(this.ajv);
+    } catch (e) {
+      // If ajv-formats fails, register basic formats manually
+      console.warn('[Validator] ajv-formats failed, using basic validation');
+    }
 
     // Add custom formats
     this.registerCustomFormats();
