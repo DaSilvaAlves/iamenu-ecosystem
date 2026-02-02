@@ -208,8 +208,8 @@ take-away-express-order/
 !.env.example
 !README.md
 
-# AIOS Framework
-.aios-core/
+# AIOS Framework (tracked - parte do projeto)
+# .aios-core/ is now tracked for version control
 
 # Dependencies (AIOS)
 node_modules
@@ -217,7 +217,7 @@ node_modules
 # IDE & OS (AIOS)
 *.swp
 
-# AIOS Local (AIOS)
+# AIOS Local (user-specific, not tracked)
 .aios-core/local/
 .claude/settings.local.json
 .aios/install-log.txt
