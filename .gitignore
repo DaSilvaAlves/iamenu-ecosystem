@@ -221,3 +221,6 @@ node_modules
 .aios-core/local/
 .claude/settings.local.json
 .aios/install-log.txt
+
+# Database backups
+backups/*.sql
