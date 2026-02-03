@@ -4,7 +4,7 @@
 **Estimated Hours:** 2-3h
 **Owner:** @data-engineer
 **Sprint:** Tech Debt P0
-**Status:** Ready
+**Status:** In Progress (Schema ready, migration pending)
 
 ---
 
@@ -49,8 +49,8 @@ model SupplierProduct {
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** All price fields use `@db.Decimal(12,4)` precision
-- [ ] **AC2:** Rating field uses `@db.Decimal(3,2)` precision (0.00 - 5.00)
+- [x] **AC1:** All price fields use `@db.Decimal(12,4)` precision
+- [x] **AC2:** Rating field uses `@db.Decimal(3,2)` precision (0.00 - 5.00)
 - [ ] **AC3:** Prisma client regenerated (`npx prisma generate`)
 - [ ] **AC4:** Migration applied successfully without data loss
 - [ ] **AC5:** Existing price data preserved correctly
@@ -105,8 +105,8 @@ model PriceHistory {
 
 ## Tasks
 
-- [ ] **Task 1:** Backup current price data (query existing values)
-- [ ] **Task 2:** Update `services/marketplace/prisma/schema.prisma` with precision annotations
+- [x] **Task 1:** Backup current price data (query existing values)
+- [x] **Task 2:** Update `services/marketplace/prisma/schema.prisma` with precision annotations
 - [ ] **Task 3:** Create migration: `npx prisma migrate dev --name add_decimal_precision`
 - [ ] **Task 4:** Regenerate Prisma client: `npx prisma generate`
 - [ ] **Task 5:** Verify migration applied without errors
@@ -162,7 +162,7 @@ If issues arise:
 
 ## Definition of Done
 
-- [ ] Schema updated with precision annotations
+- [x] Schema updated with precision annotations
 - [ ] Migration created and applied
 - [ ] Prisma client regenerated
 - [ ] Existing data verified intact
