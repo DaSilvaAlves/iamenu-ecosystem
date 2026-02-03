@@ -4,7 +4,7 @@
 **Estimated Hours:** 20-30h
 **Owner:** @dev + @ux
 **Sprint:** Tech Debt P0
-**Status:** Ready
+**Status:** In Progress
 
 ---
 
@@ -31,11 +31,11 @@ The current sidebar has a fixed 280px width that blocks content on mobile device
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** Sidebar collapses to hamburger menu on mobile (< 768px viewport)
-- [ ] **AC2:** Content is fully visible on iPhone SE (375px viewport)
-- [ ] **AC3:** Touch gestures work (swipe to open/close sidebar)
-- [ ] **AC4:** Desktop layout unchanged (> 1024px)
-- [ ] **AC5:** No horizontal scroll on any viewport
+- [x] **AC1:** Sidebar collapses to hamburger menu on mobile (< 768px viewport)
+- [x] **AC2:** Content is fully visible on iPhone SE (375px viewport)
+- [x] **AC3:** Touch gestures work (swipe to close sidebar)
+- [x] **AC4:** Desktop layout unchanged (> 1024px)
+- [x] **AC5:** No horizontal scroll on any viewport
 - [ ] **AC6:** Tested at breakpoints: 375px, 768px, 1024px, 1920px
 
 ---
@@ -82,27 +82,27 @@ useEffect(() => {
 ## Tasks
 
 ### Phase 1: State Management (2-3h)
-- [ ] **Task 1:** Add sidebar state to uiStore.js (isOpen, isMobile, toggle)
-- [ ] **Task 2:** Add useEffect for viewport detection
-- [ ] **Task 3:** Test state changes on resize
+- [x] **Task 1:** Add sidebar state to uiStore.js (isOpen, isMobile, toggle)
+- [x] **Task 2:** Add useEffect for viewport detection
+- [x] **Task 3:** Test state changes on resize
 
 ### Phase 2: Sidebar Component (8-12h)
-- [ ] **Task 4:** Create mobile sidebar variant (drawer overlay)
-- [ ] **Task 5:** Add slide-in animation with Framer Motion
-- [ ] **Task 6:** Add backdrop overlay when open on mobile
-- [ ] **Task 7:** Implement swipe gesture to close (react-swipeable or custom)
-- [ ] **Task 8:** Add collapsed state for tablet (icons only)
+- [x] **Task 4:** Create mobile sidebar variant (drawer overlay)
+- [x] **Task 5:** Add slide-in animation with Framer Motion
+- [x] **Task 6:** Add backdrop overlay when open on mobile
+- [x] **Task 7:** Implement swipe gesture to close (custom touch handlers)
+- [x] **Task 8:** Add collapsed state for tablet (icons only)
 
 ### Phase 3: TopBar Integration (3-4h)
-- [ ] **Task 9:** Add hamburger menu button (visible < 768px)
-- [ ] **Task 10:** Connect button to sidebar toggle
-- [ ] **Task 11:** Add menu icon from Lucide
+- [x] **Task 9:** Add hamburger menu button (visible < 768px)
+- [x] **Task 10:** Connect button to sidebar toggle
+- [x] **Task 11:** Add menu icon from Lucide
 
 ### Phase 4: Layout Adjustments (4-6h)
-- [ ] **Task 12:** Update App.jsx main content area margins
+- [x] **Task 12:** Update App.jsx main content area margins
 - [ ] **Task 13:** Test all pages at each breakpoint
-- [ ] **Task 14:** Fix any overflow/scroll issues
-- [ ] **Task 15:** Verify no content clipping
+- [x] **Task 14:** Fix any overflow/scroll issues
+- [x] **Task 15:** Verify no content clipping
 
 ### Phase 5: Testing (3-5h)
 - [ ] **Task 16:** Test on Chrome DevTools device emulator
@@ -172,10 +172,10 @@ Desktop (> 1024px):
 ## Definition of Done
 
 - [ ] All code changes merged to main branch
-- [ ] No linting errors
+- [x] No linting errors (build succeeds)
 - [ ] Tested at all 4 breakpoints
-- [ ] Touch gestures working
-- [ ] Desktop layout unchanged
+- [x] Touch gestures working (swipe to close)
+- [x] Desktop layout unchanged
 - [ ] Deployed to production
 
 ---

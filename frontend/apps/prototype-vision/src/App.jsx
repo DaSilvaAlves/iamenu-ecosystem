@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
+import { useSidebarStore, useViewportDetection } from './stores/uiStore';
 import DashboardBI from './views/DashboardBI';
 import AlertsView from './views/AlertsView';
 import Academy from './views/Academy';
@@ -58,6 +59,23 @@ const App = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
+    // Sidebar responsive state
+    const { isMobile, isOpen: sidebarOpen, close: closeSidebar } = useSidebarStore();
+    const { init: initViewport } = useViewportDetection();
+
+    // Initialize viewport detection
+    useEffect(() => {
+        const cleanup = initViewport();
+        return cleanup;
+    }, [initViewport]);
+
+    // Close sidebar on route change (mobile only)
+    useEffect(() => {
+        if (isMobile && sidebarOpen) {
+            closeSidebar();
+        }
+    }, [location.pathname, isMobile, sidebarOpen, closeSidebar]);
+
     useEffect(() => {
         const onboardingCompleted = localStorage.getItem('iaMenu_onboarding_completed');
         if (!onboardingCompleted) {
@@ -85,9 +103,9 @@ const App = () => {
             )}
             <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--bg-dark)' }}>
                 <TopBar />
-                <div style={{ display: 'flex', flex: 1 }}>
+                <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
                     <Sidebar selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
-                    <main style={{ flex: 1, padding: '32px', overflowY: 'auto', backgroundColor: '#0c0c0c' }}>
+                    <main style={{ flex: 1, padding: isMobile ? '16px' : '32px', overflowY: 'auto', backgroundColor: '#0c0c0c' }}>
                         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                             <AnimatePresence mode="wait">
                                 <div key={location.pathname}>

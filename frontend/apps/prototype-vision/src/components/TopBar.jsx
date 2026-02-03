@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Bell, MessageSquare, Bookmark, User, X } from 'lucide-react';
+import { Search, Bell, MessageSquare, Bookmark, User, X, Menu } from 'lucide-react';
 import { CommunityAPI, Auth } from '../services/api';
 import { getImageUrl } from '../utils/imageUtils';
+import { useSidebarStore } from '../stores/uiStore';
 
 const TopBar = () => {
     const [showNotifications, setShowNotifications] = useState(false);
@@ -11,6 +12,9 @@ const TopBar = () => {
     const [userProfile, setUserProfile] = useState(null);
     const dropdownRef = useRef(null);
     const location = useLocation();
+
+    // Responsive state from store
+    const { isMobile, toggle: toggleSidebar } = useSidebarStore();
 
     useEffect(() => {
         loadNotifications();
@@ -106,7 +110,18 @@ const TopBar = () => {
             top: 0,
             zIndex: 100
         }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '12px' : '40px' }}>
+                {/* Hamburger menu - visible on mobile */}
+                {isMobile && (
+                    <button
+                        onClick={toggleSidebar}
+                        className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                        aria-label="Toggle menu"
+                    >
+                        <Menu size={24} />
+                    </button>
+                )}
+
                 <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{
                         width: '28px',
@@ -120,51 +135,61 @@ const TopBar = () => {
                         fontWeight: 'bold',
                         fontSize: '0.8rem'
                     }}>ia</div>
-                    <span style={{ fontWeight: '600', fontSize: '1.1rem' }}>iaMenu Ecosystem [PT]</span>
+                    {!isMobile && <span style={{ fontWeight: '600', fontSize: '1.1rem' }}>iaMenu Ecosystem [PT]</span>}
                 </Link>
 
-                <nav style={{ display: 'flex', gap: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                    {navLinks.map(link => (
-                        <Link key={link.to} to={link.to} style={{
-                            cursor: 'pointer',
-                            padding: '6px 12px',
-                            borderRadius: '20px',
-                            backgroundColor: location.pathname === link.to ? 'rgba(255,255,255,0.05)' : 'transparent',
-                            color: location.pathname === link.to ? 'white' : 'inherit',
-                            transition: 'all 0.2s'
-                        }} className="hover:text-white">
-                            {link.label}
-                        </Link>
-                    ))}
-                </nav>
+                {/* Nav links - hidden on mobile */}
+                {!isMobile && (
+                    <nav style={{ display: 'flex', gap: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                        {navLinks.map(link => (
+                            <Link key={link.to} to={link.to} style={{
+                                cursor: 'pointer',
+                                padding: '6px 12px',
+                                borderRadius: '20px',
+                                backgroundColor: location.pathname === link.to ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                color: location.pathname === link.to ? 'white' : 'inherit',
+                                transition: 'all 0.2s'
+                            }} className="hover:text-white">
+                                {link.label}
+                            </Link>
+                        ))}
+                    </nav>
+                )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <Link to="/pesquisa"
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        backgroundColor: 'rgba(255,255,255,0.03)',
-                        padding: '6px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid var(--border)',
-                        width: '240px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                    }}
-                    className="hover:bg-white/5"
-                >
-                    <Search size={16} color="var(--text-muted)" />
-                    <input
-                        placeholder="Pesquisar..."
-                        style={{ backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', outline: 'none', width: '100%', cursor: 'pointer' }}
-                        readOnly
-                    />
-                </Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '12px' : '20px' }}>
+                {/* Search - full on desktop, icon only on mobile */}
+                {isMobile ? (
+                    <Link to="/pesquisa" className="p-2 rounded-lg hover:bg-white/10 transition-colors">
+                        <Search size={20} color="var(--text-muted)" />
+                    </Link>
+                ) : (
+                    <Link to="/pesquisa"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            backgroundColor: 'rgba(255,255,255,0.03)',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            width: '240px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                        }}
+                        className="hover:bg-white/5"
+                    >
+                        <Search size={16} color="var(--text-muted)" />
+                        <input
+                            placeholder="Pesquisar..."
+                            style={{ backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', outline: 'none', width: '100%', cursor: 'pointer' }}
+                            readOnly
+                        />
+                    </Link>
+                )}
 
-                <div style={{ display: 'flex', gap: '16px', color: 'var(--text-muted)' }}>
-                    {/* Notifications Dropdown - Code remains the same */}
+                <div style={{ display: 'flex', gap: isMobile ? '8px' : '16px', color: 'var(--text-muted)' }}>
+                    {/* Notifications Dropdown */}
                     <div ref={dropdownRef} style={{ position: 'relative' }}>
                         <div
                             onClick={() => setShowNotifications(!showNotifications)}
@@ -231,8 +256,13 @@ const TopBar = () => {
                     </div>
                     {/* End Notifications */}
 
-                    <MessageSquare size={20} className="cursor-pointer hover:text-white" />
-                    <Bookmark size={20} className="cursor-pointer hover:text-white" />
+                    {/* Message and Bookmark - hidden on mobile */}
+                    {!isMobile && (
+                        <>
+                            <MessageSquare size={20} className="cursor-pointer hover:text-white" />
+                            <Bookmark size={20} className="cursor-pointer hover:text-white" />
+                        </>
+                    )}
                     <Link to="/perfil"
                         style={{
                             width: '32px',
