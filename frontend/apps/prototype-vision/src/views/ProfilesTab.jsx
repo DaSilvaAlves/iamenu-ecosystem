@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Copy, QrCode, Edit, ExternalLink, TrendingUp, Mail, Star, Eye, CheckCircle, X, Save, Upload } from 'lucide-react';
+import { API_CONFIG } from '../config/api';
 
 const ProfilesTab = () => {
     // Placeholder: ID do fornecedor logado (futuramente virá do auth context)
@@ -46,7 +47,7 @@ const ProfilesTab = () => {
     useEffect(() => {
         const fetchSupplier = async () => {
             try {
-                const response = await fetch(`http://localhost:3002/api/v1/marketplace/suppliers/${supplierId}`);
+                const response = await fetch(`${API_CONFIG.MARKETPLACE_API}/suppliers/${supplierId}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 setSupplier(data);
@@ -152,7 +153,7 @@ const ProfilesTab = () => {
                 formDataToSend.append('headerFile', headerFile);
             }
 
-            const response = await fetch(`http://localhost:3002/api/v1/marketplace/suppliers/${supplierId}`, {
+            const response = await fetch(`${API_CONFIG.MARKETPLACE_API}/suppliers/${supplierId}`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`

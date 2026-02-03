@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import { API_CONFIG } from '../config/api';
 
 const RfqRequestsTab = () => {
     const [rfqRequests, setRfqRequests] = useState([]);
@@ -19,7 +20,7 @@ const RfqRequestsTab = () => {
                     return;
                 }
 
-                const response = await fetch(`http://localhost:3002/api/v1/marketplace/quotes/requests?restaurantId=${restaurantId}`);
+                const response = await fetch(`${API_CONFIG.MARKETPLACE_API}/quotes/requests?restaurantId=${restaurantId}`);
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.message || `HTTP error! status: ${response.status}`);

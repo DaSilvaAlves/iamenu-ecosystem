@@ -3,7 +3,9 @@
  * Conecta-se ao backend Business API (porta 3004)
  */
 
-const API_BASE = 'http://localhost:3004/api/v1/business';
+import { API_CONFIG } from '../config/api';
+
+const API_BASE = API_CONFIG.BUSINESS_API;
 
 // Helper para obter token (assumindo que está no localStorage)
 const getToken = () => {
