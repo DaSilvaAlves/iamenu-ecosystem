@@ -56,7 +56,7 @@ model Enrollment {
   courseId String @map("course_id")
   enrolledAt DateTime @default(now()) @map("enrolled_at")
   completedAt DateTime? @map("completed_at")
-  course Course @relation(fields: [courseId], references: [id])
+  course Course @relation(fields: [courseId], references: [id], onDelete: Restrict)
   @@unique([userId, courseId])
   @@map("enrollments")
   @@schema("academy")

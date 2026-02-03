@@ -215,7 +215,7 @@ model BargainAdhesion {
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
 
-  collectiveBargain   CollectiveBargain @relation(fields: [collectiveBargainId], references: [id])
+  collectiveBargain   CollectiveBargain @relation(fields: [collectiveBargainId], references: [id], onDelete: Cascade)
 
   @@unique([collectiveBargainId, userId]) // User can only adhere once per bargain
   @@map("bargain_adhesions")
@@ -228,8 +228,8 @@ model PriceHistory {
   price     Decimal   @db.Decimal(12,4)
   date      DateTime
 
-  product   Product   @relation(fields: [productId], references: [id])
-  supplier  Supplier  @relation(fields: [supplierId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  supplier  Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
 
   @@unique([productId, supplierId, date]) // A product from a supplier has one price per day
   @@map("price_history")
