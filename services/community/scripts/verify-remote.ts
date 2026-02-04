@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../generated/prisma';
 
 async function verify() {
     const remoteUrl = "postgresql://postgres:jMHJNsoKMsXCjuuHNJTouoWqrvzgYyRn@gondola.proxy.rlwy.net:59722/railway";

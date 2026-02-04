@@ -21,6 +21,9 @@ build/
 out/
 *.tsbuildinfo
 
+# Prisma generated clients (per-service)
+**/generated/prisma/
+
 # Environment variables
 .env
 .env.local

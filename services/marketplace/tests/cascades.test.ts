@@ -9,7 +9,7 @@
  */
 
 import prisma from '../src/lib/prisma';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../generated/prisma';
 
 describe('Cascade Delete Rules', () => {
   // Test data IDs for cleanup

@@ -6,7 +6,7 @@
  * - Rating fields: Decimal(3,2)
  */
 
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../generated/prisma';
 
 describe('Decimal Precision', () => {
   describe('Prisma Decimal type handling', () => {
