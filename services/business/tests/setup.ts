@@ -1,4 +1,5 @@
 // Jest setup file for Business API tests
+import prisma from '../src/lib/prisma';
 
 process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = 'test-jwt-secret-for-testing-only';
@@ -10,6 +11,7 @@ beforeAll(() => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
 });
 
-afterAll(() => {
+afterAll(async () => {
   jest.restoreAllMocks();
+  await prisma.$disconnect();
 });

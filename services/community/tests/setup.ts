@@ -1,4 +1,5 @@
 // Jest setup file for Community API tests
+import prisma from '../src/lib/prisma';
 
 // Set test environment variables
 process.env.NODE_ENV = 'test';
@@ -13,6 +14,8 @@ beforeAll(() => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
 });
 
-afterAll(() => {
+afterAll(async () => {
   jest.restoreAllMocks();
+  // Close Prisma connection to prevent open handles
+  await prisma.$disconnect();
 });
