@@ -21,4 +21,5 @@ module.exports = {
   testTimeout: 10000,
   verbose: true,
   passWithNoTests: true,
+  forceExit: true,
 };

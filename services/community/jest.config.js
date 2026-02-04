@@ -27,6 +27,9 @@ module.exports = {
     },
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  globalTeardown: '<rootDir>/tests/teardown.ts',
   testTimeout: 10000,
   verbose: true,
+  // Force exit to handle any remaining open handles
+  forceExit: true,
 };
