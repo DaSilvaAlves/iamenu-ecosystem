@@ -39,9 +39,9 @@ env:
 ## Acceptance Criteria
 
 - [x] **AC1:** CI workflow uses Node.js 20
-- [ ] **AC2:** All CI jobs pass (lint, test, build, security)
-- [ ] **AC3:** Frontend build succeeds in CI
-- [ ] **AC4:** No EBADENGINE warnings in CI logs
+- [x] **AC2:** All CI jobs pass (lint, test, build, security)
+- [x] **AC3:** Frontend build succeeds in CI
+- [x] **AC4:** No EBADENGINE warnings in CI logs
 
 ---
 
@@ -49,15 +49,15 @@ env:
 
 - [x] **Task 1:** Update `NODE_VERSION` in `.github/workflows/ci.yml` to '20'
 - [x] **Task 2:** Push changes and verify CI passes
-- [ ] **Task 3:** Verify all 4 jobs complete successfully
+- [x] **Task 3:** Verify all 4 jobs complete successfully
 
 ---
 
 ## Definition of Done
 
-- [ ] CI workflow updated
-- [ ] All CI jobs passing
-- [ ] No engine compatibility warnings
+- [x] CI workflow updated
+- [x] All CI jobs passing
+- [x] No engine compatibility warnings
 
 ---
 
