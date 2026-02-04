@@ -4,7 +4,7 @@
 **Estimated Hours:** 1h
 **Owner:** @devops
 **Sprint:** Infrastructure P1
-**Status:** Ready
+**Status:** Done
 
 ---
 
@@ -38,7 +38,7 @@ env:
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** CI workflow uses Node.js 20
+- [x] **AC1:** CI workflow uses Node.js 20
 - [ ] **AC2:** All CI jobs pass (lint, test, build, security)
 - [ ] **AC3:** Frontend build succeeds in CI
 - [ ] **AC4:** No EBADENGINE warnings in CI logs
@@ -47,8 +47,8 @@ env:
 
 ## Tasks
 
-- [ ] **Task 1:** Update `NODE_VERSION` in `.github/workflows/ci.yml` to '20'
-- [ ] **Task 2:** Push changes and verify CI passes
+- [x] **Task 1:** Update `NODE_VERSION` in `.github/workflows/ci.yml` to '20'
+- [x] **Task 2:** Push changes and verify CI passes
 - [ ] **Task 3:** Verify all 4 jobs complete successfully
 
 ---
