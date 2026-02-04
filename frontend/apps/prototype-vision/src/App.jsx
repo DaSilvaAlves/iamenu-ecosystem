@@ -63,11 +63,12 @@ const App = () => {
     const { isMobile, isOpen: sidebarOpen, close: closeSidebar } = useSidebarStore();
     const { init: initViewport } = useViewportDetection();
 
-    // Initialize viewport detection
+    // Initialize viewport detection (run once on mount)
     useEffect(() => {
         const cleanup = initViewport();
         return cleanup;
-    }, [initViewport]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Close sidebar on route change (mobile only)
     useEffect(() => {
