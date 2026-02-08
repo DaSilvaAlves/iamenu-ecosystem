@@ -1,3 +1,15 @@
+// Sentry must be initialized FIRST, before all other imports
+import * as Sentry from '@sentry/node';
+
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    tracesSampleRate: 0.1,
+    serverName: 'academy-api',
+  });
+}
+
 import app from './app';
 
 const PORT = process.env.PORT || 3003;
