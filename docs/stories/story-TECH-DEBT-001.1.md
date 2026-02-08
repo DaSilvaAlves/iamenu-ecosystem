@@ -39,17 +39,19 @@ Implement Row-Level Security (RLS) policies across all tables in the iaMenu Ecos
 ## 📋 Tasks
 
 ### Task 1.1.1: Audit & Design RLS Policies
-- [ ] Review all tables in all schemas
-- [ ] Create RLS matrix (table → access patterns)
-- [ ] Document policy logic for each table
+- [x] Review all tables in all schemas
+- [x] Create RLS matrix (table → access patterns)
+- [x] Document policy logic for each table
 - [ ] Review with @architect for alignment
 
 **Time Estimate:** 2h
 **Subtasks:**
-  - [ ] Audit community schema tables
-  - [ ] Audit marketplace schema tables
-  - [ ] Audit academy schema tables
-  - [ ] Create `docs/security/rls-design-matrix.md`
+  - [x] Audit community schema tables
+  - [x] Audit marketplace schema tables
+  - [x] Audit academy schema tables
+  - [x] Create `docs/security/rls-design-matrix.md`
+
+**Completed:** 2026-02-08 (1.5h)
 
 ---
 
@@ -158,7 +160,7 @@ SELECT * FROM posts WHERE user_id != auth.uid();
 
 **Will be updated as development progresses:**
 - [ ] supabase/migrations/[timestamp]_add_rls_policies.sql
-- [ ] docs/security/rls-design-matrix.md
+- [x] docs/security/rls-design-matrix.md (Created)
 - [ ] tests/rls-policies.test.ts
 - [ ] docs/security/rls-guide.md
 
@@ -167,18 +169,23 @@ SELECT * FROM posts WHERE user_id != auth.uid();
 ## 🔄 Dev Agent Record
 
 ### Checkboxes Completed
-- [ ] Task 1.1.1: Audit & Design
+- [x] Task 1.1.1: Audit & Design
 - [ ] Task 1.1.2: Implementation
 - [ ] Task 1.1.3: Testing
 - [ ] Task 1.1.4: Review & Deploy
 
 ### Debug Log
-*To be updated during development*
+- **2026-02-08 14:30**: Task 1.1.1 completed - RLS matrix design document created
+- **Findings**: 6 tables need RLS policies, 2 CRITICAL (posts, comments, quotes), 3 MEDIUM/HIGH (profiles, suppliers, enrollments)
+- **Next**: Start Task 1.1.2 - SQL policy implementation
 
 ### Completion Notes
-*To be updated upon completion*
+- Created comprehensive RLS design matrix with SQL policies for all 6 tables
+- Identified access patterns for each table based on business logic
+- Ready for @architect review before implementation
 
 ### Change Log
+- **2026-02-08 14:30**: Task 1.1.1 completed - Design matrix created
 - **2026-02-08**: Story created and ready for dev
 
 ---
