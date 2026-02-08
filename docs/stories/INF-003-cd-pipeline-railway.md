@@ -4,7 +4,7 @@
 **Estimated Hours:** 3-4h
 **Owner:** @devops
 **Sprint:** Infrastructure P1
-**Status:** Ready
+**Status:** Done
 **Depends On:** INF-001
 
 ---
