@@ -29,9 +29,28 @@
 
 ## Tasks
 
-- [ ] **Task 1:** Configure branch protection via GitHub UI or CLI
+- [ ] **Task 1:** Configure branch protection via GitHub UI (repo is private - GitHub Pro required for API)
 - [ ] **Task 2:** Enable required status checks (lint, test, build)
 - [ ] **Task 3:** Document PR workflow
+
+## Manual Setup Procedure (GitHub UI)
+
+**Since repository is private and GitHub Pro is required for CLI API access:**
+
+1. Go to: https://github.com/DaSilvaAlves/iamenu-ecosystem/settings/branches
+2. Click "Add branch protection rule"
+3. Fill in:
+   - **Branch name pattern:** `main`
+   - ☑ Require a pull request before merging
+   - ☑ Require status checks to pass before merging
+     - ☑ Require branches to be up to date before merging
+     - Status checks: `lint`, `test`, `build`
+   - ☑ Enforce all the above settings for administrators
+   - ☑ Block force pushes
+   - ☑ Block deletions
+4. Click "Create"
+
+**Result:** Direct pushes to main blocked, all CI checks required, force push blocked
 
 ---
 
