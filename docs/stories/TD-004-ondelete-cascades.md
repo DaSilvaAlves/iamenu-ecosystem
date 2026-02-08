@@ -40,12 +40,12 @@ Several Prisma relations are missing `onDelete` specifications, which can lead t
 
 - [x] **AC1:** All 5 relations have explicit `onDelete` actions
 - [x] **AC2:** No orphan records exist pre-migration (verified)
-- [ ] **AC3:** Delete operations work correctly:
-  - Delete CollectiveBargain → BargainAdhesions cascade deleted
-  - Delete Product → PriceHistory records cascade deleted
-  - Delete Supplier → PriceHistory records cascade deleted
-  - Delete Course with enrollments → Operation blocked (RESTRICT)
-  - Delete Product with order items → Operation blocked (RESTRICT)
+- [x] **AC3:** Delete operations work correctly:
+  - Delete CollectiveBargain → BargainAdhesions cascade deleted ✓
+  - Delete Product → PriceHistory records cascade deleted ✓
+  - Delete Supplier → PriceHistory records cascade deleted ✓
+  - Delete Course with enrollments → Operation blocked (RESTRICT) ✓
+  - Delete Product with order items → Operation blocked (RESTRICT) ✓
 - [x] **AC4:** No unintended data loss for unrelated records
 - [x] **AC5:** Migration applied successfully
 
