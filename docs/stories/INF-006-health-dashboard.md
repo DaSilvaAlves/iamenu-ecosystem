@@ -28,10 +28,33 @@ Currently no centralized view of service status:
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** Health check endpoint returns metrics (response time, uptime)
-- [ ] **AC2:** Dashboard page or external tool configured
-- [ ] **AC3:** All 4 services monitored
-- [ ] **AC4:** Alerting on service down (optional)
+- [x] **AC1:** Health check endpoint returns metrics (response time, uptime)
+- [x] **AC2:** Dashboard configured via BetterStack
+- [x] **AC3:** All 4 services monitored
+- [x] **AC4:** Alerting on service down via email
+
+## Implementation Summary (2026-02-08)
+
+**BetterStack Configuration:**
+- ✅ Free tier account created
+- ✅ 5 monitors configured:
+  - Community API: ✅ Up (17m)
+  - Marketplace API: ✅ Up (15m)
+  - Academy API: ⚠️ Down (investigating)
+  - Business API: ⚠️ Down (investigating)
+  - Frontend (Vercel): ✅ Up (34m)
+
+**Status Dashboard:**
+- ✅ Live at: https://uptime.betterstack.com/
+- ✅ Email alerts enabled
+- ✅ Incident tracking active
+
+**Known Issues:**
+- Academy and Business APIs showing as Down
+- Root cause: May need SENTRY_DSN verification or service restart
+- Recommended: Check Railway logs for startup errors
+
+**Status:** Ready for Review (3/5 services operational)
 
 ---
 
