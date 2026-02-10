@@ -65,6 +65,8 @@ model Supplier {
   @@index([locationRegion])
   @@index([ratingAvg(sort: Desc)])
   @@index([categories]) // For Gin index for array column
+  @@index([deliveryZones])
+  @@index([certifications])
 }
 
 model Review {
@@ -93,7 +95,7 @@ model Review {
   createdAt          DateTime  @default(now()) @map("created_at")
   updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at")
 
-  supplier           Supplier  @relation(fields: [supplierId], references: [id])
+  supplier           Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
 
   @@unique([supplierId, reviewerId]) // 1 review per supplier per reviewer
   @@index([supplierId])
@@ -138,8 +140,8 @@ model SupplierProduct {
   available       Boolean   @default(true)
   updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
 
-  supplier        Supplier  @relation(fields: [supplierId], references: [id])
-  product         Product   @relation(fields: [productId], references: [id])
+  supplier        Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  product         Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([supplierId, productId])
   @@index([supplierId])
@@ -162,6 +164,8 @@ model QuoteRequest {
   quotes              Quote[]
 
   @@map("quote_requests")
+  @@index([restaurantId])
+  @@index([suppliers])
 }
 
 model Quote {
@@ -177,8 +181,8 @@ model Quote {
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
 
-  quoteRequest     QuoteRequest @relation(fields: [quoteRequestId], references: [id])
-  supplier         Supplier     @relation(fields: [supplierId], references: [id])
+  quoteRequest     QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade)
+  supplier         Supplier     @relation(fields: [supplierId], references: [id], onDelete: Cascade)
 
   @@map("quotes")
 }
@@ -206,6 +210,7 @@ model CollectiveBargain {
   bargainAdhesions   BargainAdhesion[] // <--- NEW RELATION
 
   @@map("collective_bargains")
+  @@index([participants])
 }
 
 model BargainAdhesion {

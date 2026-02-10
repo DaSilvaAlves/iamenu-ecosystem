@@ -26,9 +26,9 @@ model Restaurant {
   closeHour      String?  // "23:00"
 
   // Financeiro (Step 3)
-  monthlyCosts   Float?   // Custos fixos mensais
+  monthlyCosts   Decimal? @db.Decimal(12,2)  // Custos fixos mensais
   staffCount     Int?
-  averageTicket  Float?   // Ticket médio atual
+  averageTicket  Decimal? @db.Decimal(10,2)  // Ticket médio atual
   suppliers      String?  // Lista de fornecedores (comma-separated)
 
   // Metadata
@@ -41,6 +41,7 @@ model Restaurant {
   orders         Order[]
   settings       RestaurantSettings?
 
+  @@index([userId])
   @@map("restaurants")
   @@schema("business")
 }
@@ -51,8 +52,8 @@ model RestaurantSettings {
   restaurantId     String @unique
 
   // Objetivos (Step 4)
-  revenueGoal      Float?  // Meta de receita mensal
-  foodCostTarget   Float?  // Food cost % ideal (ex: 30)
+  revenueGoal      Decimal? @db.Decimal(12,2)  // Meta de receita mensal
+  foodCostTarget   Decimal? @db.Decimal(5,2)  // Food cost % ideal (ex: 30)
   tableRotation    Int?    // Rotação de mesa alvo
   segment          String? // 'fast-casual', 'casual', 'fine-dining', 'fast-food'
 
@@ -73,14 +74,14 @@ model Product {
   // Dados do Produto
   name           String
   category       String   // 'Main Course', 'Appetizer', 'Dessert', 'Beverage'
-  price          Float    // Preço de venda
-  cost           Float    // Custo de produção (food cost)
+  price          Decimal  @db.Decimal(10,2)  // Preço de venda
+  cost           Decimal  @db.Decimal(10,2)  // Custo de produção (food cost)
   description    String?
 
   // Métricas
   popularity     Int      @default(0)  // 0-10 (manual ou calculado por vendas)
   sales          Int      @default(0)  // Total de vendas
-  totalRevenue   Float    @default(0)  // Receita total gerada
+  totalRevenue   Decimal  @default(0) @db.Decimal(12,2)  // Receita total gerada
 
   // Flags
   isActive       Boolean  @default(true)
@@ -93,6 +94,7 @@ model Product {
   restaurant     Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   orderItems     OrderItem[]
 
+  @@index([restaurantId])
   @@map("products")
   @@schema("business")
 }
@@ -104,7 +106,7 @@ model Order {
 
   // Dados do Pedido
   customerId     String?  // Opcional: FK para customer (futuro)
-  total          Float    // Valor total do pedido
+  total          Decimal  @db.Decimal(12,2)  // Valor total do pedido
   status         String   @default("completed") // 'pending', 'completed', 'cancelled'
 
   // Metadata
@@ -115,6 +117,9 @@ model Order {
   restaurant     Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   items          OrderItem[]
 
+  @@index([restaurantId])
+  @@index([status])
+  @@index([restaurantId, orderDate(sort: Desc)])
   @@map("orders")
   @@schema("business")
 }
@@ -126,8 +131,8 @@ model OrderItem {
   productId      String
 
   quantity       Int
-  priceAtTime    Float    // Preço no momento da venda
-  costAtTime     Float    // Custo no momento da venda
+  priceAtTime    Decimal  @db.Decimal(10,2)  // Preço no momento da venda
+  costAtTime     Decimal  @db.Decimal(10,2)  // Custo no momento da venda
 
   order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product        Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
@@ -142,14 +147,16 @@ model DailyStats {
   restaurantId   String
   date           DateTime
 
-  revenue        Float
+  revenue        Decimal  @db.Decimal(12,2)
   customers      Int
-  avgTicket      Float
-  foodCostPct    Float
+  avgTicket      Decimal  @db.Decimal(10,2)
+  foodCostPct    Decimal  @db.Decimal(5,2)
 
   createdAt      DateTime @default(now())
 
   @@unique([restaurantId, date])
+  @@index([restaurantId])
+  @@index([date(sort: Desc)])
   @@map("daily_stats")
   @@schema("business")
 }
