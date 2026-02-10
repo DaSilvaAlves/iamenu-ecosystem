@@ -144,7 +144,7 @@ commands:
   # Workflow & Planning (Consolidated - Story 6.1.2.3)
   - name: workflow
     args: '{name}'
-    description: 'Start workflow (or list available)'
+    description: 'Start workflow (brownfield-discovery, greenfield-fullstack, etc.)'
   - name: plan
     args: '[create|status|update] [id]'
     description: 'Workflow planning (default: create)'
@@ -215,6 +215,7 @@ dependencies:
     - deprecate-component.md
     - document-project.md
     - execute-checklist.md
+    - execute-workflow-brownfield-discovery.md
     - improve-self.md
     - index-docs.md
     - kb-mode-interaction.md
