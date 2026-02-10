@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # OpenAPI Generator service for SDK generation
+  openapi-generator:
+    image: openapitools/openapi-generator-cli:latest
+    container_name: iamenu-sdk-generator
+    volumes:
+      # Mount specs
+      - ./docs/api/openapi-community.yaml:/input/openapi-community.yaml:ro
+      - ./docs/api/openapi-marketplace.yaml:/input/openapi-marketplace.yaml:ro
+      - ./docs/api/openapi-academy.yaml:/input/openapi-academy.yaml:ro
+      - ./docs/api/openapi-business.yaml:/input/openapi-business.yaml:ro
+      # Mount generator configs
+      - ./sdk/generator-configs:/config:ro
+      # Mount output directories
+      - ./sdk/generated/community:/output/community
+      - ./sdk/generated/marketplace:/output/marketplace
+      - ./sdk/generated/academy:/output/academy
+      - ./sdk/generated/business:/output/business
+      - ./sdk/generated/web:/output/web
+    # Keep container alive for manual execution
+    stdin_open: true
+    tty: true
+    networks:
+      - iamenu
+    entrypoint: tail
+    command: -f /dev/null
+
+networks:
+  iamenu:
+    driver: bridge

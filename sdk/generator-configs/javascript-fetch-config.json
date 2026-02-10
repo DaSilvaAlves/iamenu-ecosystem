@@ -1,0 +1,23 @@
+{
+  "packageName": "@iamenu/api-client",
+  "packageVersion": "1.0.0",
+  "packageTitle": "iaMenu Ecosystem API Client",
+  "packageDescription": "Generated JavaScript/Fetch client for iaMenu Ecosystem APIs",
+  "npmName": "@iamenu/api-client",
+  "npmVersion": "1.0.0",
+  "npmRepository": "https://npm.pkg.github.com",
+  "npmAuthor": "iaMenu Team",
+  "npmLicense": "UNLICENSED",
+  "supportsES6": true,
+  "usePromises": true,
+  "useES6": true,
+  "hideGenerationTimestamp": false,
+  "gitUserId": "iamenu",
+  "gitRepoId": "ecosystem",
+  "enumsAsTypes": true,
+  "docPackageName": "@iamenu/api-client",
+  "apiDocumentationUrl": "https://docs.iamenu.pt/api",
+  "baseUrl": "http://localhost:9000",
+  "docModels": true,
+  "docApis": true
+}

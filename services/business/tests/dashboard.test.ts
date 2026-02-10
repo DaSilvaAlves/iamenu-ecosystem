@@ -512,7 +512,7 @@ describe('DashboardService', () => {
 
       // Assert - Stars sorted by revenue descending
       if (result.stars.length >= 2) {
-        expect(result.stars[0].revenue).toBeGreaterThanOrEqual(result.stars[1].revenue);
+        expect(Number(result.stars[0].revenue)).toBeGreaterThanOrEqual(Number(result.stars[1].revenue));
       }
     });
   });

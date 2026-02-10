@@ -1,0 +1,1082 @@
+openapi: 3.0.0
+info:
+  title: iaMenu Marketplace API
+  version: 1.0.0
+  description: |
+    Marketplace Service API - Suppliers, products, quotes, reviews, and collective bargains
+
+    ## Features
+    - Supplier profiles and management
+    - Product catalog with pricing
+    - Quote requests and responses
+    - Review system (verified purchases only)
+    - Collective bargains for restaurant groups
+
+  contact:
+    name: iaMenu Team
+
+servers:
+  - url: http://localhost:3002/api/v1/marketplace
+    description: Marketplace Service (Development)
+  - url: https://iamenumarketplace-api-production.up.railway.app/api/v1/marketplace
+    description: Marketplace Service (Production)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Supplier:
+      type: object
+      required:
+        - id
+        - companyName
+        - userId
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyName:
+          type: string
+          minLength: 3
+          maxLength: 200
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          pattern: '^\+?[0-9]{9,15}$'
+        verified:
+          type: boolean
+          default: false
+          description: Verified by admin
+        ratingAvg:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 5
+          nullable: true
+        reviewCount:
+          type: integer
+          minimum: 0
+          default: 0
+        logoUrl:
+          type: string
+          format: uri
+          nullable: true
+        headerUrl:
+          type: string
+          format: uri
+          nullable: true
+        description:
+          type: string
+          maxLength: 2000
+          nullable: true
+        categories:
+          type: array
+          items:
+            type: string
+          description: Supply categories (e.g., fruits, meats, beverages)
+        deliveryArea:
+          type: string
+          nullable: true
+        minOrderValue:
+          type: number
+          format: float
+          minimum: 0
+          nullable: true
+        userId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - supplierId
+        - price
+      properties:
+        id:
+          type: string
+          format: uuid
+        supplierId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 3
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        category:
+          type: string
+          description: Product category
+        unitOfMeasure:
+          type: string
+          enum: [kg, l, unit, box]
+          description: Base unit
+        price:
+          type: number
+          format: float
+          minimum: 0
+          description: Price per unit
+        bulkPricing:
+          type: array
+          items:
+            type: object
+            properties:
+              quantity:
+                type: integer
+                minimum: 1
+              price:
+                type: number
+                format: float
+          description: Bulk pricing tiers
+        stock:
+          type: integer
+          minimum: 0
+          description: Available stock
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+        active:
+          type: boolean
+          default: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    QuoteRequest:
+      type: object
+      required:
+        - id
+        - buyerId
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        buyerId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productName:
+                type: string
+              quantity:
+                type: number
+              unitOfMeasure:
+                type: string
+          description: Requested items
+        preferredDeliveryDate:
+          type: string
+          format: date
+          nullable: true
+        budget:
+          type: number
+          format: float
+          nullable: true
+        status:
+          type: string
+          enum: [open, closed, completed]
+          default: open
+        quotesReceived:
+          type: integer
+          minimum: 0
+          default: 0
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+
+    Quote:
+      type: object
+      required:
+        - id
+        - quoteRequestId
+        - supplierId
+        - totalPrice
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        quoteRequestId:
+          type: string
+          format: uuid
+        supplierId:
+          type: string
+          format: uuid
+        totalPrice:
+          type: number
+          format: float
+          minimum: 0
+        itemDetails:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+                format: uuid
+              quantity:
+                type: number
+              unitPrice:
+                type: number
+                format: float
+              subtotal:
+                type: number
+                format: float
+        deliveryDate:
+          type: string
+          format: date
+        deliveryFee:
+          type: number
+          format: float
+          minimum: 0
+          nullable: true
+        paymentTerms:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [pending, accepted, rejected, expired]
+          default: pending
+        notes:
+          type: string
+          nullable: true
+        validUntil:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Review:
+      type: object
+      required:
+        - id
+        - supplierId
+        - reviewerId
+        - rating
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        supplierId:
+          type: string
+          format: uuid
+        reviewerId:
+          type: string
+          format: uuid
+          description: User who left the review
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Star rating (1-5)
+        title:
+          type: string
+          minLength: 3
+          maxLength: 100
+        comment:
+          type: string
+          maxLength: 2000
+        verified:
+          type: boolean
+          default: false
+          description: Verified purchase
+        helpful:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Number of helpful votes
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CollectiveBargain:
+      type: object
+      required:
+        - id
+        - supplierId
+        - targetQuantity
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        supplierId:
+          type: string
+          format: uuid
+        product:
+          type: object
+          properties:
+            name:
+              type: string
+            unitOfMeasure:
+              type: string
+        regularPrice:
+          type: number
+          format: float
+          description: Normal product price
+        discountedPrice:
+          type: number
+          format: float
+          description: Collective bargain price
+        targetQuantity:
+          type: number
+          description: Quantity needed to trigger bargain
+        currentQuantity:
+          type: number
+          default: 0
+          description: Current commitment quantity
+        percentageFull:
+          type: number
+          format: float
+          description: Progress percentage (0-100)
+        status:
+          type: string
+          enum: [active, completed, expired]
+          default: active
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    Pagination:
+      type: object
+      required:
+        - limit
+        - offset
+        - total
+        - hasMore
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        offset:
+          type: integer
+          minimum: 0
+          default: 0
+        total:
+          type: integer
+        hasMore:
+          type: boolean
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        statusCode:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []
+
+paths:
+  /suppliers:
+    get:
+      summary: List suppliers
+      operationId: getAllSuppliers
+      tags:
+        - Suppliers
+      security: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Full-text search on company name
+        - name: verified
+          in: query
+          schema:
+            type: boolean
+          description: Filter by verification status
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Supplier'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Create supplier profile
+      operationId: createSupplier
+      tags:
+        - Suppliers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - companyName
+              properties:
+                companyName:
+                  type: string
+                  minLength: 3
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                description:
+                  type: string
+                categories:
+                  type: array
+                  items:
+                    type: string
+                deliveryArea:
+                  type: string
+                minOrderValue:
+                  type: number
+                  format: float
+      responses:
+        '201':
+          description: Supplier created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Supplier'
+        '409':
+          description: Supplier already exists for this user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /suppliers/{id}:
+    get:
+      summary: Get supplier details
+      operationId: getSupplierById
+      tags:
+        - Suppliers
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Supplier'
+        '404':
+          description: Supplier not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      summary: Update supplier
+      operationId: updateSupplier
+      tags:
+        - Suppliers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                companyName:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                description:
+                  type: string
+                categories:
+                  type: array
+                  items:
+                    type: string
+                logoFile:
+                  type: string
+                  format: binary
+                headerFile:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Supplier'
+        '403':
+          description: Only supplier owner can update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete supplier
+      operationId: deleteSupplier
+      tags:
+        - Suppliers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          description: Only supplier owner can delete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /suppliers/{supplierId}/reviews:
+    get:
+      summary: Get supplier reviews
+      operationId: getSupplierReviews
+      tags:
+        - Reviews
+      security: []
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - recent
+              - rating:high
+              - rating:low
+              - helpful
+            default: recent
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Create review
+      operationId: createReview
+      tags:
+        - Reviews
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - rating
+                - title
+              properties:
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                title:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                comment:
+                  type: string
+                  maxLength: 2000
+      responses:
+        '201':
+          description: Review created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Review'
+        '403':
+          description: Only verified customers can review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /suppliers/{supplierId}/reviews/{id}:
+    patch:
+      summary: Update review (owner only)
+      operationId: updateReview
+      tags:
+        - Reviews
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                title:
+                  type: string
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Review'
+        '403':
+          description: Can only edit own reviews
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete review (owner only)
+      operationId: deleteReview
+      tags:
+        - Reviews
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          description: Can only delete own reviews
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /quotes:
+    get:
+      summary: List quotes (RLS filtered)
+      operationId: getQuotes
+      tags:
+        - Quotes
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, accepted, rejected, expired]
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: recent
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Quote'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Create new quote
+      operationId: createQuote
+      tags:
+        - Quotes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - quoteRequestId
+                - totalPrice
+              properties:
+                quoteRequestId:
+                  type: string
+                  format: uuid
+                totalPrice:
+                  type: number
+                  format: float
+                  minimum: 0
+                itemDetails:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productId:
+                        type: string
+                        format: uuid
+                      quantity:
+                        type: number
+                      unitPrice:
+                        type: number
+                deliveryDate:
+                  type: string
+                  format: date
+                deliveryFee:
+                  type: number
+                  format: float
+                paymentTerms:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        '201':
+          description: Quote created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Quote'
+        '404':
+          description: Quote request not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /quotes/{id}:
+    get:
+      summary: Get specific quote
+      operationId: getQuoteById
+      tags:
+        - Quotes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Quote'
+        '403':
+          description: Access denied (RLS violation)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      summary: Update quote status
+      operationId: updateQuote
+      tags:
+        - Quotes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [accepted, rejected]
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Quote'
+        '403':
+          description: Only quote owner can update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /bargains:
+    get:
+      summary: List active collective bargains
+      operationId: getCollectiveBargains
+      tags:
+        - Collective Bargains
+      security: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CollectiveBargain'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /bargains/{id}:
+    get:
+      summary: Get bargain details
+      operationId: getBargainById
+      tags:
+        - Collective Bargains
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CollectiveBargain'
+
+    post:
+      summary: Join collective bargain
+      operationId: joinBargain
+      tags:
+        - Collective Bargains
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - quantity
+              properties:
+                quantity:
+                  type: number
+                  minimum: 0
+      responses:
+        '200':
+          description: Joined
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CollectiveBargain'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

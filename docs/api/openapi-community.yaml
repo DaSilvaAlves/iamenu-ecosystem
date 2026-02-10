@@ -1,0 +1,1044 @@
+openapi: 3.0.0
+info:
+  title: iaMenu Community API
+  version: 1.0.0
+  description: |
+    Community Service API - Posts, groups, followers, gamification, and moderation
+
+    ## Features
+    - Posts with comments and reactions (real-time via Socket.io)
+    - Groups and memberships
+    - Follower system and notifications
+    - Gamification (points, streaks, badges)
+    - Moderation (reports, warnings, bans)
+
+  contact:
+    name: iaMenu Team
+  x-logo:
+    url: https://iamenu.pt/logo.png
+
+servers:
+  - url: http://localhost:3001/api/v1/community
+    description: Community Service (Development)
+  - url: https://iamenucommunity-api-production.up.railway.app/api/v1/community
+    description: Community Service (Production)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Post:
+      type: object
+      required:
+        - id
+        - authorId
+        - title
+        - body
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique post identifier
+        authorId:
+          type: string
+          format: uuid
+          description: ID of the user who created the post
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+          description: Post title
+        body:
+          type: string
+          minLength: 10
+          maxLength: 5000
+          description: Post content
+        category:
+          type: string
+          nullable: true
+          description: Post category
+        tags:
+          type: array
+          items:
+            type: string
+          description: Post tags
+        status:
+          type: string
+          enum: [active, archived]
+          default: active
+          description: Publication status
+        groupId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Group ID if post belongs to a group
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Featured image URL
+        views:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Number of views
+        likes:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Number of likes
+        commentsCount:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Number of comments
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Comment:
+      type: object
+      required:
+        - id
+        - postId
+        - authorId
+        - body
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        postId:
+          type: string
+          format: uuid
+          description: Parent post ID
+        authorId:
+          type: string
+          format: uuid
+        body:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        likes:
+          type: integer
+          minimum: 0
+          default: 0
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Group:
+      type: object
+      required:
+        - id
+        - name
+        - ownerId
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          maxLength: 1000
+        ownerId:
+          type: string
+          format: uuid
+        privacy:
+          type: string
+          enum: [public, private]
+          default: public
+        membersCount:
+          type: integer
+          minimum: 1
+        postsCount:
+          type: integer
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Notification:
+      type: object
+      required:
+        - id
+        - userId
+        - type
+        - message
+        - read
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+          description: Recipient user
+        type:
+          type: string
+          enum:
+            - comment_on_post
+            - post_liked
+            - new_follower
+            - group_invitation
+            - moderation_warning
+          description: Notification type
+        message:
+          type: string
+          description: Notification message
+        relatedId:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID of related resource (post, comment, user, etc.)
+        read:
+          type: boolean
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+
+    Reaction:
+      type: object
+      description: Reaction summary for a resource
+      properties:
+        emoji:
+          type: string
+          description: Reaction emoji
+        count:
+          type: integer
+          minimum: 0
+        users:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              username:
+                type: string
+
+    Pagination:
+      type: object
+      required:
+        - limit
+        - offset
+        - total
+        - hasMore
+      properties:
+        limit:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+          default: 20
+        offset:
+          type: integer
+          format: int32
+          minimum: 0
+          default: 0
+        total:
+          type: integer
+          format: int32
+        hasMore:
+          type: boolean
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+        - timestamp
+      properties:
+        error:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - INVALID_TOKEN
+            - FORBIDDEN
+            - NOT_FOUND
+            - CONFLICT
+            - INTERNAL_SERVER_ERROR
+        message:
+          type: string
+        statusCode:
+          type: integer
+          format: int32
+        timestamp:
+          type: string
+          format: date-time
+        details:
+          type: object
+          nullable: true
+
+security:
+  - bearerAuth: []
+
+paths:
+  /posts:
+    get:
+      summary: List all posts
+      operationId: getAllPosts
+      tags:
+        - Posts
+      security: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search in title and body
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: created_at:desc
+            enum:
+              - created_at:desc
+              - created_at:asc
+              - views:desc
+              - likes:desc
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create new post
+      operationId: createPost
+      tags:
+        - Posts
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - title
+                - body
+              properties:
+                title:
+                  type: string
+                  minLength: 3
+                  maxLength: 200
+                body:
+                  type: string
+                  minLength: 10
+                  maxLength: 5000
+                category:
+                  type: string
+                tags:
+                  type: string
+                  description: Comma-separated tags
+                groupId:
+                  type: string
+                  format: uuid
+                image:
+                  type: string
+                  format: binary
+                  description: Featured image
+      responses:
+        '201':
+          description: Post created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Post'
+                  message:
+                    type: string
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /posts/{id}:
+    get:
+      summary: Get specific post
+      operationId: getPostById
+      tags:
+        - Posts
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Post'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      summary: Update post
+      operationId: updatePost
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 3
+                  maxLength: 200
+                body:
+                  type: string
+                  minLength: 10
+                  maxLength: 5000
+                status:
+                  type: string
+                  enum: [active, archived]
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Post'
+        '403':
+          description: Cannot edit other users' posts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete post
+      operationId: deletePost
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          description: Cannot delete other users' posts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /posts/{id}/reactions:
+    get:
+      summary: Get post reactions
+      operationId: getPostReactions
+      tags:
+        - Posts
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Reaction'
+
+  /posts/{id}/react:
+    post:
+      summary: Toggle reaction on post
+      operationId: toggleReaction
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - emoji
+              properties:
+                emoji:
+                  type: string
+                  description: Reaction emoji (will toggle - add if not present, remove if present)
+      responses:
+        '200':
+          description: Reaction toggled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      emoji:
+                        type: string
+                      count:
+                        type: integer
+                      userReacted:
+                        type: boolean
+
+  /posts/{postId}/comments:
+    get:
+      summary: Get post comments
+      operationId: getCommentsByPostId
+      tags:
+        - Comments
+      security: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Create comment
+      operationId: createComment
+      tags:
+        - Comments
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - body
+              properties:
+                body:
+                  type: string
+                  minLength: 1
+                  maxLength: 2000
+      responses:
+        '201':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Comment'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /posts/{postId}/comments/{id}:
+    delete:
+      summary: Delete comment
+      operationId: deleteComment
+      tags:
+        - Comments
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          description: Cannot delete other users' comments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /posts/{postId}/comments/{id}/reactions:
+    get:
+      summary: Get comment reactions
+      operationId: getCommentReactions
+      tags:
+        - Comments
+      security: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Reaction'
+
+  /posts/{postId}/comments/{id}/react:
+    post:
+      summary: Toggle reaction on comment
+      operationId: toggleCommentReaction
+      tags:
+        - Comments
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - emoji
+              properties:
+                emoji:
+                  type: string
+      responses:
+        '200':
+          description: Reaction toggled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      emoji:
+                        type: string
+                      count:
+                        type: integer
+                      userReacted:
+                        type: boolean
+
+  /groups:
+    get:
+      summary: List user's groups
+      operationId: getGroups
+      tags:
+        - Groups
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Group'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Create new group
+      operationId: createGroup
+      tags:
+        - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                description:
+                  type: string
+                  maxLength: 1000
+                privacy:
+                  type: string
+                  enum: [public, private]
+                  default: public
+      responses:
+        '201':
+          description: Group created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Group'
+
+  /groups/{id}:
+    get:
+      summary: Get specific group
+      operationId: getGroupById
+      tags:
+        - Groups
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Group'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      summary: Update group
+      operationId: updateGroup
+      tags:
+        - Groups
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                description:
+                  type: string
+                privacy:
+                  type: string
+                  enum: [public, private]
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Group'
+        '403':
+          description: Only group owner can update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete group
+      operationId: deleteGroup
+      tags:
+        - Groups
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          description: Only group owner can delete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /notifications:
+    get:
+      summary: List user's notifications
+      operationId: getNotifications
+      tags:
+        - Notifications
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: unread
+          in: query
+          schema:
+            type: boolean
+          description: Filter unread only
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notification'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /notifications/{id}/read:
+    post:
+      summary: Mark notification as read
+      operationId: markNotificationAsRead
+      tags:
+        - Notifications
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Notification'
+
+  /notifications/{id}:
+    delete:
+      summary: Delete notification
+      operationId: deleteNotification
+      tags:
+        - Notifications
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          description: Can only delete own notifications
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

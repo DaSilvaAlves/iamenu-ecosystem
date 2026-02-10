@@ -1,56 +1,47 @@
 /**
- * RLS (Row-Level Security) Middleware for Community Service
+ * RLS (Row-Level Security) Middleware for PostgreSQL
+ * Sets app.current_user_id session variable for every authenticated request
+ * Enables RLS policies to filter data at the database level
  */
-import { Request, Response, NextFunction } from 'express';
-import * as jwt from 'jsonwebtoken';
-import prisma from '../lib/prisma';
 
-export const rlsMiddleware = async (
+import { Request, Response, NextFunction } from 'express';
+import { prisma } from '../lib/prisma';
+
+/**
+ * Middleware to set PostgreSQL session variable for RLS
+ * Must run AFTER authentication middleware that sets req.user
+ */
+export const setRLSUserContext = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Missing authorization header' });
+    // Only set if user is authenticated
+    if (req.user?.userId) {
+      // Execute SQL to set the session variable
+      // This variable will be available in RLS policies as: current_setting('app.current_user_id')
+      await prisma.$executeRaw`SET app.current_user_id = ${req.user.userId}`;
     }
-
-    const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret') as {
-      userId: string;
-      email: string;
-      role: string;
-    };
-
-    const userId = decoded.userId;
-
-    // SET PostgreSQL session variable for RLS
-    await prisma.$executeRawUnsafe(
-      `SET app.current_user_id = '${userId}'`
-    );
-
-    (req as any).userId = userId;
-    (req as any).userRole = decoded.role;
-    (req as any).userEmail = decoded.email;
 
     next();
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-    if (error instanceof jwt.TokenExpiredError) {
-      return res.status(401).json({ error: 'Token expired' });
-    }
     console.error('RLS middleware error:', error);
-    return res.status(500).json({ error: 'Authentication failed' });
+    // Don't block the request if RLS setup fails
+    // But log it for debugging
+    next();
   }
 };
 
-export const setRLSContext = async (userId: string): Promise<void> => {
-  await prisma.$executeRawUnsafe(`SET app.current_user_id = '${userId}'`);
-};
-
-export const clearRLSContext = async (): Promise<void> => {
-  await prisma.$executeRawUnsafe(`RESET app.current_user_id`);
-};
+/**
+ * Alternative: Connection pooler compatible approach
+ * If using connection pooling, session variables may be lost
+ * In that case, pass user_id as a parameter to queries instead:
+ *
+ * Usage example:
+ * const posts = await prisma.post.findMany({
+ *   where: {
+ *     authorId: req.user.userId  // Filter at application layer
+ *   }
+ * });
+ */

@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: iamenu-swagger-ui
+    environment:
+      # Set the default spec on startup
+      SWAGGER_JSON: /specs/openapi-base.yaml
+      # Allow editing
+      SWAGGER_JSON_URL: http://localhost:8080/api/openapi-base.yaml
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount all OpenAPI specs
+      - ./docs/api/openapi-base.yaml:/specs/openapi-base.yaml:ro
+      - ./docs/api/openapi-community.yaml:/specs/openapi-community.yaml:ro
+      - ./docs/api/openapi-marketplace.yaml:/specs/openapi-marketplace.yaml:ro
+      - ./docs/api/openapi-academy.yaml:/specs/openapi-academy.yaml:ro
+      - ./docs/api/openapi-business.yaml:/specs/openapi-business.yaml:ro
+      # Custom config
+      - ./docker/swagger/swagger-config.json:/usr/share/nginx/html/swagger-config.json:ro
+      - ./docker/swagger/index.html:/usr/share/nginx/html/index.html:ro
+    networks:
+      - iamenu
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # Optional: nginx reverse proxy to serve specs with proper CORS headers
+  swagger-api-server:
+    image: nginx:alpine
+    container_name: iamenu-swagger-api
+    ports:
+      - "8081:80"
+    volumes:
+      - ./docs/api:/usr/share/nginx/html/api:ro
+      - ./docker/swagger/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - iamenu
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/api/openapi-community.yaml"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  iamenu:
+    driver: bridge

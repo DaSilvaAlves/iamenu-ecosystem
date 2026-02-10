@@ -1,0 +1,14 @@
+status:
+  branch: main
+  modifiedFiles:
+    - frontend/apps/prototype-vision/src/components/ui/
+  modifiedFilesTotalCount: 1
+  recentCommits:
+    - 'fix(aios): resolve remaining CLI issues and regenerate manifests'
+    - 'feat(aios): add AIOS system to version control and fix critical issues'
+  currentEpic: null
+  currentStory: null
+  lastUpdate: '2026-02-02T00:24:34.479Z'
+  isGitRepo: true
+timestamp: 1769991874480
+ttl: 60

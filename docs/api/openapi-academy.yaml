@@ -1,0 +1,766 @@
+openapi: 3.0.0
+info:
+  title: iaMenu Academy API
+  version: 1.0.0
+  description: |
+    Academy Service API - Online courses, enrollments, progress tracking, and certificates
+
+    ## Features
+    - Course management with modules and lessons
+    - Student enrollment and progress tracking
+    - Certificate generation and verification
+    - Content access control based on enrollment status
+
+  contact:
+    name: iaMenu Team
+
+servers:
+  - url: http://localhost:3003/api/v1/academy
+    description: Academy Service (Development)
+  - url: https://iamenuacademy-api-production.up.railway.app/api/v1/academy
+    description: Academy Service (Production)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Lesson:
+      type: object
+      required:
+        - id
+        - moduleId
+        - title
+        - order
+      properties:
+        id:
+          type: string
+          format: uuid
+        moduleId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+          nullable: true
+        content:
+          type: string
+          nullable: true
+          description: Lesson content (HTML or Markdown)
+        contentType:
+          type: string
+          enum: [text, video, quiz, assignment]
+          default: text
+        videoUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Video URL (if contentType is video)
+        duration:
+          type: integer
+          minimum: 0
+          description: Duration in seconds
+        order:
+          type: integer
+          minimum: 0
+          description: Lesson order in module
+        isPublished:
+          type: boolean
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Module:
+      type: object
+      required:
+        - id
+        - courseId
+        - title
+        - order
+      properties:
+        id:
+          type: string
+          format: uuid
+        courseId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+          nullable: true
+        order:
+          type: integer
+          minimum: 0
+        lessonsCount:
+          type: integer
+          minimum: 0
+          default: 0
+        duration:
+          type: integer
+          minimum: 0
+          description: Total duration in seconds
+        isPublished:
+          type: boolean
+          default: false
+        lessons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lesson'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Course:
+      type: object
+      required:
+        - id
+        - title
+        - instructorId
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+          nullable: true
+        instructorId:
+          type: string
+          format: uuid
+        category:
+          type: string
+          nullable: true
+          description: Course category (e.g., Restaurant Management)
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          default: beginner
+        price:
+          type: number
+          format: float
+          minimum: 0
+          default: 0
+          description: 0 for free courses
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+        isPublished:
+          type: boolean
+          default: false
+          description: Draft or published
+        enrollmentsCount:
+          type: integer
+          minimum: 0
+          default: 0
+        averageRating:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 5
+          nullable: true
+        modulesCount:
+          type: integer
+          minimum: 0
+          default: 0
+        duration:
+          type: integer
+          minimum: 0
+          description: Total duration in seconds
+        modules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Module'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Enrollment:
+      type: object
+      required:
+        - id
+        - courseId
+        - studentId
+        - enrolledAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        courseId:
+          type: string
+          format: uuid
+        studentId:
+          type: string
+          format: uuid
+        enrolledAt:
+          type: string
+          format: date-time
+        progress:
+          type: object
+          description: Detailed progress tracking
+          properties:
+            completedLessons:
+              type: integer
+              minimum: 0
+              default: 0
+            totalLessons:
+              type: integer
+              minimum: 0
+            completionPercentage:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 100
+            lastAccessedAt:
+              type: string
+              format: date-time
+              nullable: true
+            lastAccessedLessonId:
+              type: string
+              format: uuid
+              nullable: true
+        status:
+          type: string
+          enum: [active, paused, completed]
+          default: active
+          description: Enrollment status
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        certificateId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Generated certificate ID if completed
+
+    Certificate:
+      type: object
+      required:
+        - id
+        - enrollmentId
+        - courseId
+        - studentId
+        - issuedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        enrollmentId:
+          type: string
+          format: uuid
+        courseId:
+          type: string
+          format: uuid
+        studentId:
+          type: string
+          format: uuid
+        courseName:
+          type: string
+        instructorName:
+          type: string
+        certificationNumber:
+          type: string
+          description: Unique certificate code for verification
+        issuedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Null if certificate doesn't expire
+        pdfUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Downloadable certificate PDF
+
+    Pagination:
+      type: object
+      required:
+        - limit
+        - offset
+        - total
+        - hasMore
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        offset:
+          type: integer
+          minimum: 0
+          default: 0
+        total:
+          type: integer
+        hasMore:
+          type: boolean
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        statusCode:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []
+
+paths:
+  /courses:
+    get:
+      summary: List courses
+      operationId: getCourses
+      tags:
+        - Courses
+      security: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: published
+          in: query
+          schema:
+            type: boolean
+            default: true
+          description: Filter by publication status
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: level
+          in: query
+          schema:
+            type: string
+            enum: [beginner, intermediate, advanced]
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search in title and description
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Create new course
+      operationId: createCourse
+      tags:
+        - Courses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  minLength: 3
+                  maxLength: 200
+                description:
+                  type: string
+                  maxLength: 2000
+                category:
+                  type: string
+                level:
+                  type: string
+                  enum: [beginner, intermediate, advanced]
+                  default: beginner
+                price:
+                  type: number
+                  format: float
+                  minimum: 0
+                  default: 0
+      responses:
+        '201':
+          description: Course created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Course'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /courses/{id}:
+    get:
+      summary: Get course details
+      operationId: getCourseById
+      tags:
+        - Courses
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Course'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      summary: Update course
+      operationId: updateCourse
+      tags:
+        - Courses
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                level:
+                  type: string
+                  enum: [beginner, intermediate, advanced]
+                price:
+                  type: number
+                  format: float
+                isPublished:
+                  type: boolean
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Course'
+        '403':
+          description: Only course instructor can update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete course
+      operationId: deleteCourse
+      tags:
+        - Courses
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          description: Only course instructor can delete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /enrollments:
+    get:
+      summary: List user's enrollments (STRICT - own only)
+      operationId: getEnrollments
+      tags:
+        - Enrollments
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, paused, completed]
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Enrollment'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Enroll in course
+      operationId: enrollCourse
+      tags:
+        - Enrollments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - courseId
+              properties:
+                courseId:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Enrolled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Enrollment'
+        '409':
+          description: Already enrolled in this course
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /enrollments/{id}:
+    delete:
+      summary: Unenroll from course
+      operationId: unenrollCourse
+      tags:
+        - Enrollments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Unenrolled
+        '403':
+          description: Can only unenroll from own enrollments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      summary: Update enrollment (progress tracking)
+      operationId: updateEnrollment
+      tags:
+        - Enrollments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lastAccessedLessonId:
+                  type: string
+                  format: uuid
+                completedLessonId:
+                  type: string
+                  format: uuid
+                status:
+                  type: string
+                  enum: [active, paused, completed]
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Enrollment'
+
+  /certificates:
+    get:
+      summary: List user's certificates (STRICT - own only)
+      operationId: getCertificates
+      tags:
+        - Certificates
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Certificate'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /certificates/verify/{code}:
+    get:
+      summary: Verify certificate by code (PUBLIC)
+      operationId: verifyCertificate
+      tags:
+        - Certificates
+      security: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Certificate verification code
+      responses:
+        '200':
+          description: Certificate valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      valid:
+                        type: boolean
+                      certificateName:
+                        type: string
+                      studentName:
+                        type: string
+                      courseName:
+                        type: string
+                      issuedAt:
+                        type: string
+                        format: date-time
+                      expiresAt:
+                        type: string
+                        format: date-time
+                        nullable: true
+        '404':
+          description: Certificate not found or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

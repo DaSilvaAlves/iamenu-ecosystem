@@ -1,3 +1,8 @@
+import { Decimal } from '@prisma/client/runtime/library';
+const toNum = (val: any) => {
+  if (val instanceof Decimal) return Number(val.toString());
+  return Number(val);
+};
 import prisma from '../lib/prisma';
 import * as XLSX from 'xlsx';
 import * as ExcelJS from 'exceljs';
@@ -244,7 +249,7 @@ export class OnboardingService {
 
     if (restaurant?.tables && restaurant?.averageTicket) {
       const tableRotation = restaurant.settings?.tableRotation || 2;
-      const dailyPotential = restaurant.tables * tableRotation * restaurant.averageTicket;
+      const dailyPotential = (restaurant.tables || 0) * tableRotation * Number(restaurant.averageTicket || 0);
       const monthlyPotential = dailyPotential * 30;
       insights.potentialRevenue = monthlyPotential;
     }

@@ -1,4 +1,11 @@
 import prisma from '../lib/prisma';
+import { Decimal } from '@prisma/client/runtime/library';
+
+// Helper to convert Decimal to number
+const toNum = (val: any): number => {
+  if (val instanceof Decimal) return Number(val.toString());
+  return Number(val);
+};
 
 export class DashboardService {
   /**
@@ -46,7 +53,7 @@ export class DashboardService {
     });
 
     // Calculate metrics
-    const totalReceita = orders.reduce((sum, order) => sum + order.total, 0);
+    const totalReceita = orders.reduce((sum, order) => sum + toNum(order.total), 0);
     const totalClientes = orders.length; // Each order = 1 customer (simplificado)
     const ticketMedio = totalClientes > 0 ? totalReceita / totalClientes : 0;
 
@@ -57,7 +64,7 @@ export class DashboardService {
 
     let avgFoodCost = 0;
     if (products.length > 0) {
-      const totalFoodCost = products.reduce((sum, p) => sum + (p.cost / p.price) * 100, 0);
+      const totalFoodCost = products.reduce((sum, p) => sum + (toNum(p.cost) / toNum(p.price)) * 100, 0);
       avgFoodCost = totalFoodCost / products.length;
     }
 
@@ -77,7 +84,7 @@ export class DashboardService {
       }
     });
 
-    const previousReceita = previousOrders.reduce((sum, o) => sum + o.total, 0);
+    const previousReceita = previousOrders.reduce((sum, o) => sum + toNum(o.total), 0);
     const receitaTrend = previousReceita > 0
       ? ((totalReceita - previousReceita) / previousReceita) * 100
       : 0;
@@ -93,7 +100,7 @@ export class DashboardService {
       : 0;
 
     // Food cost trend
-    const foodCostTarget = restaurant.settings?.foodCostTarget || 30;
+    const foodCostTarget = toNum(restaurant.settings?.foodCostTarget) || 30;
     const foodCostStatus = avgFoodCost <= foodCostTarget ? 'Ótimo' : 'Atenção';
 
     return {
@@ -147,7 +154,7 @@ export class DashboardService {
     });
 
     return products.map(p => {
-      const margin = ((p.price - p.cost) / p.price) * 100;
+      const margin = ((toNum(p.price) - toNum(p.cost)) / toNum(p.price)) * 100;
       let classification = 'standard';
 
       if (margin > 60 && p.sales > 50) classification = 'star';
@@ -160,7 +167,7 @@ export class DashboardService {
         name: p.name,
         category: p.category,
         sales: p.sales,
-        revenue: p.totalRevenue,
+        revenue: toNum(p.totalRevenue),
         margin: `${margin.toFixed(1)}%`,
         classification,
         trend: p.sales > 30 ? 'up' : 'down'
@@ -190,13 +197,13 @@ export class DashboardService {
     });
 
     const highCostProducts = products.filter(p => {
-      const foodCostPct = (p.cost / p.price) * 100;
+      const foodCostPct = (toNum(p.cost) / toNum(p.price)) * 100;
       return foodCostPct > 35;
     });
 
     if (highCostProducts.length > 0) {
       const product = highCostProducts[0];
-      const foodCostPct = ((product.cost / product.price) * 100).toFixed(1);
+      const foodCostPct = ((toNum(product.cost) / toNum(product.price)) * 100).toFixed(1);
 
       alerts.push({
         type: 'critical',
@@ -210,8 +217,8 @@ export class DashboardService {
     }
 
     // Alert 2: Low Revenue vs Goal
-    const totalRevenue = products.reduce((sum, p) => sum + p.totalRevenue, 0);
-    const revenueGoal = restaurant.settings?.revenueGoal || 50000;
+    const totalRevenue = products.reduce((sum, p) => sum + toNum(p.totalRevenue), 0);
+    const revenueGoal = toNum(restaurant.settings?.revenueGoal) || 50000;
 
     if (totalRevenue < revenueGoal * 0.7) {
       alerts.push({
@@ -249,12 +256,12 @@ export class DashboardService {
     });
 
     const gems = products.filter(p => {
-      const margin = ((p.price - p.cost) / p.price) * 100;
+      const margin = ((toNum(p.price) - toNum(p.cost)) / toNum(p.price)) * 100;
       return margin > 60 && p.sales < 20;
     });
 
     if (gems.length > 0) {
-      const totalPotential = gems.reduce((sum, p) => sum + p.price * 50, 0);
+      const totalPotential = gems.reduce((sum, p) => sum + toNum(p.price) * 50, 0);
 
       opportunities.push({
         type: 'revenue',

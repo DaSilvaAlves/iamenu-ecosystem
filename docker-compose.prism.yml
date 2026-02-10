@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # Prism Mock Server - Community API
+  prism-community:
+    image: stoplight/prism:latest
+    container_name: iamenu-prism-community
+    command: mock -h 0.0.0.0 /specs/openapi-community.yaml --dynamic
+    ports:
+      - "4001:4001"
+    volumes:
+      - ./docs/api/openapi-community.yaml:/specs/openapi-community.yaml:ro
+    environment:
+      - LOG_LEVEL=info
+    networks:
+      - iamenu
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/api/v1/community/posts"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # Prism Mock Server - Marketplace API
+  prism-marketplace:
+    image: stoplight/prism:latest
+    container_name: iamenu-prism-marketplace
+    command: mock -h 0.0.0.0 /specs/openapi-marketplace.yaml --dynamic
+    ports:
+      - "4002:4001"
+    volumes:
+      - ./docs/api/openapi-marketplace.yaml:/specs/openapi-marketplace.yaml:ro
+    environment:
+      - LOG_LEVEL=info
+    networks:
+      - iamenu
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/api/v1/marketplace/suppliers"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # Prism Mock Server - Academy API
+  prism-academy:
+    image: stoplight/prism:latest
+    container_name: iamenu-prism-academy
+    command: mock -h 0.0.0.0 /specs/openapi-academy.yaml --dynamic
+    ports:
+      - "4003:4001"
+    volumes:
+      - ./docs/api/openapi-academy.yaml:/specs/openapi-academy.yaml:ro
+    environment:
+      - LOG_LEVEL=info
+    networks:
+      - iamenu
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/api/v1/academy/courses"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # Prism Mock Server - Business API
+  prism-business:
+    image: stoplight/prism:latest
+    container_name: iamenu-prism-business
+    command: mock -h 0.0.0.0 /specs/openapi-business.yaml --dynamic
+    ports:
+      - "4004:4001"
+    volumes:
+      - ./docs/api/openapi-business.yaml:/specs/openapi-business.yaml:ro
+    environment:
+      - LOG_LEVEL=info
+    networks:
+      - iamenu
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/api/v1/business/dashboard/stats"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy (unified mock API)
+  mock-api-gateway:
+    image: nginx:alpine
+    container_name: iamenu-mock-gateway
+    ports:
+      - "9000:80"
+    volumes:
+      - ./docker/prism/nginx-gateway.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - prism-community
+      - prism-marketplace
+      - prism-academy
+      - prism-business
+    networks:
+      - iamenu
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  iamenu:
+    driver: bridge

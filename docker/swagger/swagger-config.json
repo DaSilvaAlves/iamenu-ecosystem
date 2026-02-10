@@ -1,0 +1,48 @@
+{
+  "urls": [
+    {
+      "url": "/api/openapi-community.yaml",
+      "name": "Community API (Posts, Grupos, Notificações)"
+    },
+    {
+      "url": "/api/openapi-marketplace.yaml",
+      "name": "Marketplace API (Fornecedores, Quotes)"
+    },
+    {
+      "url": "/api/openapi-academy.yaml",
+      "name": "Academy API (Cursos, Certificados)"
+    },
+    {
+      "url": "/api/openapi-business.yaml",
+      "name": "Business API (Dashboard, Analytics)"
+    }
+  ],
+  "presets": [
+    "apis",
+    "swagger-ui-standalone-preset"
+  ],
+  "plugins": [
+    "DownloadUrl"
+  ],
+  "layout": "StandaloneLayout",
+  "persistAuthorization": true,
+  "defaultModelsExpandDepth": 1,
+  "defaultModelExpandDepth": 1,
+  "operationsSorter": "alpha",
+  "tagsSorter": "alpha",
+  "deepLinking": true,
+  "filter": true,
+  "showRequestHeaders": true,
+  "supportedSubmitMethods": [
+    "get",
+    "post",
+    "put",
+    "delete",
+    "patch",
+    "head",
+    "options",
+    "trace"
+  ],
+  "validatorUrl": null,
+  "onComplete": "function() { console.log('Swagger UI loaded'); }"
+}

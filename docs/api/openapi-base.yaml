@@ -1,0 +1,239 @@
+openapi: 3.0.0
+info:
+  title: iaMenu Ecosystem API
+  version: 1.0.0
+  description: |
+    Unified REST API documentation for iaMenu Ecosystem.
+
+    ## Services
+    - **Community API**: Posts, groups, followers, gamification (Port 3001)
+    - **Marketplace API**: Suppliers, quotes, reviews, collective bargains (Port 3002)
+    - **Academy API**: Courses, enrollments, certificates (Port 3003)
+    - **Business API**: Restaurants, orders, analytics (Port 3004)
+
+    ## Authentication
+    All endpoints require JWT token in Authorization header:
+    ```
+    Authorization: Bearer <JWT_TOKEN>
+    ```
+
+    ## Error Handling
+    All errors follow unified format:
+    ```json
+    {
+      "error": "ERROR_CODE",
+      "message": "User-friendly message",
+      "statusCode": 400,
+      "timestamp": "2026-02-10T15:30:00Z"
+    }
+    ```
+
+servers:
+  - url: http://localhost:3001/api/v1/community
+    description: Community Service (Development)
+  - url: http://localhost:3002/api/v1/marketplace
+    description: Marketplace Service (Development)
+  - url: http://localhost:3003/api/v1/academy
+    description: Academy Service (Development)
+  - url: http://localhost:3004/api/v1/business
+    description: Business Service (Development)
+  - url: https://iamenucommunity-api-production.up.railway.app/api/v1/community
+    description: Community Service (Production)
+  - url: https://iamenumarketplace-api-production.up.railway.app/api/v1/marketplace
+    description: Marketplace Service (Production)
+  - url: https://iamenuacademy-api-production.up.railway.app/api/v1/academy
+    description: Academy Service (Production)
+  - url: https://iamenubusiness-api-production.up.railway.app/api/v1/business
+    description: Business Service (Production)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token obtained from authentication endpoint.
+        Token payload contains:
+        - userId: User's UUID
+        - email: User's email
+        - role: user|admin|moderator
+        - exp: Expiration time (UNIX timestamp)
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+        - timestamp
+      properties:
+        error:
+          type: string
+          description: Error code (VALIDATION_ERROR, INVALID_TOKEN, FORBIDDEN, NOT_FOUND, CONFLICT, INTERNAL_ERROR)
+        message:
+          type: string
+          description: User-friendly error message
+        statusCode:
+          type: integer
+          format: int32
+          description: HTTP status code
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp
+        details:
+          type: object
+          description: Additional error context (optional)
+        requestId:
+          type: string
+          description: Request ID for debugging (optional)
+
+    Pagination:
+      type: object
+      required:
+        - limit
+        - offset
+        - total
+        - hasMore
+      properties:
+        limit:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+          default: 20
+          description: Items per page
+        offset:
+          type: integer
+          format: int32
+          minimum: 0
+          default: 0
+          description: Skip N items
+        total:
+          type: integer
+          format: int32
+          description: Total number of items
+        hasMore:
+          type: boolean
+          description: Whether more items exist
+
+    ListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          description: List of resources
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    ValidationErrorDetails:
+      type: object
+      properties:
+        field:
+          type: string
+          description: Field that failed validation
+        constraint:
+          type: string
+          description: Constraint that was violated
+        value:
+          type: string
+          description: Value that was provided
+
+  responses:
+    ValidationError:
+      description: Validation error - invalid request parameters
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  details:
+                    $ref: '#/components/schemas/ValidationErrorDetails'
+          example:
+            error: VALIDATION_ERROR
+            message: Invalid email format
+            statusCode: 400
+            timestamp: "2026-02-10T15:30:00Z"
+            details:
+              field: email
+              constraint: email
+
+    Unauthorized:
+      description: Unauthorized - invalid or missing JWT token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: INVALID_TOKEN
+            message: JWT token is invalid or expired
+            statusCode: 401
+            timestamp: "2026-02-10T15:30:00Z"
+
+    Forbidden:
+      description: Forbidden - insufficient permissions or RLS violation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: FORBIDDEN
+            message: Access denied - insufficient permissions
+            statusCode: 403
+            timestamp: "2026-02-10T15:30:00Z"
+
+    NotFound:
+      description: Not found - resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: NOT_FOUND
+            message: Resource with ID not found
+            statusCode: 404
+            timestamp: "2026-02-10T15:30:00Z"
+
+    Conflict:
+      description: Conflict - business logic violation or duplicate resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: CONFLICT
+            message: Resource already exists
+            statusCode: 409
+            timestamp: "2026-02-10T15:30:00Z"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: INTERNAL_SERVER_ERROR
+            message: An unexpected error occurred
+            statusCode: 500
+            timestamp: "2026-02-10T15:30:00Z"
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Community
+    description: Posts, groups, followers, gamification
+  - name: Marketplace
+    description: Suppliers, quotes, reviews, collective bargains
+  - name: Academy
+    description: Courses, enrollments, certificates
+  - name: Business
+    description: Restaurants, orders, analytics

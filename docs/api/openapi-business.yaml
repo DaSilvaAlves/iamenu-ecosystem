@@ -1,0 +1,669 @@
+openapi: 3.0.0
+info:
+  title: iaMenu Business API
+  version: 1.0.0
+  description: |
+    Business Service API - Restaurant management, dashboard analytics, orders, and business intelligence
+
+    ## Features
+    - Restaurant profile and settings management
+    - Order management and tracking
+    - Advanced analytics and AI predictions
+    - Demand forecasting and menu engineering
+    - Performance benchmarking against market
+
+  contact:
+    name: iaMenu Team
+
+servers:
+  - url: http://localhost:3004/api/v1/business
+    description: Business Service (Development)
+  - url: https://iamenubusiness-api-production.up.railway.app/api/v1/business
+    description: Business Service (Production)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    DashboardStats:
+      type: object
+      description: General dashboard statistics
+      properties:
+        period:
+          type: string
+          enum: [today, week, month, custom]
+        totalRevenue:
+          type: number
+          format: float
+          description: Total revenue in period
+        ordersCount:
+          type: integer
+          description: Number of orders
+        avgTicket:
+          type: number
+          format: float
+          description: Average order value
+        foodCostPercentage:
+          type: number
+          format: float
+          description: Food cost as percentage of revenue
+        profitMargin:
+          type: number
+          format: float
+        operatingCosts:
+          type: number
+          format: float
+        customerCount:
+          type: integer
+          description: Unique customers in period
+        newCustomers:
+          type: integer
+          description: New customers in period
+
+    TopProduct:
+      type: object
+      description: Product sales performance
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+        unitsSold:
+          type: integer
+        revenue:
+          type: number
+          format: float
+        profitMargin:
+          type: number
+          format: float
+          description: Profit margin percentage
+
+    Alert:
+      type: object
+      description: Critical business alert
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+            - low_stock
+            - high_food_cost
+            - declining_sales
+            - customer_complaint
+            - staffing_shortage
+            - equipment_issue
+          description: Alert type
+        severity:
+          type: string
+          enum: [critical, high, medium]
+        title:
+          type: string
+        message:
+          type: string
+        actionRequired:
+          type: boolean
+        relatedMetric:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    Opportunity:
+      type: object
+      description: Business opportunity for improvement
+      properties:
+        id:
+          type: string
+          format: uuid
+        category:
+          type: string
+          enum:
+            - product_mix
+            - pricing_optimization
+            - cost_reduction
+            - revenue_growth
+            - customer_retention
+          description: Opportunity category
+        title:
+          type: string
+        description:
+          type: string
+        estimatedImpact:
+          type: number
+          format: float
+          description: Estimated revenue impact
+        impactPercentage:
+          type: number
+          format: float
+          description: Impact as percentage of current revenue
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        actionItems:
+          type: array
+          items:
+            type: string
+
+    SalesTrend:
+      type: object
+      description: Sales trend data point
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        revenue:
+          type: number
+          format: float
+        ordersCount:
+          type: integer
+        avgOrderValue:
+          type: number
+          format: float
+        newCustomers:
+          type: integer
+
+    AIPrediction:
+      type: object
+      description: AI-powered business forecast
+      properties:
+        prediction:
+          type: string
+          description: Main prediction text
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: Prediction confidence percentage
+        suggestions:
+          type: array
+          items:
+            type: string
+          description: Actionable suggestions based on prediction
+        metrics:
+          type: object
+          description: Supporting metrics
+          properties:
+            projectedRevenue:
+              type: number
+              format: float
+            projectedOrders:
+              type: integer
+            riskFactors:
+              type: array
+              items:
+                type: string
+
+    MenuItem:
+      type: object
+      description: Product/menu item with profitability data
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+        price:
+          type: number
+          format: float
+        foodCost:
+          type: number
+          format: float
+          description: Cost to prepare item
+        profitMargin:
+          type: number
+          format: float
+          description: Profit margin percentage
+        unitsSold:
+          type: integer
+          description: Units sold in period
+        revenue:
+          type: number
+          format: float
+          description: Revenue from item in period
+        popularity:
+          type: string
+          enum: [stars, plowhorses, puzzles, dogs]
+          description: Menu engineering classification
+
+    DemandForecast:
+      type: object
+      description: Demand forecast data point
+      properties:
+        date:
+          type: string
+          format: date
+        dayOfWeek:
+          type: string
+          enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+        forecastedOrders:
+          type: integer
+          description: Estimated orders for the day
+        forecastedRevenue:
+          type: number
+          format: float
+        confidence:
+          type: number
+          format: float
+          description: Forecast confidence (0-100)
+        factors:
+          type: array
+          items:
+            type: string
+          description: Factors influencing forecast (weather, events, etc.)
+
+    PeakHour:
+      type: object
+      description: Peak hour analytics
+      properties:
+        hour:
+          type: integer
+          minimum: 0
+          maximum: 23
+        dayOfWeek:
+          type: string
+        ordersCount:
+          type: integer
+        avgOrderValue:
+          type: number
+          format: float
+        staffingRequired:
+          type: integer
+          description: Recommended staff count
+
+    BenchmarkData:
+      type: object
+      description: Performance benchmark vs sector
+      properties:
+        metric:
+          type: string
+          description: Metric being compared
+        yourPerformance:
+          type: number
+          format: float
+        sectorAverage:
+          type: number
+          format: float
+        sectorBest:
+          type: number
+          format: float
+        percentile:
+          type: integer
+          description: Your position in sector (0-100)
+        recommendation:
+          type: string
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        statusCode:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []
+
+paths:
+  /dashboard/stats:
+    get:
+      summary: Get general dashboard statistics
+      operationId: getStats
+      tags:
+        - Dashboard
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [today, week, month, custom]
+            default: today
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+          description: For custom period
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+          description: For custom period
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DashboardStats'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /dashboard/top-products:
+    get:
+      summary: Get top performing products
+      operationId: getTopProducts
+      tags:
+        - Dashboard
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            maximum: 50
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [today, week, month]
+            default: week
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [revenue, units_sold, profit_margin]
+            default: revenue
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TopProduct'
+
+  /dashboard/alerts:
+    get:
+      summary: Get critical business alerts
+      operationId: getAlerts
+      tags:
+        - Dashboard
+      parameters:
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [critical, high, medium]
+        - name: type
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Alert'
+
+  /dashboard/opportunities:
+    get:
+      summary: Get business improvement opportunities
+      operationId: getOpportunities
+      tags:
+        - Dashboard
+      parameters:
+        - name: priority
+          in: query
+          schema:
+            type: string
+            enum: [low, medium, high, critical]
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Opportunity'
+
+  /dashboard/sales-trends:
+    get:
+      summary: Get sales trends over time
+      operationId: getSalesTrends
+      tags:
+        - Dashboard
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [week, month, quarter]
+            default: week
+        - name: groupBy
+          in: query
+          schema:
+            type: string
+            enum: [hour, day, week]
+            description: Group data by time interval
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SalesTrend'
+
+  /dashboard/ai-prediction:
+    get:
+      summary: Get AI-powered prediction with suggestions
+      operationId: getAIPrediction
+      tags:
+        - Dashboard
+      parameters:
+        - name: focusArea
+          in: query
+          schema:
+            type: string
+            enum: [revenue, customer_retention, cost_reduction, product_mix]
+            description: Area to focus prediction on
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AIPrediction'
+
+  /dashboard/menu-engineering:
+    get:
+      summary: Get menu profitability matrix (BCG analysis)
+      operationId: getMenuEngineering
+      tags:
+        - Dashboard
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [month, quarter, year]
+            default: month
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MenuItem'
+                      categories:
+                        type: object
+                        properties:
+                          stars:
+                            type: array
+                            items:
+                              type: object
+                            description: High popularity, high profit
+                          plowhorses:
+                            type: array
+                            items:
+                              type: object
+                            description: High popularity, low profit
+                          puzzles:
+                            type: array
+                            items:
+                              type: object
+                            description: Low popularity, high profit
+                          dogs:
+                            type: array
+                            items:
+                              type: object
+                            description: Low popularity, low profit
+
+  /dashboard/demand-forecast:
+    get:
+      summary: Get 7-day demand forecast
+      operationId: getDemandForecast
+      tags:
+        - Dashboard
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DemandForecast'
+                  summary:
+                    type: object
+                    properties:
+                      totalForecastedOrders:
+                        type: integer
+                      totalForecastedRevenue:
+                        type: number
+                        format: float
+                      averageConfidence:
+                        type: number
+                        format: float
+
+  /dashboard/peak-hours-heatmap:
+    get:
+      summary: Get peak hours heatmap (which times are busiest)
+      operationId: getPeakHoursHeatmap
+      tags:
+        - Dashboard
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [week, month]
+            default: week
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PeakHour'
+
+  /dashboard/benchmark:
+    get:
+      summary: Get performance benchmark vs sector
+      operationId: getBenchmark
+      tags:
+        - Dashboard
+      parameters:
+        - name: metrics
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            example: [revenue, avg_ticket, customer_count]
+          description: Specific metrics to compare
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BenchmarkData'
+                  summary:
+                    type: object
+                    properties:
+                      percentile:
+                        type: integer
+                        description: Overall percentile (0-100)
+                      comparison:
+                        type: string
+                        enum: [above_average, average, below_average]

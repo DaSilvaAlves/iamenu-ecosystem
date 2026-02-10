@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8">
+    <title>iaMenu Ecosystem API - Swagger UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui.css">
+    <link rel="icon" type="image/png" href="https://fastapi.tiangolo.com/img/favicon.png" sizes="32x32" />
+    <style>
+      html {
+        box-sizing: border-box;
+        overflow: -moz-scrollbars-vertical;
+        overflow-y: scroll;
+      }
+      *, *:before, *:after {
+        box-sizing: inherit;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+        background: #fafafa;
+      }
+      .topbar {
+        background-color: #1a237e;
+        padding: 10px 0;
+        border-bottom: 3px solid #283593;
+      }
+      .topbar-inner {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .topbar-title {
+        font-size: 18px;
+        color: #fff;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .topbar-title img {
+        height: 32px;
+      }
+      .topbar-nav {
+        display: flex;
+        gap: 20px;
+      }
+      .topbar-nav a {
+        color: #fff;
+        text-decoration: none;
+        font-size: 14px;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+      .topbar-nav a:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+      .swagger-ui .topbar {
+        padding: 0;
+        border-bottom: 1px solid #ddd;
+      }
+      .spec-selector {
+        display: flex;
+        gap: 10px;
+        padding: 20px;
+        background: #fff;
+        border-bottom: 1px solid #ddd;
+      }
+      .spec-selector label {
+        font-weight: 600;
+        color: #333;
+      }
+      .spec-selector select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+        min-width: 250px;
+      }
+      .spec-info {
+        padding: 10px 20px;
+        background: #e3f2fd;
+        border-left: 4px solid #1976d2;
+        font-size: 13px;
+        color: #0d47a1;
+      }
+      .auth-info {
+        padding: 15px 20px;
+        background: #fff3e0;
+        border-left: 4px solid #f57c00;
+        font-size: 13px;
+        color: #e65100;
+        margin-bottom: 20px;
+      }
+      .auth-info strong {
+        display: block;
+        margin-bottom: 5px;
+      }
+      .auth-input {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+      }
+      .auth-input input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 12px;
+      }
+      .auth-input button {
+        padding: 8px 16px;
+        background: #f57c00;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .auth-input button:hover {
+        background: #e65100;
+      }
+      .service-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 20px;
+        max-width: 1500px;
+        margin: 0 auto;
+      }
+      .service-card {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .service-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-color: #1976d2;
+      }
+      .service-card h3 {
+        margin: 0 0 10px 0;
+        color: #1a237e;
+        font-size: 16px;
+      }
+      .service-card p {
+        margin: 0;
+        color: #666;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .service-icon {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Custom Topbar -->
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="topbar-title">
+          🍽️ iaMenu Ecosystem API
+        </div>
+        <div class="topbar-nav">
+          <a href="https://github.com/iamenu/ecosystem" target="_blank">GitHub</a>
+          <a href="/api/openapi-base.yaml" target="_blank">Base Spec</a>
+          <a href="/api/" target="_blank">All Specs</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Service Selector and Info -->
+    <div id="spec-container">
+      <div class="spec-selector">
+        <label for="spec-select">📋 Selecione um serviço:</label>
+        <select id="spec-select" onchange="loadSpec(this.value)">
+          <option value="">-- Escolha um serviço --</option>
+          <option value="/api/openapi-community.yaml">🔵 Community API (Posts, Grupos, Notificações)</option>
+          <option value="/api/openapi-marketplace.yaml">🟢 Marketplace API (Fornecedores, Quotes)</option>
+          <option value="/api/openapi-academy.yaml">🟡 Academy API (Cursos, Certificados)</option>
+          <option value="/api/openapi-business.yaml">🔴 Business API (Dashboard, Analytics)</option>
+        </select>
+      </div>
+
+      <div id="auth-info" class="auth-info" style="display:none;">
+        <strong>🔐 Autenticação</strong>
+        Coloque o seu JWT token aqui para testar endpoints protegidos:
+        <div class="auth-input">
+          <input type="password" id="auth-token" placeholder="Cole aqui o seu JWT token..." />
+          <button onclick="setAuthToken()">Definir Token</button>
+          <button onclick="clearAuthToken()" style="background: #999;">Limpar</button>
+        </div>
+      </div>
+
+      <div class="spec-info" id="spec-info" style="display:none;">
+        <strong>ℹ️ Dica:</strong> Use o seletor acima para mudar entre os 4 serviços. Todos os endpoints estão documentados com exemplos de request/response.
+      </div>
+    </div>
+
+    <!-- Swagger UI Container -->
+    <div id="swagger-ui"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui-standalone-preset.js"></script>
+    <script>
+      window.onload = function() {
+        // Initialize Swagger UI (empty state)
+        window.ui = SwaggerUIBundle({
+          url: "/api/openapi-community.yaml",
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl
+          ],
+          layout: "StandaloneLayout",
+          persistAuthorization: true,
+          defaultModelsExpandDepth: 1,
+          defaultModelExpandDepth: 1,
+          operationsSorter: "alpha",
+          tagsSorter: "alpha",
+          configUrl: null
+        });
+
+        // Load saved auth token if exists
+        const savedToken = localStorage.getItem('iamenu-api-token');
+        if (savedToken) {
+          document.getElementById('auth-token').value = savedToken;
+          applyAuthToken(savedToken);
+        }
+
+        // Show auth and info sections
+        document.getElementById('auth-info').style.display = 'block';
+        document.getElementById('spec-info').style.display = 'block';
+      };
+
+      function loadSpec(url) {
+        if (!url) {
+          alert('Por favor, selecione um serviço');
+          return;
+        }
+
+        // Update Swagger UI
+        SwaggerUIBundle({
+          url: url,
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl
+          ],
+          layout: "StandaloneLayout",
+          persistAuthorization: true,
+          defaultModelsExpandDepth: 1,
+          defaultModelExpandDepth: 1,
+          operationsSorter: "alpha",
+          tagsSorter: "alpha"
+        });
+
+        // Reapply auth token
+        const savedToken = localStorage.getItem('iamenu-api-token');
+        if (savedToken) {
+          setTimeout(() => applyAuthToken(savedToken), 500);
+        }
+
+        // Update window title
+        const serviceNames = {
+          '/api/openapi-community.yaml': 'Community API',
+          '/api/openapi-marketplace.yaml': 'Marketplace API',
+          '/api/openapi-academy.yaml': 'Academy API',
+          '/api/openapi-business.yaml': 'Business API'
+        };
+        document.title = `iaMenu - ${serviceNames[url] || 'API'}`;
+      }
+
+      function setAuthToken() {
+        const token = document.getElementById('auth-token').value.trim();
+        if (!token) {
+          alert('Por favor, cole um token JWT');
+          return;
+        }
+
+        // Save to localStorage
+        localStorage.setItem('iamenu-api-token', token);
+        applyAuthToken(token);
+        alert('✅ Token definido com sucesso!\n\nO token será usado em todos os requests que requerem autenticação.');
+      }
+
+      function applyAuthToken(token) {
+        // Apply token to Swagger UI
+        const authUI = document.querySelector('[data-name="Authorization"]');
+        if (authUI) {
+          const input = authUI.querySelector('input');
+          if (input) {
+            input.value = `Bearer ${token}`;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }
+      }
+
+      function clearAuthToken() {
+        localStorage.removeItem('iamenu-api-token');
+        document.getElementById('auth-token').value = '';
+        alert('✅ Token removido');
+      }
+
+      // Keyboard shortcut: Alt+A to focus auth input
+      document.addEventListener('keydown', (e) => {
+        if (e.altKey && e.key === 'a') {
+          document.getElementById('auth-token').focus();
+          e.preventDefault();
+        }
+      });
+    </script>
+  </body>
+</html>
