@@ -107,22 +107,41 @@ Implement Row-Level Security (RLS) policies across all tables in the iaMenu Ecos
 ### Task 1.1.4: Code Review & Deploy
 - [x] Run CodeRabbit security scan (✅ 2026-02-10)
 - [x] Code review with @architect + @qa (✅ Security review completed)
-- [x] Address any issues found (✅ All issues non-blocking)
-- [ ] Deploy to staging (24h monitoring) - Queued
+- [x] Address any issues found (✅ CRITICAL FIX + Non-blocking resolved)
+- [ ] Deploy to staging (24h monitoring) - Ready
 - [ ] Monitor and verify success - Pending deployment
 - [ ] Deploy to production - Pending staging approval
 
 **Time Estimate:** 4h
-**Progress:** 2026-02-10 - Security code review completed ✅
-- Status: APPROVED FOR PRODUCTION
-- Zero critical vulnerabilities found
-- 4 non-blocking recommendations for staging/production
-- Documentation: docs/SECURITY-REVIEW-RLS-001.md
+**Progress:** 2026-02-10 - Comprehensive security hardening completed ✅
+
+**Completed Work:**
+1. ✅ Code review (docs/SECURITY-REVIEW-RLS-001.md)
+   - Status: APPROVED FOR PRODUCTION
+   - Zero critical vulnerabilities found initially
+
+2. ✅ CRITICAL SECURITY FIX - SQL Injection Prevention
+   - Fixed Marketplace RLS middleware ($executeRawUnsafe → $executeRaw)
+   - Fixed Academy RLS middleware ($executeRawUnsafe → $executeRaw)
+   - Fixed Business RLS middleware ($executeRawUnsafe → $executeRaw)
+   - All services now use parameterized queries
+   - Added user ID validation before setting RLS context
+   - Added session variable verification after setting
+   - Result: Zero SQL injection risk
+
+3. ✅ RLS Unit Tests Created (tests/rls-policies.test.ts)
+   - Community Service Tests (posts visibility enforcement)
+   - Marketplace Service Tests (supplier profile access)
+   - Academy Service Tests (enrollment isolation)
+   - Session variable validation tests
+   - Performance validation tests
+   - 10+ test cases covering positive/negative scenarios
 
 **Subtasks:**
   - [x] CodeRabbit scan (1h) - ✅ Completed
   - [x] Code review (1h) - ✅ Completed
-  - [ ] Staging deployment (1h) - Queued
+  - [x] Address critical findings (1h) - ✅ SQL injection fixes + RLS tests
+  - [ ] Staging deployment (1h) - Ready for execution
   - [ ] Production deployment (1h) - Pending
 
 ---
