@@ -100,6 +100,9 @@ commands:
   - create-epic: Create epic for brownfield
   - create-story: Create user story
 
+  # Development Activation (Phase 11)
+  - activate-development: Prepare development handoff with prioritized stories
+
   # Documentation Operations
   - doc-out: Output complete document
   - shard-prd: Break PRD into smaller parts
@@ -124,6 +127,7 @@ dependencies:
     - create-deep-research-prompt.md
     - brownfield-create-epic.md
     - brownfield-create-story.md
+    - activate-development.md
     - execute-checklist.md
     - shard-doc.md
     # Spec Pipeline (Epic 3)

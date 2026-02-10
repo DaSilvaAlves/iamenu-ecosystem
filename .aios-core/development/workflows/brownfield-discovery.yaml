@@ -827,6 +827,56 @@ workflow:
         - ...
 
     # ═════════════════════════════════════════════════════════════════════════════════════
+    # PHASE 11: Development Activation
+    # ═════════════════════════════════════════════════════════════════════════════════════
+
+    - step: activate_development
+      phase: 11
+      phase_name: "Ativação: Desenvolvimento"
+      agent: pm
+      action: activate-development
+      task: activate-development.md
+      creates: .aios/workflow-state/development-activation.json
+      requires:
+        - docs/stories/epic-technical-debt.md
+      elicit: false
+      duration_estimate: "5-10 min"
+
+      preActions:
+        - type: validate_stories_exist
+          path: docs/stories/
+          pattern: "story-*.md"
+          minStories: 1
+        - type: mkdir
+          path: .aios/workflow-state
+
+      postActions:
+        - type: file_exists
+          path: .aios/workflow-state/development-activation.json
+        - type: verify_output_contains
+          text: "Ready to activate @dev"
+
+      notes: |
+        @pm prepara handoff para desenvolvimento:
+
+        1. Listar todas as stories criadas na Fase 10
+        2. Ordenar por prioridade (CRITICAL → HIGH → MEDIUM → LOW)
+        3. Apresentar comandos de ativação para cada story
+        4. Fornecer contexto de sprint e dependências
+        5. Sugerir ordem de implementação
+
+        OUTPUT:
+        - Numbered list com comandos copy/paste
+        - Clear 3 next steps (ativar @dev, selecionar story, escolher modo)
+        - Context saved em .aios/workflow-state/development-activation.json
+
+        HANDOFF PARA @dev:
+        - Stories ordenadas por prioridade
+        - Primeiro CRITICAL story recomendado
+        - Instruções de ativação claras
+        - Workflow-navigator.js sugere próximo comando
+
+    # ═════════════════════════════════════════════════════════════════════════════════════
     # WORKFLOW COMPLETE
     # ═════════════════════════════════════════════════════════════════════════════════════
 
@@ -865,9 +915,9 @@ workflow:
         PRÓXIMOS PASSOS:
         1. Apresentar TECHNICAL-DEBT-REPORT.md para stakeholders
         2. Obter aprovação de budget
-        3. Iniciar desenvolvimento: @dev → story-1.1
+        3. Ver FASE 11 para ativação de desenvolvimento
 
-        TEMPO TOTAL ESTIMADO: 4-6 horas
+        TEMPO TOTAL ESTIMADO: 4-6 horas (+ ~5-10 min para Fase 11)
 
   # ═══════════════════════════════════════════════════════════════════════════════════════
   #                              QUICK REFERENCE
@@ -934,6 +984,12 @@ workflow:
       command: "*create-epic + *create-story"
       output: "docs/stories/epic-*.md, story-*.md"
       duration: "30-60 min"
+    fase_11:
+      name: "Ativação: Desenvolvimento"
+      agent: "@pm"
+      command: "activate-development (automatic after phase 10)"
+      output: ".aios/workflow-state/development-activation.json"
+      duration: "5-10 min"
 
   time_estimate:
     minimum: "4 horas"
@@ -984,6 +1040,22 @@ workflow:
 
       Próximo: @pm para criar epic e stories (FASE 10)
 
+    planning_complete: |
+      Epic e Stories criadas (FASE 10)
+
+      Próximo: Ativação de desenvolvimento (FASE 11)
+      - @pm prepara handoff para @dev
+      - Lista stories por prioridade
+      - Fornece comandos de ativação
+
+    development_ready: |
+      ✅ FASE 11 COMPLETA - Pronto para Desenvolvimento!
+
+      Stories prioritizadas e comandos de ativação fornecidos.
+
+      Próximo: Ativar @dev e selecionar story
+      Comando recomendado: *develop {first-critical-story-id}
+
     workflow_complete: |
       ✅ DISCOVERY COMPLETO!
 
@@ -993,5 +1065,8 @@ workflow:
       Documentos para desenvolvimento:
       - docs/stories/epic-technical-debt.md
       - docs/stories/story-*.md
+
+      Handoff para desenvolvimento:
+      - .aios/workflow-state/development-activation.json
 
       Pronto para: @dev implementar stories

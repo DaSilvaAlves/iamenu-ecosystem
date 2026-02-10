@@ -603,6 +603,57 @@ workflows:
             description: "Create actionable stories"
             priority: 2
 
+  # Brownfield Discovery Workflow (Phase 1-11)
+  brownfield_discovery:
+    description: "Complete technical debt assessment and development planning"
+    agent_sequence:
+      - architect       # Phase 1: System documentation
+      - data-engineer   # Phase 2: Database audit
+      - ux-design-expert # Phase 3: Frontend spec
+      - architect       # Phase 4: Consolidation
+      - data-engineer   # Phase 5: DB specialist review
+      - ux-design-expert # Phase 6: UX specialist review
+      - qa              # Phase 7: QA review
+      - architect       # Phase 8: Assessment
+      - analyst         # Phase 9: Executive report
+      - pm              # Phase 10: Epic/story creation
+      - pm              # Phase 11: Development activation
+      - dev             # Implementation
+    key_commands:
+      - document-project
+      - load-schema
+      - security-audit
+      - create-front-end-spec
+      - create-epic
+      - create-story
+      - activate-development
+      - develop
+    trigger_threshold: 3
+    typical_duration: "4-6 hours"
+    success_indicators:
+      - "Technical debt report completed"
+      - "Stories created and prioritized"
+      - "Development activation ready"
+    transitions:
+      planning_complete:
+        trigger: "create-story completed"
+        confidence: 0.85
+        greeting_message: "Planning complete! Stories ready for development."
+        next_steps:
+          - command: activate-development
+            args_template: ""
+            description: "Prepare development handoff with prioritized stories"
+            priority: 1
+      development_ready:
+        trigger: "activate-development completed"
+        confidence: 0.90
+        greeting_message: "Ready to activate @dev and start implementation!"
+        next_steps:
+          - command: develop
+            args_template: "${story_path}"
+            description: "Begin development on first CRITICAL story"
+            priority: 1
+
 # Validation Notes:
 # - Patterns cross-referenced with Epic 6.1 workflow analysis
 # - Commands verified against actual project usage in .aios-core/agents/*.md

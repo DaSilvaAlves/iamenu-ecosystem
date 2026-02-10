@@ -209,6 +209,81 @@ class WorkflowNavigator {
     const transition = workflow.transitions[workflowState.state];
     return transition?.greeting_message || '';
   }
+
+  /**
+   * Load development activation context if available
+   * Used after Phase 11 (Development Activation) completes
+   * @returns {Object|null} Development context or null
+   */
+  loadDevelopmentContext() {
+    try {
+      const activationPath = path.join(
+        process.cwd(),
+        '.aios',
+        'workflow-state',
+        'development-activation.json'
+      );
+
+      if (!fs.existsSync(activationPath)) {
+        return null;
+      }
+
+      const content = fs.readFileSync(activationPath, 'utf8');
+      return JSON.parse(content);
+    } catch (error) {
+      console.warn('[WorkflowNavigator] Failed to load development context:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Get next story suggestion based on priority
+   * Finds first uncompleted CRITICAL story, then HIGH, then MEDIUM
+   * @param {Object} developmentContext - Context from development activation
+   * @returns {Object|null} Suggested story or null
+   */
+  getNextStorySuggestion(developmentContext) {
+    if (!developmentContext?.stories?.length) {
+      return null;
+    }
+
+    // Find first uncompleted CRITICAL story
+    const critical = developmentContext.stories.find(s =>
+      s.priority && s.priority.includes('CRITICAL') && s.status !== 'Completed'
+    );
+
+    if (critical) {
+      return {
+        storyId: critical.id,
+        title: critical.title,
+        command: critical.activationCommand,
+        reason: 'Next CRITICAL priority story',
+      };
+    }
+
+    // Fallback to first uncompleted HIGH story
+    const high = developmentContext.stories.find(s =>
+      s.priority && s.priority.includes('HIGH') && s.status !== 'Completed'
+    );
+
+    if (high) {
+      return {
+        storyId: high.id,
+        title: high.title,
+        command: high.activationCommand,
+        reason: 'Next HIGH priority story',
+      };
+    }
+
+    // Fallback to any uncompleted story
+    const next = developmentContext.stories.find(s => s.status !== 'Completed');
+    return next ? {
+      storyId: next.id,
+      title: next.title,
+      command: next.activationCommand,
+      reason: 'Next uncompleted story',
+    } : null;
+  }
 }
 
 module.exports = WorkflowNavigator;
