@@ -5,7 +5,7 @@ services:
   prism-community:
     image: stoplight/prism:latest
     container_name: iamenu-prism-community
-    command: mock -h 0.0.0.0 /specs/openapi-community.yaml --dynamic
+    command: mock -h 0.0.0.0 -p 4001 /specs/openapi-community.yaml --dynamic
     ports:
       - "4001:4001"
     volumes:
@@ -25,7 +25,7 @@ services:
   prism-marketplace:
     image: stoplight/prism:latest
     container_name: iamenu-prism-marketplace
-    command: mock -h 0.0.0.0 /specs/openapi-marketplace.yaml --dynamic
+    command: mock -h 0.0.0.0 -p 4001 /specs/openapi-marketplace.yaml --dynamic
     ports:
       - "4002:4001"
     volumes:
@@ -45,7 +45,7 @@ services:
   prism-academy:
     image: stoplight/prism:latest
     container_name: iamenu-prism-academy
-    command: mock -h 0.0.0.0 /specs/openapi-academy.yaml --dynamic
+    command: mock -h 0.0.0.0 -p 4001 /specs/openapi-academy.yaml --dynamic
     ports:
       - "4003:4001"
     volumes:
@@ -65,7 +65,7 @@ services:
   prism-business:
     image: stoplight/prism:latest
     container_name: iamenu-prism-business
-    command: mock -h 0.0.0.0 /specs/openapi-business.yaml --dynamic
+    command: mock -h 0.0.0.0 -p 4001 /specs/openapi-business.yaml --dynamic
     ports:
       - "4004:4001"
     volumes:
