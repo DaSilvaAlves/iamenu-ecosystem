@@ -98,27 +98,48 @@ export class PostsService {
     // Create a map for quick lookup
     const authorMap = new Map(authors.map(a => [a.userId, a]));
 
+    // OPTIMIZATION: Batch-load all reactions at once instead of N separate queries
+    const postIds = posts.map(p => p.id);
+    const allReactions = await prisma.reaction.groupBy({
+      by: ['targetId', 'reactionType'],
+      where: {
+        targetType: 'post',
+        targetId: { in: postIds },
+      },
+      _count: {
+        reactionType: true,
+      },
+    });
+
+    // Create a map for O(1) lookup: postId -> { reactionType -> count }
+    const reactionsMap = new Map<string, Record<string, number>>();
+    allReactions.forEach(r => {
+      if (!reactionsMap.has(r.targetId)) {
+        reactionsMap.set(r.targetId, {});
+      }
+      const postReactions = reactionsMap.get(r.targetId)!;
+      postReactions[r.reactionType] = r._count.reactionType;
+    });
+
     // Add reaction counts and author data to each post
-    const postsWithReactions = await Promise.all(
-      posts.map(async (post) => {
-        const reactions = await this.getPostReactions(post.id);
-        const totalReactions = Object.values(reactions).reduce((sum, count) => sum + count, 0);
-        const author = authorMap.get(post.authorId);
-        return {
-          ...post,
-          author: author ? {
-            userId: author.userId,
-            displayName: author.restaurantName || author.username || 'Utilizador',
-            profilePhoto: author.profilePhoto,
-          } : null,
-          reactions,
-          _count: {
-            ...post._count,
-            reactions: totalReactions,
-          },
-        };
-      })
-    );
+    const postsWithReactions = posts.map((post) => {
+      const reactions = reactionsMap.get(post.id) || {};
+      const totalReactions = Object.values(reactions).reduce((sum, count) => sum + count, 0);
+      const author = authorMap.get(post.authorId);
+      return {
+        ...post,
+        author: author ? {
+          userId: author.userId,
+          displayName: author.restaurantName || author.username || 'Utilizador',
+          profilePhoto: author.profilePhoto,
+        } : null,
+        reactions,
+        _count: {
+          ...post._count,
+          reactions: totalReactions,
+        },
+      };
+    });
 
     const total = await prisma.post.count({ where });
 
@@ -146,6 +167,16 @@ export class PostsService {
         comments: {
           take: 5,
           orderBy: { createdAt: 'desc' },
+          include: {
+            author: {
+              select: {
+                userId: true,
+                username: true,
+                restaurantName: true,
+                profilePhoto: true,
+              },
+            },
+          },
         },
       },
     });
