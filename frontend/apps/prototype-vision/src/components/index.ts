@@ -19,6 +19,10 @@ export type { CardProps, CardVariant, CardSize } from './Card/Card.types';
 export { Select } from './Select/Select';
 export type { SelectProps, SelectOption, SelectSize, SelectMode } from './Select/Select.types';
 
+// Task 2.2.6: Checkbox Component ✅
+export { Checkbox } from './Checkbox/Checkbox';
+export type { CheckboxProps, CheckboxSize, CheckboxState } from './Checkbox/Checkbox.types';
+
 // Tokens
 export * from './tokens';
 
