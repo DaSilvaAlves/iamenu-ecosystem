@@ -31,10 +31,14 @@ const LOG_LEVEL = process.env.LOG_LEVEL ||
 /**
  * JSON format for structured logging
  * Outputs logs in JSON format for easy parsing and analysis
- * Automatically redacts sensitive data before serialization
+ * Redacts sensitive data before serialization
  */
 const jsonFormat = printf((info: any) => {
   const { level, message, timestamp, service, requestId, stack, ...meta } = info;
+
+  // Redact sensitive data from meta
+  const redactedMeta = redactSensitiveData(meta);
+
   const logEntry: any = {
     timestamp,
     level: level.toUpperCase(),
@@ -46,17 +50,15 @@ const jsonFormat = printf((info: any) => {
     logEntry.requestId = requestId;
   }
 
-  if (Object.keys(meta).length > 0) {
-    Object.assign(logEntry, meta);
+  if (Object.keys(redactedMeta).length > 0) {
+    Object.assign(logEntry, redactedMeta);
   }
 
   if (stack) {
-    logEntry.stack = stack;
+    logEntry.stack = redactSensitiveData(stack);
   }
 
-  // Redact sensitive data before returning
-  const redactedEntry = redactSensitiveData(logEntry);
-  return JSON.stringify(redactedEntry);
+  return JSON.stringify(logEntry);
 });
 
 /**

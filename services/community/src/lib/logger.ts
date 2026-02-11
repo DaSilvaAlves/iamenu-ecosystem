@@ -14,7 +14,7 @@ import path from 'path';
 import fs from 'fs';
 import { redactSensitiveData } from './redact';
 
-const { combine, timestamp, printf, colorize, errors, json } = winston.format;
+const { combine, timestamp, printf, colorize, errors } = winston.format;
 
 // Service name - used in all logs
 const SERVICE_NAME = process.env.SERVICE_NAME || 'community';

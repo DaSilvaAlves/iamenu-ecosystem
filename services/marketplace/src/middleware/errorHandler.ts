@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import logger from '../lib/logger';
 
+// Get service name from environment or default
+const SERVICE_NAME = process.env.SERVICE_NAME || 'marketplace-api';
+
 /**
  * Custom Error class
  */
@@ -68,7 +71,7 @@ export const errorHandler = (
   const response: any = {
     error: getErrorName(statusCode),
     message: message,
-    service: 'marketplace-api',
+    service: SERVICE_NAME,
     timestamp: new Date().toISOString(),
     path: req.path
   };
