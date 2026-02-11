@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import logger from '../lib/logger';
 
 /**
  * Custom Error class
@@ -52,13 +53,14 @@ export const errorHandler = (
 
   // Log error (só erros não operacionais - inesperados)
   if (!isOperational || statusCode === 500) {
-    console.error('❌ ERROR:', {
+    const requestLogger = (req as any).logger || logger;
+    requestLogger.error('Request error', {
       message: err.message,
       stack: err.stack,
       url: req.url,
       method: req.method,
-      body: req.body,
-      user: req.user?.userId || 'anonymous'
+      statusCode,
+      userId: (req as any).user?.userId || 'anonymous'
     });
   }
 
@@ -66,7 +68,7 @@ export const errorHandler = (
   const response: any = {
     error: getErrorName(statusCode),
     message: message,
-    service: 'community-api',
+    service: 'marketplace-api',
     timestamp: new Date().toISOString(),
     path: req.path
   };

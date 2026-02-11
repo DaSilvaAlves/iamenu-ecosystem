@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma';
+import logger from '../lib/logger';
 
 interface GetSuppliersParams {
   search?: string;
@@ -84,7 +85,10 @@ export const updateSupplier = async (supplierId: string, data: any) => {
         ? JSON.parse(data.categories)
         : (Array.isArray(data.categories) ? data.categories : []);
     } catch (e) {
-      console.error('Error parsing categories:', e);
+      logger.warn('Error parsing categories', {
+        error: e instanceof Error ? e.message : String(e),
+        input: data.categories
+      });
       parsedCategories = [];
     }
 
@@ -93,7 +97,10 @@ export const updateSupplier = async (supplierId: string, data: any) => {
         ? JSON.parse(data.certifications)
         : (Array.isArray(data.certifications) ? data.certifications : []);
     } catch (e) {
-      console.error('Error parsing certifications:', e);
+      logger.warn('Error parsing certifications', {
+        error: e instanceof Error ? e.message : String(e),
+        input: data.certifications
+      });
       parsedCertifications = [];
     }
 
@@ -178,7 +185,7 @@ export const updateSupplier = async (supplierId: string, data: any) => {
       sanitizedData.paymentTerms = data.paymentTerms && data.paymentTerms !== '' ? data.paymentTerms : null;
     }
 
-    console.log('Updating supplier with data:', JSON.stringify(sanitizedData, null, 2));
+    logger.debug('Updating supplier with data', { sanitizedData });
 
     // Update supplier in database
     const updatedSupplier = await prisma.supplier.update({
@@ -197,7 +204,11 @@ export const updateSupplier = async (supplierId: string, data: any) => {
 
     return updatedSupplier;
   } catch (error) {
-    console.error('Error updating supplier:', error);
+    logger.error('Error updating supplier', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      supplierId
+    });
     throw error;
   }
 };
