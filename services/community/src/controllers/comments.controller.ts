@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import logger from '../lib/logger';
 import { commentsService } from '../services/comments.service';
 import { notificationsService } from '../services/notifications.service';
 import { postsService } from '../services/posts.service';
@@ -33,7 +34,11 @@ export class CommentsController {
         },
       });
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching comments failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch comments',
@@ -87,7 +92,11 @@ export class CommentsController {
           });
         }
       } catch (notifError) {
-        console.error('Failed to create notification:', notifError);
+        const requestLogger = (req as any).logger || logger;
+        requestLogger.error('Create notification failed', {
+          error: notifError instanceof Error ? notifError.message : String(notifError),
+          stack: notifError instanceof Error ? notifError.stack : undefined
+        });
         // Don't fail the request if notification fails
       }
 
@@ -96,7 +105,11 @@ export class CommentsController {
         data: comment,
       });
     } catch (error) {
-      console.error('Error creating comment:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error creating comment failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to create comment',
@@ -129,7 +142,11 @@ export class CommentsController {
         message: 'Comment deleted successfully',
       });
     } catch (error: any) {
-      console.error('Error deleting comment:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error deleting comment failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
 
       if (error.message === 'Unauthorized') {
         return res.status(403).json({
@@ -207,7 +224,11 @@ export class CommentsController {
           }
           await prisma.$disconnect();
         } catch (notifError) {
-          console.error('Failed to create notification:', notifError);
+          const requestLogger = (req as any).logger || logger;
+        requestLogger.error('Create notification failed', {
+          error: notifError instanceof Error ? notifError.message : String(notifError),
+          stack: notifError instanceof Error ? notifError.stack : undefined
+        });
           // Don't fail the request if notification fails
         }
       }
@@ -218,7 +239,11 @@ export class CommentsController {
         message: `Reaction ${result.action}`,
       });
     } catch (error) {
-      console.error('Error toggling reaction:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error toggling reaction failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to toggle reaction',
@@ -241,7 +266,11 @@ export class CommentsController {
         data: reactions,
       });
     } catch (error) {
-      console.error('Error fetching reactions:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching reactions failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch reactions',

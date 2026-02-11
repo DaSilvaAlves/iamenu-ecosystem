@@ -12,6 +12,7 @@ if (process.env.SENTRY_DSN) {
 
 import { createServer } from 'http';
 import app from './app';
+import logger from './lib/logger';
 
 // Import WebSocket service
 import { websocketService } from './services/websocket.service';
@@ -29,21 +30,13 @@ const httpServer = createServer(app);
 websocketService.initialize(httpServer);
 
 const server = httpServer.listen(Number(PORT), '0.0.0.0', () => {
-  console.log(`
-╔═══════════════════════════════════════════════════╗
-║                                                   ║
-║   🟢 Community API (iaMenu)                      ║
-║                                                   ║
-║   Port:    ${PORT}                                    ║
-║   Env:     ${process.env.NODE_ENV || 'development'}                    ║
-║   Health:  http://localhost:${PORT}/health           ║
-║   API:     http://localhost:${PORT}/api/v1/community ║
-║   WebSocket: ws://localhost:${PORT}                  ║
-║                                                   ║
-║   Status:  ✅ Running                            ║
-║                                                   ║
-╚═══════════════════════════════════════════════════╝
-  `);
+  logger.info('Community API started', {
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development',
+    health: `http://localhost:${PORT}/health`,
+    api: `http://localhost:${PORT}/api/v1/community`,
+    websocket: `ws://localhost:${PORT}`,
+  });
 });
 
 // ===================================
@@ -52,15 +45,21 @@ const server = httpServer.listen(Number(PORT), '0.0.0.0', () => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason: Error | any, promise: Promise<any>) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-  console.error(reason instanceof Error ? reason.stack : reason);
+  const errorMessage = reason instanceof Error ? reason.message : String(reason);
+  const errorStack = reason instanceof Error ? reason.stack : undefined;
+  logger.error('Unhandled Rejection', {
+    error: errorMessage,
+    stack: errorStack,
+  });
   process.exit(1);
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error: Error) => {
-  console.error('❌ Uncaught Exception:', error.message);
-  console.error(error.stack);
+  logger.error('Uncaught Exception', {
+    error: error.message,
+    stack: error.stack,
+  });
   process.exit(1);
 });
 
@@ -69,17 +68,17 @@ process.on('uncaughtException', (error: Error) => {
 // ===================================
 
 process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
+  logger.info('SIGTERM signal received: closing HTTP server');
   server.close(() => {
-    console.log('HTTP server closed');
+    logger.info('HTTP server closed');
     process.exit(0);
   });
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT signal received: closing HTTP server');
+  logger.info('SIGINT signal received: closing HTTP server');
   server.close(() => {
-    console.log('HTTP server closed');
+    logger.info('HTTP server closed');
     process.exit(0);
   });
 });

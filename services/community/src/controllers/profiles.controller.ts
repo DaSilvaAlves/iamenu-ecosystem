@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import logger from '../lib/logger';
 import { profilesService } from '../services/profiles.service';
 
 /**
@@ -28,7 +29,11 @@ export class ProfilesController {
         data: profiles,
       });
     } catch (error) {
-      console.error('Error searching profiles:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error searching profiles failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to search profiles',
@@ -51,7 +56,11 @@ export class ProfilesController {
         data: profile,
       });
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching profile failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch profile',
@@ -107,7 +116,11 @@ export class ProfilesController {
         message: 'Profile updated successfully',
       });
     } catch (error) {
-      console.error('Error updating profile:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error updating profile failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to update profile',
@@ -130,7 +143,11 @@ export class ProfilesController {
         data: stats,
       });
     } catch (error) {
-      console.error('Error fetching user stats:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching user stats failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch user stats',
@@ -161,7 +178,11 @@ export class ProfilesController {
         },
       });
     } catch (error) {
-      console.error('Error fetching user posts:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching user posts failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch user posts',

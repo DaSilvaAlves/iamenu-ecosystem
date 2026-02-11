@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma';
+import logger from '../lib/logger';
 import { notificationsService } from './notifications.service';
 import { extractMentions, resolveMentions } from '../utils/mention.utils';
 
@@ -249,7 +250,10 @@ export class PostsService {
         }
       }
     } catch (mentionError) {
-      console.error('Failed to process mentions:', mentionError);
+      logger.warn('Failed to process mentions', {
+        error: mentionError instanceof Error ? mentionError.message : String(mentionError),
+        postId: post.id
+      });
       // Don't fail post creation if mention processing fails
     }
 

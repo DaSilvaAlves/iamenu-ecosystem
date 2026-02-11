@@ -5,7 +5,8 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { prisma } from '../lib/prisma';
+import prisma from '../lib/prisma';
+import logger from '../lib/logger';
 
 /**
  * Middleware to set PostgreSQL session variable for RLS
@@ -29,7 +30,7 @@ export const setRLSUserContext = async (
 
     // SECURITY: Validate userId is a non-empty string (UUID format)
     if (typeof req.user.userId !== 'string' || !req.user.userId.trim()) {
-      console.warn('Invalid user ID format in RLS context:', {
+      logger.warn('Invalid user ID format in RLS context', {
         userId: req.user.userId,
         type: typeof req.user.userId
       });
@@ -49,7 +50,9 @@ export const setRLSUserContext = async (
     `;
 
     if (!result?.[0]?.current_user_id) {
-      console.error('Failed to set RLS session variable for user:', req.user.userId);
+      logger.error('Failed to set RLS session variable', {
+        userId: req.user.userId
+      });
       return res.status(500).json({
         error: 'RLS_CONFIGURATION_ERROR',
         message: 'Failed to configure Row-Level Security context'
@@ -59,9 +62,10 @@ export const setRLSUserContext = async (
     // User context validated and RLS session variable set
     next();
   } catch (error) {
-    console.error('RLS middleware error:', {
+    logger.error('RLS middleware error', {
       userId: req.user?.userId,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
     });
 
     // Return 500 instead of silently continuing

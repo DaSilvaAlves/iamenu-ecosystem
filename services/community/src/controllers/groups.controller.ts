@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import logger from '../lib/logger';
 import { groupsService } from '../services/groups.service';
 import { groupMembersService } from '../services/group-members.service';
 
@@ -33,7 +34,11 @@ export class GroupsController {
         },
       });
     } catch (error) {
-      console.error('Error fetching groups:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching groups failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch groups',
@@ -63,7 +68,11 @@ export class GroupsController {
         data: group,
       });
     } catch (error) {
-      console.error('Error fetching group:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching group failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch group',
@@ -115,7 +124,11 @@ export class GroupsController {
         message: 'Group created successfully',
       });
     } catch (error: any) {
-      console.error('Error creating group:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error creating group failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
 
       // Handle unique constraint violation (duplicate group name)
       if (error.code === 'P2002') {
@@ -170,7 +183,11 @@ export class GroupsController {
         message: 'Group updated successfully',
       });
     } catch (error) {
-      console.error('Error updating group:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error updating group failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to update group',
@@ -208,7 +225,11 @@ export class GroupsController {
         message: 'Group deleted successfully',
       });
     } catch (error) {
-      console.error('Error deleting group:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error deleting group failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to delete group',
@@ -232,7 +253,11 @@ export class GroupsController {
         count: groups.length,
       });
     } catch (error) {
-      console.error('Error fetching groups by category:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching groups by category failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch groups by category',
@@ -268,7 +293,11 @@ export class GroupsController {
         message: 'Successfully joined the group',
       });
     } catch (error: any) {
-      console.error('Error joining group:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error joining group failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
 
       if (error.message === 'Group not found') {
         return res.status(404).json({
@@ -314,7 +343,11 @@ export class GroupsController {
         message: 'Successfully left the group',
       });
     } catch (error: any) {
-      console.error('Error leaving group:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error leaving group failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
 
       if (error.message.includes('creator cannot leave')) {
         return res.status(403).json({
@@ -346,7 +379,11 @@ export class GroupsController {
         count: members.length,
       });
     } catch (error) {
-      console.error('Error fetching group members:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching group members failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch group members',
@@ -370,7 +407,11 @@ export class GroupsController {
         count: groups.length,
       });
     } catch (error) {
-      console.error('Error fetching user groups:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching user groups failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch user groups',
@@ -415,7 +456,11 @@ export class GroupsController {
         message: 'Member role updated successfully',
       });
     } catch (error: any) {
-      console.error('Error updating member role:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error updating member role failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
 
       if (error.message.includes('Only group owner or admins')) {
         return res.status(403).json({
@@ -454,7 +499,11 @@ export class GroupsController {
         message: 'Member removed successfully',
       });
     } catch (error: any) {
-      console.error('Error removing member:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error removing member failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
 
       if (error.message.includes('Only group owner or admins')) {
         return res.status(403).json({

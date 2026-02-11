@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import logger from '../lib/logger';
 import { gamificationService } from '../services/gamification.service';
 
 /**
@@ -19,7 +20,11 @@ export class GamificationController {
         data: achievements,
       });
     } catch (error) {
-      console.error('Error fetching achievements:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching achievements failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch achievements',
@@ -48,7 +53,11 @@ export class GamificationController {
         },
       });
     } catch (error) {
-      console.error('Error fetching leaderboard:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching leaderboard failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch leaderboard',
@@ -79,7 +88,11 @@ export class GamificationController {
         },
       });
     } catch (error) {
-      console.error('Error fetching user gamification:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching user gamification failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch user gamification data',
@@ -103,7 +116,11 @@ export class GamificationController {
         data: history,
       });
     } catch (error) {
-      console.error('Error fetching points history:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching points history failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch points history',
@@ -133,7 +150,11 @@ export class GamificationController {
         },
       });
     } catch (error) {
-      console.error('Error fetching user rank:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching user rank failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch user rank',
@@ -171,7 +192,11 @@ export class GamificationController {
           : 'Nenhum badge novo desbloqueado',
       });
     } catch (error) {
-      console.error('Error checking badges:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error checking badges failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to check badges',

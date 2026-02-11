@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import logger from '../lib/logger';
 import { postsService } from '../services/posts.service';
 import { notificationsService } from '../services/notifications.service';
 
@@ -38,7 +39,11 @@ export class PostsController {
         },
       });
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching posts failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch posts',
@@ -68,7 +73,11 @@ export class PostsController {
         data: post,
       });
     } catch (error) {
-      console.error('Error fetching post:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching post failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch post',
@@ -121,7 +130,11 @@ export class PostsController {
         message: 'Post created successfully',
       });
     } catch (error) {
-      console.error('Error creating post:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error creating post failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to create post',
@@ -166,7 +179,11 @@ export class PostsController {
         message: 'Post updated successfully',
       });
     } catch (error) {
-      console.error('Error updating post:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error updating post failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to update post',
@@ -204,7 +221,11 @@ export class PostsController {
         message: 'Post deleted successfully',
       });
     } catch (error) {
-      console.error('Error deleting post:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error deleting post failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to delete post',
@@ -252,7 +273,11 @@ export class PostsController {
             });
           }
         } catch (notifError) {
-          console.error('Failed to create notification:', notifError);
+          const requestLogger = (req as any).logger || logger;
+          requestLogger.error('Create notification failed', {
+            error: notifError instanceof Error ? notifError.message : String(notifError),
+            stack: notifError instanceof Error ? notifError.stack : undefined
+          });
           // Don't fail the request if notification fails
         }
       }
@@ -263,7 +288,11 @@ export class PostsController {
         message: `Reaction ${result.action}`,
       });
     } catch (error) {
-      console.error('Error toggling reaction:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error toggling reaction failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to toggle reaction',
@@ -286,7 +315,11 @@ export class PostsController {
         data: reactions,
       });
     } catch (error) {
-      console.error('Error fetching reactions:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching reactions failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch reactions',
