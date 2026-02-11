@@ -1,15 +1,17 @@
 /**
  * Modal Component
  *
- * Sizes: sm, md, lg, xl, full
+ * Sizes: sm, md, lg, xl, 2xl, full
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { FC, ReactNode, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
-const sizes = {
+type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+
+const sizes: Record<ModalSize, string> = {
   sm: 'max-w-sm',
   md: 'max-w-md',
   lg: 'max-w-lg',
@@ -18,7 +20,20 @@ const sizes = {
   full: 'max-w-[90vw] max-h-[90vh]'
 };
 
-const Modal = ({
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  children?: ReactNode;
+  title?: string;
+  description?: string;
+  size?: ModalSize;
+  showCloseButton?: boolean;
+  closeOnOverlayClick?: boolean;
+  closeOnEscape?: boolean;
+  className?: string;
+}
+
+const Modal: FC<ModalProps> = ({
   isOpen,
   onClose,
   children,
@@ -31,7 +46,7 @@ const Modal = ({
   className = ''
 }) => {
   // Handle escape key
-  const handleEscape = useCallback((e) => {
+  const handleEscape = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape' && closeOnEscape) {
       onClose?.();
     }
@@ -49,7 +64,7 @@ const Modal = ({
     };
   }, [isOpen, handleEscape]);
 
-  const handleOverlayClick = (e) => {
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && closeOnOverlayClick) {
       onClose?.();
     }
@@ -117,22 +132,30 @@ const Modal = ({
 };
 
 // Sub-components for flexibility
-const ModalHeader = ({ children, className = '' }) => (
+interface ModalSubComponentProps {
+  children?: ReactNode;
+  className?: string;
+}
+
+const ModalHeader: FC<ModalSubComponentProps> = ({ children, className = '' }) => (
   <div className={`mb-4 ${className}`}>{children}</div>
 );
 
-const ModalBody = ({ children, className = '' }) => (
+const ModalBody: FC<ModalSubComponentProps> = ({ children, className = '' }) => (
   <div className={className}>{children}</div>
 );
 
-const ModalFooter = ({ children, className = '' }) => (
+const ModalFooter: FC<ModalSubComponentProps> = ({ children, className = '' }) => (
   <div className={`flex items-center justify-end gap-3 mt-6 pt-4 border-t border-border ${className}`}>
     {children}
   </div>
 );
 
-Modal.Header = ModalHeader;
-Modal.Body = ModalBody;
-Modal.Footer = ModalFooter;
+// Attach sub-components to Modal
+Object.assign(Modal, {
+  Header: ModalHeader,
+  Body: ModalBody,
+  Footer: ModalFooter
+});
 
 export default Modal;

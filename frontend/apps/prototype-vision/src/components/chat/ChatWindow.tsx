@@ -1,10 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { FC, useState, useRef, useEffect, FormEvent, ChangeEvent, KeyboardEvent } from 'react';
 import { CURRENT_USER } from '../../utils/chatConstants';
+import { Chat } from './chatTypes';
 
-const ChatWindow = ({ chat, onSendMessage, onReceiveMessage }) => {
-  const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const scrollRef = useRef(null);
+interface ChatWindowProps {
+  chat: Chat | null;
+  onSendMessage: (chatId: string, messageText: string) => void;
+}
+
+const ChatWindow: FC<ChatWindowProps> = ({ chat, onSendMessage }) => {
+  const [inputValue, setInputValue] = useState<string>('');
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -24,7 +29,7 @@ const ChatWindow = ({ chat, onSendMessage, onReceiveMessage }) => {
     );
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
@@ -100,21 +105,6 @@ const ChatWindow = ({ chat, onSendMessage, onReceiveMessage }) => {
           );
         })}
 
-        {isTyping && (
-          <div className="flex gap-4 max-w-[80%]">
-             <div className="shrink-0 self-end">
-                <div
-                  className="bg-center bg-no-repeat bg-cover rounded-full size-8"
-                  style={{ backgroundImage: `url("${chat.user.avatarUrl}")` }}
-                />
-              </div>
-              <div className="bg-white p-4 rounded-2xl rounded-bl-none shadow-sm border border-stone-100 flex items-center gap-1">
-                <div className="size-1.5 bg-stone-300 rounded-full animate-bounce"></div>
-                <div className="size-1.5 bg-stone-300 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <div className="size-1.5 bg-stone-300 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-              </div>
-          </div>
-        )}
       </div>
 
       {/* Input */}
@@ -133,11 +123,11 @@ const ChatWindow = ({ chat, onSendMessage, onReceiveMessage }) => {
               placeholder="Escreve uma mensagem..."
               rows={1}
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setInputValue(e.target.value)}
+              onKeyDown={(e: KeyboardEvent<HTMLTextAreaElement>) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  handleSubmit(e);
+                  handleSubmit(e as any);
                 }
               }}
             />

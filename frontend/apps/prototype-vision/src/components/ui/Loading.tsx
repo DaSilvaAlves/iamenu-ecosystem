@@ -4,25 +4,36 @@
  * Spinner, Skeleton, LoadingOverlay
  */
 
-import React from 'react';
+import { FC, CSSProperties } from 'react';
 import { motion } from 'framer-motion';
+
+type SpinnerSize = 'sm' | 'md' | 'lg' | 'xl';
+type SpinnerColor = 'primary' | 'white' | 'muted';
+type SkeletonVariant = 'text' | 'title' | 'avatar' | 'thumbnail' | 'card';
+type SkeletonRounded = 'none' | 'sm' | 'md' | 'lg' | 'full';
 
 /**
  * Spinner - Simple loading spinner
  */
-export const Spinner = ({
+interface SpinnerProps {
+  size?: SpinnerSize;
+  className?: string;
+  color?: SpinnerColor;
+}
+
+export const Spinner: FC<SpinnerProps> = ({
   size = 'md',
   className = '',
   color = 'primary'
 }) => {
-  const sizes = {
+  const sizes: Record<SpinnerSize, string> = {
     sm: 'w-4 h-4',
     md: 'w-6 h-6',
     lg: 'w-8 h-8',
     xl: 'w-12 h-12'
   };
 
-  const colors = {
+  const colors: Record<SpinnerColor, string> = {
     primary: 'text-primary',
     white: 'text-white',
     muted: 'text-text-muted'
@@ -54,14 +65,22 @@ export const Spinner = ({
 /**
  * Skeleton - Placeholder for loading content
  */
-export const Skeleton = ({
+interface SkeletonProps {
+  className?: string;
+  variant?: SkeletonVariant;
+  width?: string | number;
+  height?: string | number;
+  rounded?: SkeletonRounded;
+}
+
+export const Skeleton: FC<SkeletonProps> = ({
   className = '',
   variant = 'text',
   width,
   height,
   rounded = 'md'
 }) => {
-  const roundedClasses = {
+  const roundedClasses: Record<SkeletonRounded, string> = {
     none: 'rounded-none',
     sm: 'rounded-sm',
     md: 'rounded-md',
@@ -69,7 +88,7 @@ export const Skeleton = ({
     full: 'rounded-full'
   };
 
-  const variantDefaults = {
+  const variantDefaults: Record<SkeletonVariant, string> = {
     text: 'h-4 w-full',
     title: 'h-6 w-3/4',
     avatar: 'h-10 w-10 rounded-full',
@@ -77,7 +96,7 @@ export const Skeleton = ({
     card: 'h-32 w-full'
   };
 
-  const style = {
+  const style: CSSProperties = {
     width: width || undefined,
     height: height || undefined
   };
@@ -98,7 +117,11 @@ export const Skeleton = ({
 /**
  * SkeletonCard - Pre-built skeleton for card layouts
  */
-export const SkeletonCard = ({ className = '' }) => (
+interface SkeletonCardProps {
+  className?: string;
+}
+
+export const SkeletonCard: FC<SkeletonCardProps> = ({ className = '' }) => (
   <div className={`bg-surface border border-border rounded-xl p-5 space-y-4 ${className}`}>
     <div className="flex items-center gap-3">
       <Skeleton variant="avatar" />
@@ -116,7 +139,14 @@ export const SkeletonCard = ({ className = '' }) => (
 /**
  * LoadingOverlay - Full-screen or container overlay
  */
-export const LoadingOverlay = ({
+interface LoadingOverlayProps {
+  isLoading: boolean;
+  message?: string;
+  fullScreen?: boolean;
+  className?: string;
+}
+
+export const LoadingOverlay: FC<LoadingOverlayProps> = ({
   isLoading,
   message = 'Loading...',
   fullScreen = false,
@@ -146,7 +176,11 @@ export const LoadingOverlay = ({
 /**
  * LoadingDots - Animated dots
  */
-export const LoadingDots = ({ className = '' }) => (
+interface LoadingDotsProps {
+  className?: string;
+}
+
+export const LoadingDots: FC<LoadingDotsProps> = ({ className = '' }) => (
   <div className={`flex items-center gap-1 ${className}`}>
     {[0, 1, 2].map((i) => (
       <motion.div
@@ -165,7 +199,7 @@ export const LoadingDots = ({ className = '' }) => (
   </div>
 );
 
-// Default export
+// Default export as namespace
 const Loading = {
   Spinner,
   Skeleton,

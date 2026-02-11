@@ -5,10 +5,13 @@
  * Sizes: sm, md, lg
  */
 
-import React from 'react';
+import React, { FC, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 
-const variants = {
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'link';
+type ButtonSize = 'sm' | 'md' | 'lg';
+
+const variants: Record<ButtonVariant, string> = {
   primary: 'bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20',
   secondary: 'bg-surface hover:bg-surface-highlight text-white border border-border',
   danger: 'bg-red-600 hover:bg-red-700 text-white',
@@ -16,13 +19,24 @@ const variants = {
   link: 'bg-transparent text-primary hover:underline p-0'
 };
 
-const sizes = {
+const sizes: Record<ButtonSize, string> = {
   sm: 'px-3 py-1.5 text-sm',
   md: 'px-4 py-2 text-sm',
   lg: 'px-6 py-3 text-base'
 };
 
-const Button = React.forwardRef(({
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  disabled?: boolean;
+  loading?: boolean;
+  icon?: FC<{ className?: string }>;
+  iconPosition?: 'left' | 'right';
+  fullWidth?: boolean;
+  children?: ReactNode;
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   children,
   variant = 'primary',
   size = 'md',
@@ -51,7 +65,7 @@ const Button = React.forwardRef(({
       className={`${baseClasses} ${variantClasses} ${sizeClasses} ${widthClasses} ${className}`}
       whileHover={{ scale: disabled ? 1 : 1.02 }}
       whileTap={{ scale: disabled ? 1 : 0.98 }}
-      {...props}
+      {...(props as any)}
     >
       {loading ? (
         <>

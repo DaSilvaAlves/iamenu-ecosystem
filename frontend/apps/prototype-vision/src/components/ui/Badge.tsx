@@ -5,9 +5,13 @@
  * Sizes: sm, md, lg
  */
 
-import React from 'react';
+import { FC, ReactNode } from 'react';
 
-const variants = {
+type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'outline';
+type BadgeSize = 'sm' | 'md' | 'lg';
+type StatusType = 'active' | 'inactive' | 'pending' | 'completed' | 'cancelled' | 'draft' | 'published' | 'archived';
+
+const variants: Record<BadgeVariant, string> = {
   default: 'bg-white/10 text-white',
   primary: 'bg-primary/20 text-primary border border-primary/30',
   success: 'bg-green-500/20 text-green-400 border border-green-500/30',
@@ -17,13 +21,23 @@ const variants = {
   outline: 'bg-transparent text-white border border-border'
 };
 
-const sizes = {
+const sizes: Record<BadgeSize, string> = {
   sm: 'px-2 py-0.5 text-xs',
   md: 'px-2.5 py-1 text-xs',
   lg: 'px-3 py-1.5 text-sm'
 };
 
-const Badge = ({
+interface BadgeProps {
+  children?: ReactNode;
+  variant?: BadgeVariant;
+  size?: BadgeSize;
+  icon?: FC<{ className?: string }>;
+  removable?: boolean;
+  onRemove?: () => void;
+  className?: string;
+}
+
+const Badge: FC<BadgeProps> = ({
   children,
   variant = 'default',
   size = 'md',
@@ -64,8 +78,13 @@ const Badge = ({
 /**
  * StatusBadge - Pre-configured badges for common statuses
  */
-export const StatusBadge = ({ status, className = '' }) => {
-  const statusConfig = {
+interface StatusBadgeProps {
+  status: StatusType | string;
+  className?: string;
+}
+
+export const StatusBadge: FC<StatusBadgeProps> = ({ status, className = '' }) => {
+  const statusConfig: Record<StatusType, { variant: BadgeVariant; label: string }> = {
     active: { variant: 'success', label: 'Active' },
     inactive: { variant: 'default', label: 'Inactive' },
     pending: { variant: 'warning', label: 'Pending' },
@@ -76,7 +95,7 @@ export const StatusBadge = ({ status, className = '' }) => {
     archived: { variant: 'default', label: 'Archived' }
   };
 
-  const config = statusConfig[status?.toLowerCase()] || { variant: 'default', label: status };
+  const config = statusConfig[(status?.toLowerCase() as StatusType)] || { variant: 'default', label: status };
 
   return (
     <Badge variant={config.variant} className={className}>
@@ -88,7 +107,14 @@ export const StatusBadge = ({ status, className = '' }) => {
 /**
  * CountBadge - Notification count badge
  */
-export const CountBadge = ({
+interface CountBadgeProps {
+  count: number;
+  max?: number;
+  showZero?: boolean;
+  className?: string;
+}
+
+export const CountBadge: FC<CountBadgeProps> = ({
   count,
   max = 99,
   showZero = false,

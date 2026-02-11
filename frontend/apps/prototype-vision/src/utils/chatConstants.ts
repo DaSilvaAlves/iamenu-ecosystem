@@ -1,13 +1,14 @@
-import { NavigationTab } from './chatTypes';
+import { NavigationTab } from '../components/chat/chatTypes';
+import { User, Chat } from '../components/chat/chatTypes';
 
-export const CURRENT_USER = {
+export const CURRENT_USER: User = {
   id: 'chef_joao',
   name: 'Chef João',
   role: 'Chef Executivo',
   avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC5exVJnqTzfwdIj9Y_Zio-1mNcuWHy0rqggzxpJjewgexJujKpffBZh7kYFSUq_k0b9f4htgEIg24N3-H8nmbKW7HwAZnNMEIytyHpa4-8LmPHRsWMUpbxUWJUKtnX8mDi2siC-AsxO0r6J4X97XBF4RLz6s123YT-A60-eYE2jAT1DhpNNcG7CqUNJdpIFPpt735ZUGvHQMbP5Mpgy-XKzxR5SU9hjIKetvJjCS-0gjh5A5sMpe1Y7wVADOnitjkaufq2RWa7F512'
 };
 
-export const INITIAL_CHATS = [
+export const INITIAL_CHATS: Chat[] = [
   {
     id: '1',
     user: {
@@ -53,7 +54,13 @@ export const INITIAL_CHATS = [
   }
 ];
 
-export const NAV_ITEMS = [
+interface NavItem {
+  id: string;
+  label: string;
+  icon: string;
+}
+
+export const NAV_ITEMS: NavItem[] = [
   { id: NavigationTab.Home, label: 'Home', icon: 'home' },
   { id: NavigationTab.Community, label: 'Comunidade', icon: 'group' },
   { id: NavigationTab.Messages, label: 'Mensagens', icon: 'chat_bubble' },
