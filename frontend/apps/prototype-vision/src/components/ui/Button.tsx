@@ -5,11 +5,11 @@
  * Sizes: sm, md, lg
  */
 
-import React, { FC, ReactNode } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
+import { ButtonProps, ButtonVariant, ButtonSize } from './Button.types';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'link';
-type ButtonSize = 'sm' | 'md' | 'lg';
+export type { ButtonProps, ButtonVariant, ButtonSize } from './Button.types';
 
 const variants: Record<ButtonVariant, string> = {
   primary: 'bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20',
@@ -24,17 +24,6 @@ const sizes: Record<ButtonSize, string> = {
   md: 'px-4 py-2 text-sm',
   lg: 'px-6 py-3 text-base'
 };
-
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  disabled?: boolean;
-  loading?: boolean;
-  icon?: FC<{ className?: string }>;
-  iconPosition?: 'left' | 'right';
-  fullWidth?: boolean;
-  children?: ReactNode;
-}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   children,

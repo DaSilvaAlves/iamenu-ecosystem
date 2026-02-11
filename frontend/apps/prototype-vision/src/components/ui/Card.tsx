@@ -4,11 +4,11 @@
  * Variants: default, elevated, outlined, interactive
  */
 
-import React, { FC, ReactNode } from 'react';
+import React, { FC } from 'react';
 import { motion } from 'framer-motion';
+import { CardProps, CardSubComponentProps, CardVariant, CardPadding } from './Card.types';
 
-type CardVariant = 'default' | 'elevated' | 'outlined' | 'interactive';
-type CardPadding = 'none' | 'sm' | 'md' | 'lg';
+export type { CardProps, CardSubComponentProps, CardVariant, CardPadding } from './Card.types';
 
 const variants: Record<CardVariant, string> = {
   default: 'bg-surface border border-border',
@@ -16,14 +16,6 @@ const variants: Record<CardVariant, string> = {
   outlined: 'bg-transparent border border-border',
   interactive: 'bg-surface border border-border hover:border-primary/50 cursor-pointer'
 };
-
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: CardVariant;
-  padding?: CardPadding;
-  children?: ReactNode;
-  animate?: boolean;
-  onClick?: () => void;
-}
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(({
   children,
@@ -77,16 +69,13 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(({
 Card.displayName = 'Card';
 
 // Sub-components
-interface CardSubComponentProps {
-  children?: ReactNode;
-  className?: string;
-}
-
 const CardHeader: FC<CardSubComponentProps> = ({ children, className = '' }) => (
   <div className={`mb-4 ${className}`}>
     {children}
   </div>
 );
+
+CardHeader.displayName = 'Card.Header';
 
 const CardTitle: FC<CardSubComponentProps> = ({ children, className = '' }) => (
   <h3 className={`text-lg font-bold text-white ${className}`}>
@@ -94,11 +83,15 @@ const CardTitle: FC<CardSubComponentProps> = ({ children, className = '' }) => (
   </h3>
 );
 
+CardTitle.displayName = 'Card.Title';
+
 const CardDescription: FC<CardSubComponentProps> = ({ children, className = '' }) => (
   <p className={`text-sm text-text-muted mt-1 ${className}`}>
     {children}
   </p>
 );
+
+CardDescription.displayName = 'Card.Description';
 
 const CardContent: FC<CardSubComponentProps> = ({ children, className = '' }) => (
   <div className={className}>
@@ -106,11 +99,15 @@ const CardContent: FC<CardSubComponentProps> = ({ children, className = '' }) =>
   </div>
 );
 
+CardContent.displayName = 'Card.Content';
+
 const CardFooter: FC<CardSubComponentProps> = ({ children, className = '' }) => (
   <div className={`mt-4 pt-4 border-t border-border ${className}`}>
     {children}
   </div>
 );
+
+CardFooter.displayName = 'Card.Footer';
 
 // Attach sub-components to Card
 Object.assign(Card, {

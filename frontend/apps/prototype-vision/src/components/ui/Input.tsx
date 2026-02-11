@@ -4,22 +4,11 @@
  * Types: text, email, password, number, search, textarea
  */
 
-import React, { FC, useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { Eye, EyeOff, Search, X } from 'lucide-react';
+import { InputProps, InputType } from './Input.types';
 
-type InputType = 'text' | 'email' | 'password' | 'number' | 'search' | 'textarea';
-
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  type?: InputType;
-  label?: string;
-  error?: string;
-  hint?: string;
-  icon?: FC<{ className?: string }>;
-  clearable?: boolean;
-  onClear?: () => void;
-  inputClassName?: string;
-  value?: string;
-}
+export type { InputProps, InputType } from './Input.types';
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   type = 'text',
