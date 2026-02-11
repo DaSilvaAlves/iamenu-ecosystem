@@ -21,6 +21,7 @@ import moderationRouter from './routes/moderation';
 // Import middleware
 import { authenticateJWT } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
+import requestIdMiddleware from './middleware/requestId';
 
 const app: Application = express();
 
@@ -33,6 +34,8 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
+// Request ID tracking - add unique ID to all requests for distributed tracing
+app.use(requestIdMiddleware);
 
 // CORS - Allow multiple origins
 const allowedOrigins = [
