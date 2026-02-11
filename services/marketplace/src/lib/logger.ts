@@ -11,6 +11,7 @@
 import winston, { createLogger, format, transports } from 'winston';
 import path from 'path';
 import fs from 'fs';
+import { redactSensitiveData } from './redact';
 
 const { combine, timestamp, printf, colorize, errors, json } = format;
 
@@ -30,6 +31,7 @@ const LOG_LEVEL = process.env.LOG_LEVEL ||
 /**
  * JSON format for structured logging
  * Outputs logs in JSON format for easy parsing and analysis
+ * Automatically redacts sensitive data before serialization
  */
 const jsonFormat = printf((info: any) => {
   const { level, message, timestamp, service, requestId, stack, ...meta } = info;
@@ -52,12 +54,15 @@ const jsonFormat = printf((info: any) => {
     logEntry.stack = stack;
   }
 
-  return JSON.stringify(logEntry);
+  // Redact sensitive data before returning
+  const redactedEntry = redactSensitiveData(logEntry);
+  return JSON.stringify(redactedEntry);
 });
 
 /**
  * Console format for development
  * Human-readable format with colors for terminal output
+ * Automatically redacts sensitive data before displaying
  */
 const consoleFormat = printf((info: any) => {
   const { level, message, timestamp, requestId, stack, ...meta } = info;
@@ -68,11 +73,12 @@ const consoleFormat = printf((info: any) => {
   }
 
   if (stack) {
-    log += `\n${stack}`;
+    log += `\n${redactSensitiveData(stack)}`;
   }
 
   if (Object.keys(meta).length > 0) {
-    log += ` ${JSON.stringify(meta)}`;
+    const redactedMeta = redactSensitiveData(meta);
+    log += ` ${JSON.stringify(redactedMeta)}`;
   }
 
   return log;

@@ -123,20 +123,29 @@ Currently, each service has ad-hoc logging (console.log, custom loggers), making
 ---
 
 ### Task 2.3.5: Add Sensitive Data Redaction
-- [ ] Identify sensitive fields (passwords, tokens, API keys)
-- [ ] Create redaction utility function
-- [ ] Redact passwords in logs
-- [ ] Redact authentication tokens
-- [ ] Redact API keys and secrets
-- [ ] Test redaction functionality
+- [x] Identify sensitive fields (passwords, tokens, API keys) ✅
+- [x] Create redaction utility function ✅
+- [x] Redact passwords in logs ✅
+- [x] Redact authentication tokens ✅
+- [x] Redact API keys and secrets ✅
+- [x] Test redaction functionality ✅
 
 **Time Estimate:** 1h
 **Subtasks:**
-  - [ ] Create redaction utility (0.4h)
-  - [ ] Apply to all services (0.4h)
-  - [ ] Test redaction (0.2h)
+  - [x] Create redaction utility (0.4h) - redact.ts created with 25+ field types
+  - [x] Apply to all services (0.4h) - Integrated into 4 service loggers
+  - [x] Test redaction (0.2h) - 20+ test cases created
 
-**Deliverable:** Sensitive data redaction utility
+**Deliverable:** Sensitive data redaction utility ✅
+
+**Implementation Details:**
+- Created `lib/redact.ts` utility with comprehensive field and pattern matching
+- Supports 25+ sensitive field types (passwords, tokens, API keys, etc.)
+- Pattern-based redaction for JWT tokens, Bearer tokens, Basic auth, AWS keys
+- Recursive redaction for nested objects and arrays
+- Integrated into Winston logger (both JSON and console formats)
+- Prevents circular reference infinite loops with depth limit
+- All 4 services (marketplace, community, academy, business) updated
 
 ---
 
@@ -373,7 +382,7 @@ logger.info('User created', {
 - [x] Task 2.3.2: Community Logger (1/1) ✅
 - [x] Task 2.3.3: Marketplace Logger (1/1) ✅
 - [x] Task 2.3.4: Academy & Business Logger (1/1) ✅
-- [ ] Task 2.3.5: Sensitive Data Redaction (0/1)
+- [x] Task 2.3.5: Sensitive Data Redaction (1/1) ✅
 - [ ] Task 2.3.6: Testing & Validation (0/1)
 - [ ] Task 2.3.7: Documentation & Review (0/1)
 
@@ -399,31 +408,32 @@ logger.info('User created', {
 ## 🚀 Definition of Done
 
 Story completion status:
-- [x] Task 2.3.1, 2.3.2, 2.3.3 & 2.3.4 complete ✅ - **71% DONE**
+- [x] Task 2.3.1, 2.3.2, 2.3.3, 2.3.4 & 2.3.5 complete ✅ - **86% DONE**
 - [x] All 4 services using Winston - ✅ COMPLETE
 - [x] Request IDs logged - ✅ (All 4 services)
 - [x] Log format consistent - ✅ (JSON with timestamp, level, service)
-- [ ] No sensitive data logged - Task 2.3.5 pending
+- [x] No sensitive data logged - ✅ COMPLETE (Redaction integrated)
 - [x] Core compilation passing - Marketplace ✅, Academy ✅
-- [ ] CodeRabbit: PASS (no HIGH issues) - PENDING
+- [ ] CodeRabbit: PASS (no HIGH issues) - PENDING (Task 2.3.7)
 - [ ] Documentation complete - Task 2.3.7 pending
 
-**Current Status:** ⚙️ **IN PROGRESS (71% Complete)**
+**Current Status:** ⚙️ **NEAR COMPLETION (86% Complete)**
 **Completed:**
 - ✅ Winston setup (Task 2.3.1) - Infrastructure
 - ✅ Marketplace logger (Task 2.3.3) - 28 → 0 | Builds ✅
 - ✅ Community logger (Task 2.3.2) - 91 → 0
 - ✅ Academy & Business (Task 2.3.4) - 31 → 0 | Academy builds ✅
+- ✅ Sensitive data redaction (Task 2.3.5) - 25+ fields + patterns
 **Remaining:**
-- Sensitive data redaction (Task 2.3.5) - 1 task
 - Testing & validation (Task 2.3.6) - 1 task
 - Documentation & review (Task 2.3.7) - 1 task
 **Owner:** @dev
-**Next Step:** Task 2.3.5 - Sensitive data redaction utility
+**Next Steps:** Task 2.3.6 → Task 2.3.7 → Merge
 
 ---
 
-**Progress:** 5 of 7 tasks complete ✅
+**Progress:** 6 of 7 tasks complete ✅
 **Console calls replaced:** 186 of ~210 (88%)
 **Services migrated:** 4 of 4 (100%) ✅
+**Redaction coverage:** 25+ field types + pattern matching
 **Branch:** feature/logging-centralization-TECH-DEBT-002.3

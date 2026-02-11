@@ -6,11 +6,13 @@
  * - Multiple log levels (ERROR, WARN, INFO, DEBUG)
  * - File rotation (max 5MB, 10 files)
  * - Structured JSON format for easy parsing
+ * - Sensitive data redaction (passwords, tokens, API keys)
  */
 
 import winston, { createLogger, format, transports } from 'winston';
 import path from 'path';
 import fs from 'fs';
+import { redactSensitiveData } from './redact';
 
 const { combine, timestamp, printf, colorize, errors } = format;
 
@@ -29,9 +31,14 @@ const LOG_LEVEL = process.env.LOG_LEVEL ||
 
 /**
  * JSON format for structured logging
+ * Redacts sensitive data before serialization
  */
 const jsonFormat = printf((info: any) => {
   const { level, message, timestamp, service, requestId, stack, ...meta } = info;
+  
+  // Redact sensitive data from meta
+  const redactedMeta = redactSensitiveData(meta);
+  
   const logEntry: any = {
     timestamp,
     level: level.toUpperCase(),
@@ -43,12 +50,12 @@ const jsonFormat = printf((info: any) => {
     logEntry.requestId = requestId;
   }
 
-  if (Object.keys(meta).length > 0) {
-    Object.assign(logEntry, meta);
+  if (Object.keys(redactedMeta).length > 0) {
+    Object.assign(logEntry, redactedMeta);
   }
 
   if (stack) {
-    logEntry.stack = stack;
+    logEntry.stack = redactSensitiveData(stack);
   }
 
   return JSON.stringify(logEntry);
@@ -56,6 +63,7 @@ const jsonFormat = printf((info: any) => {
 
 /**
  * Console format for development
+ * Redacts sensitive data before display
  */
 const consoleFormat = printf((info: any) => {
   const { level, message, timestamp, requestId, stack, ...meta } = info;
@@ -66,11 +74,11 @@ const consoleFormat = printf((info: any) => {
   }
 
   if (stack) {
-    log += `\n${stack}`;
+    log += `\n${redactSensitiveData(stack)}`;
   }
 
   if (Object.keys(meta).length > 0) {
-    log += ` ${JSON.stringify(meta)}`;
+    log += ` ${JSON.stringify(redactSensitiveData(meta))}`;
   }
 
   return log;
