@@ -15,6 +15,10 @@ export type { InputProps, InputType, InputSize, InputState } from './Input/Input
 export { Card } from './Card/Card';
 export type { CardProps, CardVariant, CardSize } from './Card/Card.types';
 
+// Task 2.2.5: Select Component ✅
+export { Select } from './Select/Select';
+export type { SelectProps, SelectOption, SelectSize, SelectMode } from './Select/Select.types';
+
 // Tokens
 export * from './tokens';
 
