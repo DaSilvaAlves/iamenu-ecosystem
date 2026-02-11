@@ -17,8 +17,8 @@
 -- Current time: 2145ms | Expected: 100-150ms (93% improvement)
 -- Storage: ~8 MB
 
-CREATE INDEX IF NOT EXISTS idx_quotes_status
-  ON marketplace.quotes (status);
+CREATE INDEX IF NOT EXISTS "idx_quotes_status"
+  ON marketplace."quotes" ("status");
 
 -- Index 2: Timeline/date range queries (CRITICAL)
 -- Purpose: Sort and range-query quotes by creation date
@@ -26,8 +26,8 @@ CREATE INDEX IF NOT EXISTS idx_quotes_status
 -- Current time: 1000ms | Expected: 350ms (65% improvement)
 -- Storage: ~8 MB
 
-CREATE INDEX IF NOT EXISTS idx_quotes_createdAt_desc
-  ON marketplace.quotes (created_at DESC);
+CREATE INDEX IF NOT EXISTS "idx_quotes_created_at_desc"
+  ON marketplace."quotes" ("created_at" DESC);
 
 -- Index 3: Supplier lookup (HIGH - Required for RLS from Story 1.1)
 -- Purpose: Find quotes by supplier_id (RLS policy requirement)
@@ -35,8 +35,8 @@ CREATE INDEX IF NOT EXISTS idx_quotes_createdAt_desc
 -- Current time: 500ms | Expected: 50ms (90% improvement)
 -- Storage: ~5 MB
 
-CREATE INDEX IF NOT EXISTS idx_quotes_supplierId
-  ON marketplace.quotes (supplier_id);
+CREATE INDEX IF NOT EXISTS "idx_quotes_supplier_id"
+  ON marketplace."quotes" ("supplier_id");
 
 -- Index 4: Quote request association (HIGH)
 -- Purpose: Find all quotes for a specific request
@@ -44,8 +44,8 @@ CREATE INDEX IF NOT EXISTS idx_quotes_supplierId
 -- Current time: 400ms | Expected: 50ms (87% improvement)
 -- Storage: ~3 MB
 
-CREATE INDEX IF NOT EXISTS idx_quotes_quoteRequestId
-  ON marketplace.quotes (quote_request_id);
+CREATE INDEX IF NOT EXISTS "idx_quotes_quote_request_id"
+  ON marketplace."quotes" ("quote_request_id");
 
 -- =====================================================
 -- Validation & Notes

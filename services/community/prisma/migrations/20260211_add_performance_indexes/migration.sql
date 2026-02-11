@@ -11,21 +11,21 @@
 -- Expected improvement: 40-50% faster status queries
 -- Storage: ~8 MB on 500K rows
 
-CREATE INDEX IF NOT EXISTS idx_posts_status
-  ON community.posts (status)
-  WHERE status != 'deleted';  -- Partial index for active posts only
+CREATE INDEX IF NOT EXISTS "idx_posts_status"
+  ON community."posts" ("status")
+  WHERE "status" != 'deleted';  -- Partial index for active posts only
 
 -- =====================================================
 -- community.comments - Add composite index (optional)
 -- =====================================================
 -- Purpose: Optimize "get comments for post X, sorted by date" queries
--- Current: Uses separate indexes on post_id and created_at
+-- Current: Uses separate indexes on postId and createdAt
 -- Improvement: Composite index allows index-only scans
 -- Expected improvement: 30-40% faster comment threads
 -- Storage: ~12 MB on 2M rows
 
-CREATE INDEX IF NOT EXISTS idx_comments_postId_createdAt_desc
-  ON community.comments (post_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS "idx_comments_postId_createdAt_desc"
+  ON community."comments" ("postId", "createdAt" DESC);
 
 -- =====================================================
 -- Validation

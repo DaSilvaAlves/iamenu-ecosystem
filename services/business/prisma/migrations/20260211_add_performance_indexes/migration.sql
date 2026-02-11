@@ -13,8 +13,8 @@
 -- Expected improvement: 30-40% faster admin dashboard queries
 -- Storage: ~2-3 MB on 100K rows
 
-CREATE INDEX IF NOT EXISTS idx_orders_createdAt_desc
-  ON business.orders (created_at DESC);
+CREATE INDEX IF NOT EXISTS "idx_orders_created_at_desc"
+  ON business."orders" ("createdAt" DESC);
 
 -- =====================================================
 -- Notes
