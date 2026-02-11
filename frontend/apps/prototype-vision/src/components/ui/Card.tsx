@@ -4,17 +4,28 @@
  * Variants: default, elevated, outlined, interactive
  */
 
-import React from 'react';
+import React, { FC, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 
-const variants = {
+type CardVariant = 'default' | 'elevated' | 'outlined' | 'interactive';
+type CardPadding = 'none' | 'sm' | 'md' | 'lg';
+
+const variants: Record<CardVariant, string> = {
   default: 'bg-surface border border-border',
   elevated: 'bg-surface-card shadow-lg',
   outlined: 'bg-transparent border border-border',
   interactive: 'bg-surface border border-border hover:border-primary/50 cursor-pointer'
 };
 
-const Card = React.forwardRef(({
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: CardVariant;
+  padding?: CardPadding;
+  children?: ReactNode;
+  animate?: boolean;
+  onClick?: () => void;
+}
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(({
   children,
   variant = 'default',
   padding = 'md',
@@ -25,7 +36,7 @@ const Card = React.forwardRef(({
 }, ref) => {
   const variantClasses = variants[variant] || variants.default;
 
-  const paddingClasses = {
+  const paddingClasses: Record<CardPadding, string> = {
     none: '',
     sm: 'p-3',
     md: 'p-5',
@@ -44,7 +55,7 @@ const Card = React.forwardRef(({
         whileTap={variant === 'interactive' ? { scale: 0.98 } : {}}
         initial={animate ? { opacity: 0, y: 20 } : false}
         animate={animate ? { opacity: 1, y: 0 } : false}
-        {...props}
+        {...(props as any)}
       >
         {children}
       </motion.div>
@@ -66,40 +77,48 @@ const Card = React.forwardRef(({
 Card.displayName = 'Card';
 
 // Sub-components
-const CardHeader = ({ children, className = '' }) => (
+interface CardSubComponentProps {
+  children?: ReactNode;
+  className?: string;
+}
+
+const CardHeader: FC<CardSubComponentProps> = ({ children, className = '' }) => (
   <div className={`mb-4 ${className}`}>
     {children}
   </div>
 );
 
-const CardTitle = ({ children, className = '' }) => (
+const CardTitle: FC<CardSubComponentProps> = ({ children, className = '' }) => (
   <h3 className={`text-lg font-bold text-white ${className}`}>
     {children}
   </h3>
 );
 
-const CardDescription = ({ children, className = '' }) => (
+const CardDescription: FC<CardSubComponentProps> = ({ children, className = '' }) => (
   <p className={`text-sm text-text-muted mt-1 ${className}`}>
     {children}
   </p>
 );
 
-const CardContent = ({ children, className = '' }) => (
+const CardContent: FC<CardSubComponentProps> = ({ children, className = '' }) => (
   <div className={className}>
     {children}
   </div>
 );
 
-const CardFooter = ({ children, className = '' }) => (
+const CardFooter: FC<CardSubComponentProps> = ({ children, className = '' }) => (
   <div className={`mt-4 pt-4 border-t border-border ${className}`}>
     {children}
   </div>
 );
 
-Card.Header = CardHeader;
-Card.Title = CardTitle;
-Card.Description = CardDescription;
-Card.Content = CardContent;
-Card.Footer = CardFooter;
+// Attach sub-components to Card
+Object.assign(Card, {
+  Header: CardHeader,
+  Title: CardTitle,
+  Description: CardDescription,
+  Content: CardContent,
+  Footer: CardFooter
+});
 
 export default Card;

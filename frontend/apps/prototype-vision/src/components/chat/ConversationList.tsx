@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
+import { FC, useState, ChangeEvent } from 'react';
+import { Chat } from './chatTypes';
 
-const ConversationList = ({ chats, selectedChatId, onSelectChat }) => {
-  const [search, setSearch] = useState('');
+interface ConversationListProps {
+  chats: Chat[];
+  selectedChatId: string | null;
+  onSelectChat: (_chatId: string) => void;
+}
+
+const ConversationList: FC<ConversationListProps> = ({ chats, selectedChatId, onSelectChat }) => {
+  const [search, setSearch] = useState<string>('');
 
   const filteredChats = chats.filter(chat =>
     chat.user.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -25,7 +32,7 @@ const ConversationList = ({ chats, selectedChatId, onSelectChat }) => {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
             className="block w-full pl-11 pr-4 py-3 bg-white border-stone-200 rounded-xl text-sm placeholder-stone-400 focus:border-primary focus:ring-primary/20 transition-all shadow-sm"
             placeholder="Pesquisar conversas..."
           />

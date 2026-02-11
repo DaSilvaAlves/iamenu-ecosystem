@@ -1,5 +1,24 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// ===== TYPE DEFINITIONS =====
+
+interface MarketingPlanInput {
+  apiKey: string;
+  name: string;
+  cuisine: string;
+  uniquePoint: string;
+  targetAudience: string;
+  challenge: string;
+}
+
+interface DishAnalysisResult {
+  description: string;
+  hasGluten: boolean;
+  hasLactose: boolean;
+}
+
+// ===== CONSTANTS =====
+
 export const SYSTEM_INSTRUCTION = `
 # SYSTEM INSTRUCTIONS
 
@@ -51,7 +70,7 @@ Você DEVE responder SEMPRE usando a seguinte estrutura Markdown:
 
 *   **Semana 1: 🧱 [Nome do Tema da Semana 1]**
     *   *Objetivo:* [Ex: Estabelecer a vossa história e autenticidade.]
-    
+
 *   **Semana 2: 🤤 [Nome do Tema da Semana 2]**
     *   *Objetivo:* [Ex: Criar desejo mostrando a qualidade dos ingredientes e do processo.]
 
@@ -109,42 +128,6 @@ Você DEVE responder SEMPRE usando a seguinte estrutura Markdown:
 *   **📝 Artigo de Blog/Newsletter:** [Ex: "Transcrever a entrevista e transformá-la num artigo de blog sobre a vossa filosofia."]
 `;
 
-export const generateMarketingPlan = async (data) => {
-    if (!data.apiKey || data.apiKey.trim() === '') {
-        throw new Error("API Key is missing. Please provide your Google Gemini API key.");
-    }
-
-    const ai = new GoogleGenerativeAI({ apiKey: data.apiKey });
-
-    const prompt = `
-        Por favor, crie um plano de marketing de 30 dias para o seguinte restaurante:
-        
-        Nome: ${data.name}
-        Tipo de Cozinha: ${data.cuisine}
-        Elemento Único (Vaca Roxa): ${data.uniquePoint}
-        Público Alvo: ${data.targetAudience}
-        Maior Desafio Atual: ${data.challenge}
-    `;
-
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-            systemInstruction: SYSTEM_INSTRUCTION
-        });
-
-        if (response.text) {
-            return response.text;
-        } else {
-            throw new Error("Empty response from AI.");
-        }
-    } catch (error) {
-        console.error("Error generating plan:", error);
-        throw error;
-    }
-};
-// --- GASTROLENS AI VISION FUNCTIONS ---
-
 const PORTUGUESE_ALLERGEN_CONTEXT = `
 GUIA DE REFERÊNCIA DE ALÉRGENOS (Culinária Portuguesa):
 
@@ -168,93 +151,132 @@ GUIA DE REFERÊNCIA DE ALÉRGENOS (Culinária Portuguesa):
 - Puré, Molhos brancos industriais (Pode ter Lactose).
 `;
 
+// ===== FUNCTIONS =====
+
+/**
+ * Generates a 30-day marketing plan for a restaurant using Gemini AI.
+ */
+export const generateMarketingPlan = async (data: MarketingPlanInput): Promise<string> => {
+  if (!data.apiKey || data.apiKey.trim() === '') {
+    throw new Error("API Key is missing. Please provide your Google Gemini API key.");
+  }
+
+  const ai = new GoogleGenerativeAI(data.apiKey);
+  const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+  const prompt = `
+    Por favor, crie um plano de marketing de 30 dias para o seguinte restaurante:
+
+    Nome: ${data.name}
+    Tipo de Cozinha: ${data.cuisine}
+    Elemento Único (Vaca Roxa): ${data.uniquePoint}
+    Público Alvo: ${data.targetAudience}
+    Maior Desafio Atual: ${data.challenge}
+  `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+
+    if (response.text()) {
+      return response.text();
+    } else {
+      throw new Error("Empty response from AI.");
+    }
+  } catch (error) {
+    console.error("Error generating plan:", error);
+    throw error;
+  }
+};
+
 /**
  * Generates a menu description and allergen analysis using Gemini Vision.
  */
-export const generateDishAnalysis = async (apiKey, base64Image, mimeType, dishName, ingredients) => {
-    try {
-        const ai = new GoogleGenerativeAI({ apiKey });
-        const response = await ai.models.generateContent({
-            model: 'gemini-1.5-flash',
-            contents: [{
-                role: 'user',
-                parts: [
-                    {
-                        inlineData: {
-                            mimeType: mimeType || 'image/jpeg',
-                            data: base64Image,
-                        },
-                    },
-                    {
-                        text: `Atue como um Especialista em Culinária Portuguesa e Nutricionista. Analise este prato.
-            
-            DADOS FORNECIDOS:
-            Nome do Prato: "${dishName}"
-            Ingredientes: "${ingredients}"
-            
-            ${PORTUGUESE_ALLERGEN_CONTEXT}
-            
-            SUAS TAREFAS:
-            1. COPYWRITING: Crie uma descrição curta, sensorial e vendedora para o menu (máx 35 palavras). Foque no sabor e textura.
-            
-            2. ANÁLISE RIGOROSA DE ALÉRGENOS (Glúten e Lactose):
-               - Analise o Nome do Prato, os Ingredientes e a Imagem.
-               - Consulte o GUIA DE REFERÊNCIA acima.
-               - Se identificar QUALQUER ingrediente da lista vermelha ou azul, marque TRUE.
-               - Na dúvida, marque TRUE por segurança.
-            
-            Retorne um objeto JSON válido com as propriedades: description (string), hasGluten (boolean), hasLactose (boolean).`
-                    },
-                ],
-            }],
-            config: {
-                responseMimeType: "application/json"
-            }
-        });
+export const generateDishAnalysis = async (
+  apiKey: string,
+  base64Image: string,
+  mimeType: string,
+  dishName: string,
+  ingredients: string
+): Promise<DishAnalysisResult> => {
+  try {
+    const ai = new GoogleGenerativeAI(apiKey);
+    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        if (response.text) {
-            return JSON.parse(response.text);
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          mimeType: mimeType || "image/jpeg",
+          data: base64Image
         }
-        throw new Error("Resposta vazia da IA.");
-    } catch (error) {
-        console.error("Error generating analysis:", error);
-        return {
-            description: "Delicioso prato preparado com ingredientes frescos. Consulte o staff para alérgenos.",
-            hasGluten: false,
-            hasLactose: false
-        };
+      },
+      {
+        text: `Atue como um Especialista em Culinária Portuguesa e Nutricionista. Analise este prato.
+
+        DADOS FORNECIDOS:
+        Nome do Prato: "${dishName}"
+        Ingredientes: "${ingredients}"
+
+        ${PORTUGUESE_ALLERGEN_CONTEXT}
+
+        SUAS TAREFAS:
+        1. COPYWRITING: Crie uma descrição curta, sensorial e vendedora para o menu (máx 35 palavras). Foque no sabor e textura.
+
+        2. ANÁLISE RIGOROSA DE ALÉRGENOS (Glúten e Lactose):
+           - Analise o Nome do Prato, os Ingredientes e a Imagem.
+           - Consulte o GUIA DE REFERÊNCIA acima.
+           - Se identificar QUALQUER ingrediente da lista vermelha ou azul, marque TRUE.
+           - Na dúvida, marque TRUE por segurança.
+
+        Retorne um objeto JSON válido com as propriedades: description (string), hasGluten (boolean), hasLactose (boolean).`
+      }
+    ]);
+
+    const response = result.response;
+    if (response.text()) {
+      return JSON.parse(response.text()) as DishAnalysisResult;
     }
+    throw new Error("Resposta vazia da IA.");
+  } catch (error) {
+    console.error("Error generating analysis:", error);
+    return {
+      description:
+        "Delicioso prato preparado com ingredientes frescos. Consulte o staff para alérgenos.",
+      hasGluten: false,
+      hasLactose: false
+    };
+  }
 };
 
 /**
  * Enhances the image using Gemini Vision (Creative Prompting).
  */
-export const enhanceFoodImage = async (apiKey, base64Image, mimeType) => {
-    try {
-        const ai = new GoogleGenerativeAI({ apiKey });
-        const response = await ai.models.generateContent({
-            model: 'gemini-1.5-flash', // Using flash for speed, or gemini-2.0-flash-exp if available
-            contents: [{
-                role: 'user',
-                parts: [
-                    {
-                        inlineData: {
-                            mimeType: mimeType || 'image/jpeg',
-                            data: base64Image,
-                        },
-                    },
-                    {
-                        text: "Enhance this food image. Make it look like professional Michelin star food photography. Improve lighting, vibrancy, depth of field and color grading. Make it appetizing. High resolution, 4k."
-                    },
-                ],
-            }],
-        });
+export const enhanceFoodImage = async (
+  apiKey: string,
+  base64Image: string,
+  mimeType: string
+): Promise<string> => {
+  try {
+    const ai = new GoogleGenerativeAI(apiKey);
+    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        // Note: The model might return text describing the image or a transformed image depending on capabilities.
-        // For now, we use the original or log if the model returned data.
-        return base64Image; // Fallback to original for now as Gemini 1.5 doesn't return enhanced pixels directly yet in standard API
-    } catch (error) {
-        console.error("Error enhancing image:", error);
-        return base64Image;
-    }
+    await model.generateContent([
+      {
+        inlineData: {
+          mimeType: mimeType || "image/jpeg",
+          data: base64Image
+        }
+      },
+      {
+        text: "Enhance this food image. Make it look like professional Michelin star food photography. Improve lighting, vibrancy, depth of field and color grading. Make it appetizing. High resolution, 4k."
+      }
+    ]);
+
+    // Note: The model might return text describing the image or a transformed image depending on capabilities.
+    // For now, we use the original or log if the model returned data.
+    return base64Image; // Fallback to original for now as Gemini 1.5 doesn't return enhanced pixels directly yet in standard API
+  } catch (error) {
+    console.error("Error enhancing image:", error);
+    return base64Image;
+  }
 };
