@@ -5,6 +5,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma';
+import logger from '../lib/logger';
 
 /**
  * RLS Middleware - Sets PostgreSQL session variable for Row-Level Security
@@ -59,7 +60,10 @@ export const rlsMiddleware = async (
 
     next();
   } catch (error) {
-    console.error('RLS middleware error:', error);
+    logger.error('RLS middleware error', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return res.status(401).json({ error: 'Authentication failed' });
   }
 };

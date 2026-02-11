@@ -5,6 +5,7 @@ import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler';
+import requestIdMiddleware from './middleware/requestId';
 
 // Import routes
 import coursesRouter from './routes/courses';
@@ -20,6 +21,7 @@ const app: Application = express();
 // ===================================
 
 app.use(helmet());
+app.use(requestIdMiddleware);
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*', credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

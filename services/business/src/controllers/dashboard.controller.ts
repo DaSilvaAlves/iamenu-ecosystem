@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import logger from '../lib/logger';
 import { dashboardService } from '../services/dashboard.service';
 
 export class DashboardController {
@@ -23,7 +24,11 @@ export class DashboardController {
         data: stats
       });
     } catch (error: any) {
-      console.error('Error getting stats:', error);
+      logger.error('Error getting stats', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
 
       if (error.message === 'Restaurant not found') {
         return res.status(404).json({
@@ -61,7 +66,11 @@ export class DashboardController {
         data: products
       });
     } catch (error: any) {
-      console.error('Error getting top products:', error);
+      logger.error('Error getting top products:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
       res.status(500).json({
         success: false,
         error: error.message || 'Failed to get top products'
@@ -89,7 +98,11 @@ export class DashboardController {
         data: alerts
       });
     } catch (error: any) {
-      console.error('Error getting alerts:', error);
+      logger.error('Error getting alerts:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
       res.status(500).json({
         success: false,
         error: error.message || 'Failed to get alerts'
@@ -117,7 +130,11 @@ export class DashboardController {
         data: opportunities
       });
     } catch (error: any) {
-      console.error('Error getting opportunities:', error);
+      logger.error('Error getting opportunities:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
       res.status(500).json({
         success: false,
         error: error.message || 'Failed to get opportunities'
@@ -146,7 +163,11 @@ export class DashboardController {
         data: trends
       });
     } catch (error: any) {
-      console.error('Error getting sales trends:', error);
+      logger.error('Error getting sales trends:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
       res.status(500).json({
         success: false,
         error: error.message || 'Failed to get sales trends'
@@ -174,7 +195,11 @@ export class DashboardController {
         data: prediction
       });
     } catch (error: any) {
-      console.error('Error getting AI prediction:', error);
+      logger.error('Error getting AI prediction:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
       res.status(500).json({
         success: false,
         error: error.message || 'Failed to get AI prediction'
@@ -202,7 +227,11 @@ export class DashboardController {
         data: matrix
       });
     } catch (error: any) {
-      console.error('Error getting menu engineering:', error);
+      logger.error('Error getting menu engineering:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
       res.status(500).json({
         success: false,
         error: error.message || 'Failed to get menu engineering data'
@@ -230,7 +259,11 @@ export class DashboardController {
         data: forecast
       });
     } catch (error: any) {
-      console.error('Error getting demand forecast:', error);
+      logger.error('Error getting demand forecast:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
       res.status(500).json({
         success: false,
         error: error.message || 'Failed to get demand forecast'
@@ -258,7 +291,11 @@ export class DashboardController {
         data: heatmap
       });
     } catch (error: any) {
-      console.error('Error getting peak hours heatmap:', error);
+      logger.error('Error getting peak hours heatmap:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
       res.status(500).json({
         success: false,
         error: error.message || 'Failed to get peak hours heatmap'
@@ -286,7 +323,11 @@ export class DashboardController {
         data: benchmark
       });
     } catch (error: any) {
-      console.error('Error getting benchmark:', error);
+      logger.error('Error getting benchmark:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
       res.status(500).json({
         success: false,
         error: error.message || 'Failed to get benchmark data'

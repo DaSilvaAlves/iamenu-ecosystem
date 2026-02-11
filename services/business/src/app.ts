@@ -5,6 +5,7 @@ import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import path from 'path';
+import logger from './lib/logger';
 
 // Load environment variables
 dotenv.config();
@@ -89,7 +90,10 @@ app.use(`${API_BASE}/dashboard`, dashboardRouter);
 // ===================================
 
 app.use((err: Error, req: Request, res: Response, next: any) => {
-  console.error('Error:', err);
+  logger.error('Unhandled application error', {
+    error: err instanceof Error ? err.message : String(err),
+    stack: err instanceof Error ? err.stack : undefined
+  });
   res.status(500).json({
     success: false,
     error: err.message || 'Internal Server Error'

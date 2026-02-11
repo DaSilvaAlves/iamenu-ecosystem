@@ -1,49 +1,154 @@
-import winston from 'winston';
+/**
+ * Centralized Logger Configuration for Business Service
+ *
+ * Uses Winston for structured JSON logging with:
+ * - Request ID tracking for distributed tracing
+ * - Multiple log levels (ERROR, WARN, INFO, DEBUG)
+ * - File rotation (max 5MB, 10 files)
+ * - Structured JSON format for easy parsing
+ */
 
-const { combine, timestamp, printf, colorize, errors } = winston.format;
+import winston, { createLogger, format, transports } from 'winston';
+import path from 'path';
+import fs from 'fs';
 
-const logFormat = printf(({ level, message, timestamp, stack, ...meta }) => {
+const { combine, timestamp, printf, colorize, errors } = format;
+
+// Service name - used in all logs
+const SERVICE_NAME = process.env.SERVICE_NAME || 'business';
+
+// Create logs directory if it doesn't exist
+const logsDir = path.join(process.cwd(), 'logs');
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
+
+// Determine log level
+const LOG_LEVEL = process.env.LOG_LEVEL ||
+  (process.env.NODE_ENV === 'production' ? 'info' : 'debug');
+
+/**
+ * JSON format for structured logging
+ */
+const jsonFormat = printf((info: any) => {
+  const { level, message, timestamp, service, requestId, stack, ...meta } = info;
+  const logEntry: any = {
+    timestamp,
+    level: level.toUpperCase(),
+    service,
+    message,
+  };
+
+  if (requestId) {
+    logEntry.requestId = requestId;
+  }
+
+  if (Object.keys(meta).length > 0) {
+    Object.assign(logEntry, meta);
+  }
+
+  if (stack) {
+    logEntry.stack = stack;
+  }
+
+  return JSON.stringify(logEntry);
+});
+
+/**
+ * Console format for development
+ */
+const consoleFormat = printf((info: any) => {
+  const { level, message, timestamp, requestId, stack, ...meta } = info;
   let log = `${timestamp} [${level}]: ${message}`;
-  if (stack) log += `\n${stack}`;
-  if (Object.keys(meta).length > 0) log += ` ${JSON.stringify(meta)}`;
+
+  if (requestId) {
+    log += ` [ID: ${requestId}]`;
+  }
+
+  if (stack) {
+    log += `\n${stack}`;
+  }
+
+  if (Object.keys(meta).length > 0) {
+    log += ` ${JSON.stringify(meta)}`;
+  }
+
   return log;
 });
 
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
+// Create logger instance
+const logger = createLogger({
+  level: LOG_LEVEL,
   format: combine(
     errors({ stack: true }),
-    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    logFormat
+    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' })
   ),
-  defaultMeta: { service: 'business-api' },
+  defaultMeta: { service: SERVICE_NAME },
   transports: [
-    new winston.transports.Console({
-      format: combine(colorize({ all: true }), logFormat),
+    // Console transport - human readable
+    new transports.Console({
+      format: combine(
+        colorize({ all: true }),
+        consoleFormat
+      ),
+    }),
+
+    // Error log file - JSON format
+    new transports.File({
+      filename: path.join(logsDir, 'error.log'),
+      level: 'error',
+      format: jsonFormat,
+      maxsize: 5242880,
+      maxFiles: 10,
+      tailable: true,
+    }),
+
+    // Combined log file - JSON format
+    new transports.File({
+      filename: path.join(logsDir, 'app.log'),
+      level: LOG_LEVEL,
+      format: jsonFormat,
+      maxsize: 5242880,
+      maxFiles: 10,
+      tailable: true,
     }),
   ],
 });
 
-if (process.env.NODE_ENV === 'production') {
-  logger.add(new winston.transports.File({
-    filename: 'logs/error.log',
-    level: 'error',
+// Add debug log file if debug level is enabled
+if (LOG_LEVEL === 'debug' || LOG_LEVEL === 'trace') {
+  logger.add(new transports.File({
+    filename: path.join(logsDir, 'debug.log'),
+    level: 'debug',
+    format: jsonFormat,
     maxsize: 5242880,
-    maxFiles: 5,
-  }));
-  logger.add(new winston.transports.File({
-    filename: 'logs/combined.log',
-    maxsize: 5242880,
-    maxFiles: 5,
+    maxFiles: 10,
+    tailable: true,
   }));
 }
 
 export default logger;
 
+/**
+ * Create a child logger with request ID for tracking
+ */
+export const getRequestLogger = (
+  requestId: string,
+  metadata?: Record<string, any>
+) => {
+  return logger.child({
+    requestId,
+    ...metadata,
+  });
+};
+
+export { logger };
+
+// Convenience methods for backward compatibility
 export const logInfo = (message: string, meta?: object) => logger.info(message, meta);
 export const logError = (message: string, error?: Error | unknown) => {
   if (error instanceof Error) {
-    logger.error(message, { stack: error.stack, errorMessage: error.message });
+    logger.error(message, { errorMessage: error.message, stack: error.stack });
   } else {
     logger.error(message, { error });
   }
