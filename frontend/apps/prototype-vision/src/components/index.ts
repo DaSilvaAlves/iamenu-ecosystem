@@ -11,9 +11,9 @@ export type { ButtonProps, ButtonVariant, ButtonSize } from './Button/Button.typ
 export { Input } from './Input/Input';
 export type { InputProps, InputType, InputSize, InputState } from './Input/Input.types';
 
-// Task 2.2.4: Card Component
-// export { Card } from './Card/Card';
-// export type { CardProps } from './Card/Card.types';
+// Task 2.2.4: Card Component ✅
+export { Card } from './Card/Card';
+export type { CardProps, CardVariant, CardSize } from './Card/Card.types';
 
 // Tokens
 export * from './tokens';
