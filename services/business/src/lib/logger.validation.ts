@@ -144,7 +144,7 @@ export class LoggerValidation {
 
       // Check if logs are valid JSON
       let validJsonCount = 0;
-      let jsonObjects: any[] = [];
+      const jsonObjects: any[] = [];
 
       for (const line of lines) {
         try {
