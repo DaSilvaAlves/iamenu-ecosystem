@@ -1,0 +1,497 @@
+# front-end-spec-tmpl.yaml
+# Template para especificação e auditoria de frontend
+# Utilizado na Fase 3 (Coleta: Frontend/UX) do workflow brownfield-discovery
+
+metadata:
+  version: "1.0.0"
+  created: "2026-02-11"
+  author: "@ux-design-expert"
+  purpose: "Comprehensive frontend specification for brownfield projects"
+  target_workflow: "brownfield-discovery"
+  phase: 3
+
+---
+
+# FRONTEND SPECIFICATION & AUDIT
+
+## Executive Summary
+
+**Project**: {project_name}
+**Frontend Framework**: {framework}
+**Current State**: {state: "Legacy|Modernized|Mixed"}
+**Team Size**: {team_size}
+**User Base**: {user_count}
+
+---
+
+## 1. CURRENT FRONTEND STACK
+
+### 1.1 Technology Inventory
+
+```yaml
+framework:
+  name: {framework_name}
+  version: {version}
+  status: {status}
+  support_status: {support}
+
+build_tooling:
+  bundler: {bundler_name}
+  version: {version}
+  performance: {score}/10
+
+styling:
+  approach: {css|scss|tailwind|styled-components}
+  preprocessor: {preprocessor_name}
+  component_library: {library_name}
+
+state_management:
+  solution: {redux|zustand|context|jotai}
+  version: {version}
+  complexity: {simple|moderate|complex}
+
+testing:
+  unit_framework: {jest|vitest}
+  e2e_framework: {cypress|playwright|webdriverio}
+  coverage: {coverage_percent}%
+
+package_manager:
+  name: {npm|yarn|pnpm}
+  version: {version}
+  workspace_support: {yes|no}
+```
+
+### 1.2 Code Architecture
+
+```
+frontend/
+├── components/
+│   ├── atoms/          {count} componentes
+│   ├── molecules/      {count} componentes
+│   ├── organisms/      {count} componentes
+│   └── templates/      {count} componentes
+├── pages/              {count} páginas
+├── layouts/            {count} layouts
+├── hooks/              {count} custom hooks
+├── utils/              {count} funções auxiliares
+├── stores/             {state_solution}
+├── styles/             {styling_approach}
+└── types/              {type_coverage}% type coverage
+```
+
+---
+
+## 2. COMPONENT AUDIT
+
+### 2.1 Component Inventory
+
+| Category | Count | Status | Issues |
+|----------|-------|--------|--------|
+| **Atoms** | {count} | {status} | {issues} |
+| **Molecules** | {count} | {status} | {issues} |
+| **Organisms** | {count} | {status} | {issues} |
+| **Pages** | {count} | {status} | {issues} |
+| **Custom Hooks** | {count} | {status} | {issues} |
+
+**Total Components**: {total_count}
+**Reusable**: {reusable_percent}%
+**Documented**: {documented_percent}%
+**Tested**: {tested_percent}%
+
+### 2.2 Component Quality
+
+```yaml
+code_quality:
+  avg_lines_per_component: {lines}
+  avg_props_per_component: {props}
+  prop_drilling: {score}/10 (0=bad, 10=good)
+  rendering_efficiency: {score}/10
+  accessibility: {score}/10
+  responsiveness: {score}/10
+
+issues:
+  - prop_drilling: {high|medium|low}
+  - over_abstraction: {high|medium|low}
+  - missing_types: {high|medium|low}
+  - poor_naming: {high|medium|low}
+  - memory_leaks: {high|medium|low}
+```
+
+### 2.3 Component Dependencies
+
+```
+Critical Dependencies:
+  - {dependency_1} ({status})
+  - {dependency_2} ({status})
+  - {dependency_3} ({status})
+
+Vulnerable Packages:
+  - {package} {version} → CRITICAL
+  - {package} {version} → HIGH
+```
+
+---
+
+## 3. DESIGN SYSTEM ANALYSIS
+
+### 3.1 Design Tokens
+
+```yaml
+design_tokens:
+  colors:
+    primary: {count} palettes
+    semantic: {count} tokens
+    status: {documented|undocumented}
+
+  typography:
+    scales: {count} (xs, sm, md, lg, xl, etc.)
+    families: {count}
+    status: {documented|undocumented}
+
+  spacing:
+    scales: {count} (4px, 8px, 16px, etc.)
+    coverage: {percent}% of components
+    consistency: {score}/10
+
+  shadows:
+    elevation_levels: {count}
+    consistency: {score}/10
+```
+
+### 3.2 Component Library
+
+```yaml
+library_type: {custom|shadcn|material|ant-design|other}
+adoption: {percent}% of components use library
+consistency: {score}/10
+
+available_components:
+  - Buttons: {variants}
+  - Forms: {variants}
+  - Cards: {variants}
+  - Modals: {variants}
+  - Navigation: {variants}
+  - Tables: {variants}
+
+missing_components:
+  - {component}: required for {use_case}
+  - {component}: required for {use_case}
+```
+
+### 3.3 Storybook Status
+
+```yaml
+storybook:
+  enabled: {yes|no}
+  version: {version}
+  components_documented: {count}/{total}
+  coverage: {percent}%
+
+  issues:
+    - {issue_1}
+    - {issue_2}
+
+  status: {up_to_date|outdated|not_maintained}
+```
+
+---
+
+## 4. PERFORMANCE ANALYSIS
+
+### 4.1 Core Web Vitals
+
+| Metric | Current | Target | Status |
+|--------|---------|--------|--------|
+| **LCP** | {value}ms | <2500ms | {status} |
+| **FID** | {value}ms | <100ms | {status} |
+| **CLS** | {value} | <0.1 | {status} |
+| **TTL** | {value}ms | <3000ms | {status} |
+| **FCP** | {value}ms | <1800ms | {status} |
+
+### 4.2 Bundle Analysis
+
+```yaml
+bundle:
+  total_size: {size}KB
+  js_size: {size}KB
+  css_size: {size}KB
+  images_size: {size}KB
+
+  gzipped: {size}KB
+  compressed: {ratio}% reduction
+
+  optimization:
+    code_splitting: {yes|no}
+    lazy_loading: {yes|no}
+    tree_shaking: {yes|no}
+    asset_optimization: {yes|no}
+```
+
+### 4.3 Rendering Performance
+
+```yaml
+rendering:
+  avg_first_paint: {value}ms
+  avg_interactive: {value}ms
+  avg_complete: {value}ms
+
+  bottlenecks:
+    - {bottleneck_1}: {impact}
+    - {bottleneck_2}: {impact}
+
+  optimization_opportunities:
+    - {opportunity_1}: potential {improvement}% gain
+    - {opportunity_2}: potential {improvement}% gain
+```
+
+---
+
+## 5. ACCESSIBILITY AUDIT
+
+### 5.1 WCAG Compliance
+
+```yaml
+wcag:
+  level: {A|AA|AAA}
+  compliance_score: {percent}%
+
+  issues_by_category:
+    perceivable: {count} issues
+    operable: {count} issues
+    understandable: {count} issues
+    robust: {count} issues
+```
+
+### 5.2 Common Issues
+
+- [ ] Missing alt text on images ({count} found)
+- [ ] Poor color contrast ({count} elements)
+- [ ] Missing form labels ({count} forms)
+- [ ] Keyboard navigation issues ({count} found)
+- [ ] Missing ARIA attributes ({count} elements)
+- [ ] Heading hierarchy problems ({count} pages)
+
+### 5.3 Accessibility Score
+
+```
+Overall Score: {score}/100
+
+  Keyboard Navigation: {score}/10
+  Screen Reader Support: {score}/10
+  Color Contrast: {score}/10
+  Focus Management: {score}/10
+  ARIA Usage: {score}/10
+```
+
+---
+
+## 6. RESPONSIVE DESIGN ANALYSIS
+
+### 6.1 Breakpoints
+
+```yaml
+breakpoints:
+  mobile: 320px - 640px
+    status: {responsive|issues}
+    issues: {list}
+
+  tablet: 640px - 1024px
+    status: {responsive|issues}
+    issues: {list}
+
+  desktop: 1024px - 1440px
+    status: {responsive|issues}
+    issues: {list}
+
+  large: 1440px+
+    status: {responsive|issues}
+    issues: {list}
+```
+
+### 6.2 Common Responsive Issues
+
+- [ ] Layout breaks at specific breakpoints
+- [ ] Text not readable on mobile
+- [ ] Images not optimized for mobile
+- [ ] Touch targets too small ({count} elements)
+- [ ] Horizontal overflow issues
+- [ ] Font sizes not scaling properly
+
+---
+
+## 7. USER EXPERIENCE INSIGHTS
+
+### 7.1 User Journey Analysis
+
+**Primary User Flows**:
+1. {flow_1}: {description}
+2. {flow_2}: {description}
+3. {flow_3}: {description}
+
+**Pain Points Identified**:
+- {pain_point_1}: {impact}
+- {pain_point_2}: {impact}
+- {pain_point_3}: {impact}
+
+### 7.2 User Feedback
+
+```yaml
+feedback_summary:
+  satisfaction_score: {score}/10
+  common_praise: [{item_1}, {item_2}]
+  common_complaints: [{item_1}, {item_2}]
+  feature_requests: [{item_1}, {item_2}]
+```
+
+---
+
+## 8. MODERNIZATION RECOMMENDATIONS
+
+### 8.1 Quick Wins (0-2 weeks)
+
+- [ ] Update dependencies to latest patch versions
+- [ ] Fix accessibility issues (alt text, contrast)
+- [ ] Optimize images for web
+- [ ] Add missing component documentation
+- [ ] Fix responsive design issues
+
+**Impact**: Medium | **Effort**: Low | **Value**: High
+
+### 8.2 Medium-term (2-8 weeks)
+
+- [ ] Upgrade to latest framework/library versions
+- [ ] Implement code splitting and lazy loading
+- [ ] Refactor components for reusability
+- [ ] Complete Storybook documentation
+- [ ] Add comprehensive test coverage
+- [ ] Implement design tokens system
+
+**Impact**: High | **Effort**: Medium | **Value**: High
+
+### 8.3 Long-term (2-6 months)
+
+- [ ] Redesign UI/UX (if needed)
+- [ ] Implement design system
+- [ ] Migrate to modern framework (if needed)
+- [ ] Complete accessibility overhaul (WCAG AAA)
+- [ ] Performance optimization across all metrics
+- [ ] Implement analytics and monitoring
+
+**Impact**: Critical | **Effort**: High | **Value**: Critical
+
+---
+
+## 9. TESTING STRATEGY
+
+### 9.1 Current Test Coverage
+
+```yaml
+unit_tests: {percent}% coverage
+integration_tests: {percent}% coverage
+e2e_tests: {count} scenarios
+
+testing_tools:
+  unit: {framework} {version}
+  e2e: {framework} {version}
+  visual: {tool|none}
+  accessibility: {tool|none}
+```
+
+### 9.2 Testing Gaps
+
+- [ ] Missing unit tests for {component_type}
+- [ ] No e2e tests for critical user flows
+- [ ] No visual regression testing
+- [ ] No accessibility testing
+- [ ] No performance testing
+
+### 9.3 Testing Recommendations
+
+```yaml
+improvements:
+  - add_visual_regression: "Implement Percy or Chromatic"
+  - add_accessibility_testing: "Implement axe-core"
+  - add_e2e_critical_flows: "Cover all critical paths"
+  - improve_coverage: "Target 80%+ coverage"
+```
+
+---
+
+## 10. MIGRATION ROADMAP
+
+### Phase 1: Stabilize (Weeks 1-2)
+- Document current state
+- Update dependencies (patch versions)
+- Fix critical accessibility issues
+- Add component documentation
+
+### Phase 2: Improve (Weeks 3-6)
+- Implement design tokens
+- Add missing tests
+- Optimize performance
+- Refactor for reusability
+
+### Phase 3: Modernize (Weeks 7-12)
+- Upgrade framework/libraries (major versions)
+- Implement new patterns
+- Complete redesign (if needed)
+- Full WCAG compliance
+
+---
+
+## 11. SUCCESS METRICS
+
+### Code Quality
+- Test coverage: {target}% (from {current}%)
+- Type coverage: {target}% (from {current}%)
+- Component reusability: {target}% (from {current}%)
+- Documentation: {target}% (from {current}%)
+
+### Performance
+- Core Web Vitals: All green
+- Bundle size: {target}KB (from {current}KB)
+- Lighthouse score: {target} (from {current})
+
+### User Experience
+- Accessibility score: {target}/100 (from {current}/100)
+- User satisfaction: {target}/10 (from {current}/10)
+- Mobile usability: {target}% (from {current}%)
+
+---
+
+## 12. DEPENDENCIES
+
+### External Dependencies
+- {dependency_1}: {description}
+- {dependency_2}: {description}
+
+### Known Blockers
+- {blocker_1}: {mitigation}
+- {blocker_2}: {mitigation}
+
+---
+
+## APPENDICES
+
+### A. Component Inventory (Full List)
+[Detailed list with status, coverage, tests]
+
+### B. Performance Reports
+[Lighthouse, WebPageTest, Bundle analysis]
+
+### C. Accessibility Report
+[Detailed WCAG compliance report]
+
+### D. User Research Findings
+[Interview summaries, feedback analysis]
+
+### E. Design System Specifications
+[Tokens, components, patterns]
+
+---
+
+**Document**: frontend-specification.md
+**Generated by**: @ux-design-expert
+**Date**: {date}
+**Status**: ✅ Ready for review
+**Next Review**: {date + 2 weeks}
