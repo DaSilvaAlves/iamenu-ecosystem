@@ -37,7 +37,10 @@ const { ServiceRegistry, getRegistry, loadRegistry } = require('./registry/regis
 const healthCheck = require('./health-check');
 
 // Auto-Refresh System (2026-02-12)
-const { initializeAutoRefresh, getAutoRefreshStatus } = require('./startup/auto-refresh-init');
+// DISABLED TEMPORARILY: Causing infinite HMR reloads
+// const { initializeAutoRefresh, getAutoRefreshStatus } = require('./startup/auto-refresh-init');
+const initializeAutoRefresh = () => console.log('[AUTO-REFRESH] Disabled temporarily');
+const getAutoRefreshStatus = () => ({ enabled: false, reason: 'Disabled for stability' });
 
 /**
  * Core module exports
