@@ -1,0 +1,166 @@
+# Brownfield Architecture Template
+# Used by @architect in Phase 1: System Documentation
+# Auto-filled during brownfield-discovery workflow
+
+metadata:
+  title: "System Architecture Analysis"
+  date: "${DATE}"
+  version: "1.0"
+  scope: "Complete technical audit"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 1: EXECUTIVE SUMMARY
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+executive_summary: |
+  ## Overview
+  ${PROJECT_NAME} is a ${PROJECT_TYPE} system built with ${TECH_STACK}.
+
+  **Current State:** ${CURRENT_STATE_DESC}
+  **Key Strengths:** ${STRENGTHS}
+  **Primary Challenges:** ${CHALLENGES}
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 2: TECHNOLOGY STACK
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+technology_stack:
+  runtime: ${RUNTIME}
+
+  backend:
+    framework: ${BACKEND_FRAMEWORK}
+    version: "${BACKEND_VERSION}"
+    language: ${BACKEND_LANGUAGE}
+    async_support: ${HAS_ASYNC}
+
+  frontend:
+    framework: ${FRONTEND_FRAMEWORK}
+    version: "${FRONTEND_VERSION}"
+    language: ${FRONTEND_LANGUAGE}
+    styling: ${STYLING_SOLUTION}
+    state_management: ${STATE_MANAGEMENT}
+
+  database:
+    type: ${DATABASE_TYPE}
+    version: "${DATABASE_VERSION}"
+    orm: ${ORM_FRAMEWORK}
+    migrations: ${MIGRATION_TOOL}
+
+  infrastructure:
+    hosting: ${HOSTING_PLATFORM}
+    ci_cd: ${CI_CD_PLATFORM}
+    containerization: ${CONTAINER_TECH}
+    monitoring: ${MONITORING_TOOL}
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 3: ARCHITECTURE PATTERNS
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+architecture_patterns:
+  style: ${ARCHITECTURE_STYLE}
+  monorepo: ${IS_MONOREPO}
+  microservices: ${HAS_MICROSERVICES}
+
+  code_organization:
+    backend_structure: |
+      ${BACKEND_FOLDER_STRUCTURE}
+
+    frontend_structure: |
+      ${FRONTEND_FOLDER_STRUCTURE}
+
+  dependencies:
+    - name: "${DEP_NAME}"
+      purpose: "${DEP_PURPOSE}"
+      risk: "${DEP_RISK_LEVEL}"
+    - name: "${DEP_NAME_2}"
+      purpose: "${DEP_PURPOSE_2}"
+      risk: "${DEP_RISK_LEVEL_2}"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 4: DATA FLOW & INTEGRATION POINTS
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+data_flow:
+  authentication:
+    mechanism: ${AUTH_MECHANISM}
+    token_type: ${TOKEN_TYPE}
+    session_management: ${SESSION_MANAGEMENT}
+    security_level: ${AUTH_SECURITY_LEVEL}
+
+  api_design:
+    style: ${API_STYLE}
+    versioning: ${API_VERSIONING}
+    rate_limiting: ${HAS_RATE_LIMITING}
+    documentation: ${HAS_API_DOCS}
+
+  real_time:
+    enabled: ${HAS_REAL_TIME}
+    technology: ${REAL_TIME_TECH}
+    use_cases: ${REAL_TIME_USE_CASES}
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 5: CRITICAL TECHNICAL DEBT IDENTIFIED
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+technical_debt:
+  critical:
+    - id: ARCH-001
+      title: "${DEBT_TITLE_1}"
+      description: "${DEBT_DESC_1}"
+      impact: "${DEBT_IMPACT_1}"
+      effort_estimate: "${EFFORT_1}"
+
+  high_priority:
+    - id: ARCH-002
+      title: "${DEBT_TITLE_2}"
+      description: "${DEBT_DESC_2}"
+      impact: "${DEBT_IMPACT_2}"
+      effort_estimate: "${EFFORT_2}"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 6: SCALABILITY & PERFORMANCE ASSESSMENT
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+scalability:
+  current_capacity: ${CURRENT_CAPACITY}
+  projected_growth: ${PROJECTED_GROWTH}
+  bottlenecks:
+    - "${BOTTLENECK_1}"
+    - "${BOTTLENECK_2}"
+
+  performance_metrics:
+    api_response_time: "${API_RESPONSE_TIME}"
+    database_query_time: "${DB_QUERY_TIME}"
+    frontend_load_time: "${FE_LOAD_TIME}"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 7: RECOMMENDATIONS & NEXT STEPS
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+recommendations:
+  immediate:
+    - priority: CRITICAL
+      action: "${IMMEDIATE_ACTION_1}"
+      rationale: "${RATIONALE_1}"
+
+  short_term:
+    - priority: HIGH
+      action: "${SHORT_TERM_ACTION_1}"
+      timeline: "${TIMELINE_1}"
+
+  long_term:
+    - priority: MEDIUM
+      action: "${LONG_TERM_ACTION_1}"
+      timeline: "${TIMELINE_LT_1}"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# METADATA FOR WORKFLOW INTEGRATION
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+workflow_metadata:
+  phase: 1
+  agent: architect
+  created_by: brownfield-discovery
+  status: complete
+  validation_checklist: architect-checklist.md
+  next_phase: database-analysis

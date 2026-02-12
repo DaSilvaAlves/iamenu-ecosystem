@@ -36,6 +36,9 @@ const { ServiceRegistry, getRegistry, loadRegistry } = require('./registry/regis
 // Health Check System
 const healthCheck = require('./health-check');
 
+// Auto-Refresh System (2026-02-12)
+const { initializeAutoRefresh, getAutoRefreshStatus } = require('./startup/auto-refresh-init');
+
 /**
  * Core module exports
  */
@@ -81,6 +84,10 @@ module.exports = {
   CheckStatus: healthCheck.CheckStatus,
   CheckRegistry: healthCheck.CheckRegistry,
   healthCheck,
+
+  // Auto-Refresh System (2026-02-12)
+  initializeAutoRefresh,
+  getAutoRefreshStatus,
 
   // Version info
   version: '2.0.0',

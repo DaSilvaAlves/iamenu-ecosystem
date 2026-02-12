@@ -5,7 +5,17 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    hmr: false
+    hmr: {
+      host: 'localhost',
+      port: 5173,
+      protocol: 'ws'
+    },
+    // Auto-reload on CSS/JS changes
+    middlewareMode: false,
+    // Hot Module Replacement enabled for instant updates
+    watch: {
+      usePolling: false
+    }
   },
   preview: {
     host: '0.0.0.0'
