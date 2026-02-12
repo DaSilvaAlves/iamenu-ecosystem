@@ -1,0 +1,141 @@
+name: 🔄 Auto-Sync AIOS Templates
+
+on:
+  push:
+    paths:
+      - '.aios-core/development/templates/**'
+      - '.aios-core/config/templates-sync.yaml'
+    branches:
+      - main
+      - develop
+      - feature/**
+
+  pull_request:
+    paths:
+      - '.aios-core/development/templates/**'
+    branches:
+      - main
+      - develop
+
+  schedule:
+    # Sincronização diária (00:00 UTC)
+    - cron: '0 0 * * *'
+
+  workflow_dispatch:
+    # Permite disparo manual
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-templates:
+    name: 🔄 Sincronizar Templates AIOS
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: |
+          npm install --legacy-peer-deps
+          npm install chokidar js-yaml
+
+      - name: ✅ Validate templates
+        run: |
+          echo "🔍 Validando templates YAML..."
+          for file in .aios-core/development/templates/*.yaml; do
+            if [ -f "$file" ]; then
+              echo "  ✓ Validando: $(basename $file)"
+              npx js-yaml "$file" > /dev/null || exit 1
+            fi
+          done
+          echo "✅ Todos os templates são válidos"
+
+      - name: 🔄 Sync templates to remote
+        run: |
+          echo "🔄 Iniciando sincronização de templates..."
+          node .aios-core/development/scripts/sync-templates.js sync
+
+      - name: 📊 Generate sync report
+        if: always()
+        run: |
+          echo "## 📊 Template Sync Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch**: $(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: $(git rev-parse --short HEAD)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Templates" >> $GITHUB_STEP_SUMMARY
+          ls -1 .aios-core/development/templates/*.yaml 2>/dev/null | while read file; do
+            echo "- $(basename $file)" >> $GITHUB_STEP_SUMMARY
+          done
+
+      - name: 🔔 Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Template sync failed. Please check the workflow logs.'
+            })
+
+  # Job opcional para criar PR com mudanças
+  create-pr:
+    name: 📝 Create sync PR (if needed)
+    runs-on: ubuntu-latest
+    needs: sync-templates
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📊 Check for unsynced changes
+        id: check
+        run: |
+          CHANGES=$(git status --porcelain | grep "templates/" | wc -l)
+          if [ "$CHANGES" -gt 0 ]; then
+            echo "unsynced=true" >> $GITHUB_OUTPUT
+            echo "count=$CHANGES" >> $GITHUB_OUTPUT
+          else
+            echo "unsynced=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🔄 Create sync PR
+        if: steps.check.outputs.unsynced == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(aios): auto-sync templates'
+          title: '🔄 Auto-sync AIOS templates'
+          body: |
+            ## 🔄 Automatic Template Synchronization
+
+            This PR syncs AIOS templates from local changes.
+
+            **Changes**: ${{ steps.check.outputs.count }} file(s) modified
+
+            ### Modified Templates
+            ```
+            ${{ github.event.head_commit.message }}
+            ```
+
+            **Note**: This is an automated PR. Review before merging.
+          branch: 'aios/sync-templates'
+          delete-branch: true
+          labels: 'chore,aios,automated'

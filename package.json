@@ -60,7 +60,10 @@
     "setup": "npm install && npm run prisma:generate",
     "postinstall": "npm run prisma:generate --workspaces --if-present",
     "pretest": "npm run prisma:generate --workspaces --if-present",
-    "aios": "node .aios-core/cli-runner.js"
+    "aios": "node .aios-core/cli-runner.js",
+    "sync:templates": "node .aios-core/development/scripts/sync-templates.js sync",
+    "sync:templates:watch": "node .aios-core/development/scripts/sync-templates.js watch",
+    "sync:templates:status": "node .aios-core/development/scripts/sync-templates.js status"
   },
   "keywords": [
     "iamenu",

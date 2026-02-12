@@ -1,0 +1,54 @@
+# templates-sync.yaml
+# Configuração de sincronização automática de templates AIOS
+
+enabled: true
+
+# Ativa sincronização automática quando templates são modificados
+auto_sync: true
+
+# Modo watch - monitora mudanças em tempo real
+watch_mode: false
+
+# Tempo de espera antes de fazer sync (ms)
+debounce_ms: 5000
+
+# Templates para monitorar
+templates:
+  - brownfield-architecture-tmpl.yaml
+  - front-end-spec-tmpl.yaml
+  - architecture-tmpl.yaml
+  - fullstack-architecture-tmpl.yaml
+  - service-template
+  - squad
+
+# Padrões a ignorar
+excluded_patterns:
+  - node_modules
+  - .git
+  - '*.tmp'
+  - '*.bak'
+  - .DS_Store
+
+# Configuração de commit automático
+commit_prefix: 'chore(aios)'
+
+# Branch para fazer push (usa branch atual se vazio)
+branch: ''
+
+# Modo teste (não faz push real)
+dry_run: false
+
+# Mensagem de commit automática
+commit_message_template: 'chore(aios): auto-sync templates [{{timestamp}}]'
+
+# Sincronização via GitHub Actions
+github_actions:
+  enabled: true
+  frequency: 'push'  # on-push, daily, weekly
+  workflow_file: '.github/workflows/sync-aios-templates.yml'
+
+# Logging
+logging:
+  enabled: true
+  level: 'info'  # debug, info, warn, error
+  file: '.aios/logs/template-sync.log'
