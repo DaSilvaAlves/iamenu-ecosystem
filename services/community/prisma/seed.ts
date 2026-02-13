@@ -5,6 +5,55 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
+  // Create sample profiles first
+  const profile1 = await prisma.profile.create({
+    data: {
+      userId: 'user-001',
+      username: 'joaosilva',
+      restaurantName: 'Restaurante Silva',
+      locationCity: 'Porto',
+      locationRegion: 'Norte',
+      restaurantType: 'Tradicional',
+      bio: 'Especializado em gastronomia portuguesa',
+    },
+  });
+
+  const profile2 = await prisma.profile.create({
+    data: {
+      userId: 'user-002',
+      username: 'mariasantos',
+      restaurantName: 'Tascaria Santos',
+      locationCity: 'Algarve',
+      locationRegion: 'Algarve',
+      restaurantType: 'Casual',
+      bio: 'Atendimento rápido e qualidade',
+    },
+  });
+
+  const profile3 = await prisma.profile.create({
+    data: {
+      userId: 'user-003',
+      username: 'pedrooliveira',
+      restaurantName: 'O Peixe Fresco',
+      locationCity: 'Lisboa',
+      locationRegion: 'Lisboa & Vale do Tejo',
+      restaurantType: 'Especializado',
+      bio: 'Frutos do mar frescos diariamente',
+    },
+  });
+
+  console.log('✅ Created 3 sample profiles');
+
+  // Create admin profile for groups
+  const adminProfile = await prisma.profile.create({
+    data: {
+      userId: 'admin-001',
+      username: 'admin',
+      restaurantName: 'iamenu Admin',
+      role: 'admin',
+    },
+  }).catch(() => null);
+
   // Create sample posts
   const post1 = await prisma.post.create({
     data: {

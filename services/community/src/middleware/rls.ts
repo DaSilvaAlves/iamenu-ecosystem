@@ -19,7 +19,7 @@ export const setRLSUserContext = async (
   req: Request,
   res: Response,
   next: NextFunction
-): Promise<void> => {
+): Promise<void | Response> => {
   try {
     // SECURITY: Validate user is authenticated and has valid userId
     if (!req.user?.userId) {

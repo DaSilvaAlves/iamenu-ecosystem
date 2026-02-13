@@ -168,15 +168,12 @@ export class PostsService {
         comments: {
           take: 5,
           orderBy: { createdAt: 'desc' },
-          include: {
-            author: {
-              select: {
-                userId: true,
-                username: true,
-                restaurantName: true,
-                profilePhoto: true,
-              },
-            },
+          select: {
+            id: true,
+            body: true,
+            authorId: true,
+            createdAt: true,
+            likes: true,
           },
         },
       },
