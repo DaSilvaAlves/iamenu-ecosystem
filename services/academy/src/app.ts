@@ -22,7 +22,10 @@ const app: Application = express();
 
 app.use(helmet());
 app.use(requestIdMiddleware);
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*', credentials: true }));
+app.use(cors({
+  origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173'],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(compression());
