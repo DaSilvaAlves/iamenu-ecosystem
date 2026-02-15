@@ -20,7 +20,7 @@
     "test:community": "npm run test --workspace=@iamenu/community-api",
     "test:marketplace": "npm run test --workspace=@iamenu/marketplace-api",
     "lint": "eslint \"services/**/src/**/*.ts\" --fix",
-    "lint:check": "eslint \"services/**/src/**/*.ts\"",
+    "lint:check": "eslint \"services/**/src/**/*.ts\" --max-warnings 500",
     "prisma:generate": "npm run prisma:generate --workspaces",
     "prisma:migrate": "npm run prisma:migrate --workspaces",
     "prisma:seed": "npm run prisma:seed --workspaces",
