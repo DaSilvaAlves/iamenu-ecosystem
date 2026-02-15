@@ -62,7 +62,7 @@ async function validateRLS() {
           );
 
           if (policyCount > 0) {
-            const policyNames = policies.map((p) => p.policyname).join(', ');
+            const policyNames = policies.map((p: { policyname: string }) => p.policyname).join(', ');
             console.log(`     └─ Policies: ${policyNames}`);
           }
         }

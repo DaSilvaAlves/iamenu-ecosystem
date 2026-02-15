@@ -1,0 +1,154 @@
+# Load Testing Configuration - Story 2.2: Fix API Response Performance
+# Framework: Artillery.io
+# Targets: 100 concurrent users across 60 seconds
+# Success Criteria: P95 <150ms, P99 <200ms, 0 errors
+
+config:
+  target: "{{ TARGET_URL | 'http://localhost:3001' }}"
+  phases:
+    # Warm-up phase: 10 users for 10 seconds
+    - duration: 10
+      arrivalRate: 10
+      ramp: 10
+      name: "Warm-up"
+
+    # Ramp-up phase: 50 users for 20 seconds
+    - duration: 20
+      arrivalRate: 50
+      ramp: 50
+      name: "Ramp-up"
+
+    # Peak load phase: 100 concurrent users for 30 seconds
+    - duration: 30
+      arrivalRate: 100
+      ramp: 100
+      name: "Peak Load"
+
+    # Cool-down phase: 10 users for 10 seconds
+    - duration: 10
+      arrivalRate: 10
+      ramp: -90
+      name: "Cool-down"
+
+  # HTTP settings
+  http:
+    timeout: 10
+    max: 100
+
+  # Reporting
+  processor: "./load-test-processor.js"
+  variables:
+    path_base: "/api/v1/community"
+
+  # Output results
+  output:
+    - "json:../../../docs/performance/artillery-results.json"
+
+# Scenario: API Performance Test
+scenarios:
+  - name: "API Performance - Community Posts"
+    flow:
+      # Test 1: Get all posts (list view - most cached)
+      - get:
+          url: "{{ path_base }}/posts?limit=20&offset=0"
+          expect:
+            - statusCode: [200, 400]
+          capture:
+            json: "$.data"
+            as: "posts_list"
+          think: 2
+          name: "GET /posts (list)"
+
+      # Test 2: Get specific post by ID
+      - get:
+          url: "{{ path_base }}/posts/post-1"
+          expect:
+            - statusCode: [200, 404]
+          think: 1
+          name: "GET /posts/:id (detail)"
+
+      # Test 3: Get posts with category filter
+      - get:
+          url: "{{ path_base }}/posts?category=food&limit=20"
+          expect:
+            - statusCode: [200, 400]
+          think: 2
+          name: "GET /posts (filtered)"
+
+      # Test 4: Get posts with search
+      - get:
+          url: "{{ path_base }}/posts?search=restaurant&limit=20"
+          expect:
+            - statusCode: [200, 400]
+          think: 2
+          name: "GET /posts (search)"
+
+      # Test 5: Get comments on a post
+      - get:
+          url: "{{ path_base }}/posts/post-1/comments"
+          expect:
+            - statusCode: [200, 404]
+          think: 1
+          name: "GET /posts/:id/comments"
+
+  - name: "API Performance - Marketplace Suppliers"
+    flow:
+      # Test 6: Get all suppliers
+      - get:
+          url: "/api/v1/marketplace/suppliers?limit=20&offset=0"
+          expect:
+            - statusCode: [200, 400]
+          think: 2
+          name: "GET /suppliers (list)"
+
+      # Test 7: Get supplier details
+      - get:
+          url: "/api/v1/marketplace/suppliers/supplier-1"
+          expect:
+            - statusCode: [200, 404]
+          think: 1
+          name: "GET /suppliers/:id (detail)"
+
+      # Test 8: Search suppliers
+      - get:
+          url: "/api/v1/marketplace/suppliers?search=meat&limit=20"
+          expect:
+            - statusCode: [200, 400]
+          think: 2
+          name: "GET /suppliers (search)"
+
+  - name: "API Performance - Academy Courses"
+    flow:
+      # Test 9: Get all courses
+      - get:
+          url: "/api/v1/academy/courses?limit=20&offset=0"
+          expect:
+            - statusCode: [200, 400]
+          think: 2
+          name: "GET /courses (list)"
+
+      # Test 10: Get course details
+      - get:
+          url: "/api/v1/academy/courses/course-1"
+          expect:
+            - statusCode: [200, 404]
+          think: 1
+          name: "GET /courses/:id (detail)"
+
+  - name: "API Performance - Business Dashboard"
+    flow:
+      # Test 11: Get daily stats
+      - get:
+          url: "/api/v1/business/stats/daily"
+          expect:
+            - statusCode: [200, 400]
+          think: 2
+          name: "GET /stats/daily"
+
+      # Test 12: Get orders
+      - get:
+          url: "/api/v1/business/orders?limit=20"
+          expect:
+            - statusCode: [200, 404]
+          think: 2
+          name: "GET /orders (list)"

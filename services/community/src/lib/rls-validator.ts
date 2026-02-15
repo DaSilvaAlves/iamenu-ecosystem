@@ -69,7 +69,7 @@ export class RLSValidator {
         ORDER BY policyname
       `;
 
-      return policies.map((p) => p.policyname);
+      return policies.map((p: { policyname: string }) => p.policyname);
     } catch (error) {
       console.error(
         `Error fetching policies for ${schemaName}.${tableName}:`,

@@ -30,12 +30,12 @@ export class PostsController {
 
       res.status(200).json({
         success: true,
-        data: result.posts,
+        data: result?.posts || [],
         pagination: {
-          total: result.total,
-          limit: result.limit,
-          offset: result.offset,
-          hasMore: result.offset + result.limit < result.total,
+          total: result?.total || 0,
+          limit: result?.limit || limit,
+          offset: result?.offset || offset,
+          hasMore: (result?.offset || 0) + (result?.limit || limit) < (result?.total || 0),
         },
       });
     } catch (error) {
