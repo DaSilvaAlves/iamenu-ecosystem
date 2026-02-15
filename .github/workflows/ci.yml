@@ -98,7 +98,7 @@ jobs:
         run: npm test -- --forceExit --testTimeout=60000
         timeout-minutes: 20
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/iamenu_test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/iamenu_test?schema=community
           JWT_SECRET: test-jwt-secret-for-ci
           NODE_ENV: test
 
