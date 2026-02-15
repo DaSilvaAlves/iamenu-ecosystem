@@ -23,6 +23,7 @@ import {
     Camera,
     ChefHat,
     Package,
+    PenTool,
     X
 } from 'lucide-react';
 import { CommunityAPI } from '../services/api';
@@ -39,8 +40,8 @@ const NavItem = ({ icon: Icon, label, to, badge, isCollapsed = false }) => {
             <Link
                 to={to}
                 className={`flex items-center justify-center p-3 rounded-lg cursor-pointer transition-all duration-200 group relative ${isActive
-                        ? 'bg-white/10 text-white'
-                        : 'text-white/60 hover:text-white hover:bg-white/5'
+                    ? 'bg-white/10 text-white'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
                     }`}
                 title={label}
             >
@@ -58,8 +59,8 @@ const NavItem = ({ icon: Icon, label, to, badge, isCollapsed = false }) => {
         <Link
             to={to}
             className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 group ${isActive
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                ? 'bg-white/10 text-white'
+                : 'text-white/60 hover:text-white hover:bg-white/5'
                 }`}
         >
             <div className="flex items-center gap-3">
@@ -180,6 +181,7 @@ const SidebarContent = ({
                 <NavItem label="Painel de Controlo do Negócio" icon={LayoutDashboard} to="/dashboard" isCollapsed={isCollapsed} />
                 <NavItem label="Escalas de Staff AI" icon={Users} to="/equipas" isCollapsed={isCollapsed} />
                 <NavItem label="Aulas ao VIVO" icon={Video} to="/aulas" isCollapsed={isCollapsed} />
+                <NavItem label="AIOS Copy Studio" icon={PenTool} to="/copy-studio" badge="TOP" isCollapsed={isCollapsed} />
             </SidebarSection>
 
             {/* Groups section - hidden when collapsed */}

@@ -83,7 +83,9 @@ export const errorHandler = (
 };
 
 // Async wrapper to catch errors
-export const asyncHandler = (fn: Function) => (
+export const asyncHandler = (
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<void> | void
+) => (
   req: Request,
   res: Response,
   next: NextFunction

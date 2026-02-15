@@ -98,6 +98,8 @@
   },
   "dependencies": {
     "ajv-formats": "^3.0.1",
-    "node-fetch": "^3.3.2"
+    "aws-sdk": "^2.1693.0",
+    "node-fetch": "^3.3.2",
+    "pg-boss": "^10.4.2"
   }
 }

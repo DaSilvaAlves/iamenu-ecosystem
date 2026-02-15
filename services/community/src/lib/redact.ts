@@ -69,19 +69,19 @@ const SENSITIVE_FIELDS = [
  */
 const SENSITIVE_PATTERNS = [
   // JWT tokens (pattern: eyXXX.eyXXX.XXXX)
-  /eyJ[\w\-\.]+\.eyJ[\w\-\.]+\.[\w\-\.]+/gi,
+  /eyJ[\w-]+\.eyJ[\w-]+\.[\w-]+/gi,
 
   // Bearer tokens
-  /bearer\s+[\w\-\.]+/gi,
+  /bearer\s+[\w-]+/gi,
 
   // API keys (common patterns)
-  /api[_-]?key[\s:=]+['\"]?[\w\-]+['\"]?/gi,
+  /api[_-]?key[\s:=]+['"]?[\w-]+['"]?/gi,
 
   // AWS keys
   /AKIA[0-9A-Z]{16}/g,
 
   // Basic auth (base64)
-  /basic\s+[\w\-\.]+/gi,
+  /basic\s+[\w-]+/gi,
 
   // Email in logs (optional - can be commented out if needed)
   // /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
@@ -207,7 +207,7 @@ export function redactError(error: any): any {
 
   // Copy additional properties
   for (const [key, value] of Object.entries(error)) {
-    if (!redacted.hasOwnProperty(key)) {
+    if (!Object.prototype.hasOwnProperty.call(redacted, key)) {
       if (isSensitiveField(key)) {
         redacted[key] = REDACTED;
       } else if (typeof value === 'string') {

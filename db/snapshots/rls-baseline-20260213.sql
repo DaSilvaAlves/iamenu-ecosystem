@@ -1,0 +1,117 @@
+-- RLS Baseline Snapshot
+-- Created: 2026-02-13
+-- Purpose: Backup of schema state before RLS testing
+-- This file documents the RLS policies in place across all schemas
+
+-- ============================================
+-- COMMUNITY SCHEMA - RLS STATUS
+-- ============================================
+-- Tables with RLS Enabled (16):
+-- ✅ posts - 4 policies (view, create, update, delete)
+-- ✅ comments - 4 policies (view, create, update, delete)
+-- ✅ groups - 2 policies (view, update)
+-- ✅ group_memberships - 2 policies (view, join)
+-- ✅ notifications - 1 policy (strict: own only)
+-- ✅ reactions - 1 policy (allow all)
+-- ✅ followers - 2 policies (view all, own operations)
+-- ✅ refresh_tokens - 1 policy (strict: own only)
+-- ✅ profiles - 1 policy (view all)
+-- ✅ user_points - 1 policy (own only)
+-- ✅ points_history - 1 policy (own only)
+-- ✅ user_streaks - 1 policy (own only)
+-- ✅ user_warnings - 1 policy (own only)
+-- ✅ moderation_logs - 1 policy (admin via app layer)
+-- ✅ user_bans - 1 policy (own only)
+-- ✅ reports - 1 policy (owner or admin)
+
+-- ============================================
+-- MARKETPLACE SCHEMA - RLS STATUS
+-- ============================================
+-- Tables with RLS Enabled:
+-- ✅ quotes - 2 policies (supplier owner, buyer request owner)
+-- ✅ suppliers - 2 policies (user owner, public view)
+-- ✅ Indexes: quotes_supplier_id, quotes_quote_request_id, suppliers_user_id, quote_requests_restaurant_id
+
+-- ============================================
+-- ACADEMY SCHEMA - RLS STATUS
+-- ============================================
+-- Tables with RLS Enabled:
+-- ✅ enrollments - User isolation (enrollee only)
+-- ✅ certificates - User isolation (earner only)
+-- ✅ courses - Public view (all authenticated users)
+
+-- ============================================
+-- BUSINESS SCHEMA - RLS STATUS
+-- ============================================
+-- Tables with RLS Enabled:
+-- ✅ orders - Restaurant isolation (restaurant owner only)
+-- ✅ order_items - Via orders RLS
+-- ✅ daily_stats - Restaurant isolation (restaurant owner only)
+
+-- ============================================
+-- MIGRATIONS APPLIED
+-- ============================================
+-- Community: 8 migrations (including 2 RLS migrations)
+-- Marketplace: 10 migrations (including 4 RLS migrations)
+-- Academy: 4 migrations (including 2 RLS migrations)
+-- Business: 5 migrations (including 1 RLS migration)
+
+-- ============================================
+-- KEY RLS PATTERNS USED
+-- ============================================
+-- Pattern 1: User Isolation
+--   USING (user_id = current_setting('app.current_user_id'))
+--
+-- Pattern 2: Group Access
+--   USING (
+--     user_id IN (
+--       SELECT user_id FROM group_memberships
+--       WHERE user_id = current_setting('app.current_user_id')
+--     )
+--   )
+--
+-- Pattern 3: Public + Private
+--   USING (
+--     is_public = true OR
+--     owner_id = current_setting('app.current_user_id')
+--   )
+--
+-- Pattern 4: Strict (No View Permission)
+--   USING (user_id = current_setting('app.current_user_id'))
+--   Applied to: notifications, refresh_tokens, user_warnings, user_bans
+
+-- ============================================
+-- SESSION VARIABLE SETUP
+-- ============================================
+-- RLS Enforcement requires: SET app.current_user_id = '<user-id>'
+-- This is handled in: services/community/src/middleware/rls.ts
+-- Pattern: Middleware sets variable before any DB operations
+
+-- ============================================
+-- TEST COVERAGE CHECKLIST
+-- ============================================
+-- [ ] Positive: User can access own data
+-- [ ] Positive: User can access shared data (groups)
+-- [ ] Positive: User can access public data
+-- [ ] Negative: User cannot access other users' data
+-- [ ] Negative: User cannot access private group data
+-- [ ] Operations: CREATE with user_id = current user
+-- [ ] Operations: UPDATE only own records
+-- [ ] Operations: DELETE only own records
+-- [ ] Security: STRICT tables fully isolated
+-- [ ] Performance: RLS queries use indexes
+
+-- ============================================
+-- ROLLBACK PROCEDURE (if needed)
+-- ============================================
+-- To disable RLS on all tables:
+-- ALTER TABLE "community"."posts" DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE "community"."comments" DISABLE ROW LEVEL SECURITY;
+-- ... (repeat for all tables)
+--
+-- To drop specific policies:
+-- DROP POLICY "posts_view_policy" ON "community"."posts";
+--
+-- Note: Rollback via Prisma migration if problems occur
+
+-- End of Snapshot
