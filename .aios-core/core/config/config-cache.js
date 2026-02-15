@@ -17,9 +17,9 @@ class ConfigCache {
   /**
    * Create a new ConfigCache
    *
-   * @param {number} ttl - Time-to-live in milliseconds (default: 5 minutes)
+   * @param {number} ttl - Time-to-live in milliseconds (default: 30 seconds)
    */
-  constructor(ttl = 5 * 60 * 1000) {
+  constructor(ttl = 30 * 1000) {
     this.cache = new Map();
     this.timestamps = new Map();
     this.ttl = ttl;

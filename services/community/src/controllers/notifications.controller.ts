@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import logger from '../lib/logger';
 import { notificationsService } from '../services/notifications.service';
 
 /**
@@ -38,7 +39,11 @@ export class NotificationsController {
         },
       });
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching notifications failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch notifications',
@@ -77,7 +82,11 @@ export class NotificationsController {
         message: 'Notification marked as read',
       });
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error marking notification as read failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to mark notification as read',
@@ -108,7 +117,11 @@ export class NotificationsController {
         message: `${count} notifications marked as read`,
       });
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error marking all notifications as read failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to mark all notifications as read',
@@ -146,7 +159,11 @@ export class NotificationsController {
         message: 'Notification deleted successfully',
       });
     } catch (error) {
-      console.error('Error deleting notification:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error deleting notification failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to delete notification',

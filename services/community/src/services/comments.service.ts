@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma';
+import logger from '../lib/logger';
 import { notificationsService } from './notifications.service';
 import { reactionsService } from './reactions.service';
 import { extractMentions, resolveMentions } from '../utils/mention.utils';
@@ -97,7 +98,10 @@ export class CommentsService {
         }
       }
     } catch (mentionError) {
-      console.error('Failed to process mentions:', mentionError);
+      logger.warn('Failed to process mentions', {
+        error: mentionError instanceof Error ? mentionError.message : String(mentionError),
+        commentId: comment.id
+      });
     }
 
     return comment;

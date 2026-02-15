@@ -1,6 +1,7 @@
 import { Server as SocketServer, Socket } from 'socket.io';
 import type { Server as HttpServer } from 'http';
 import * as jwt from 'jsonwebtoken';
+import logger from '../lib/logger';
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -72,7 +73,7 @@ export class WebSocketService {
       this.handleConnection(socket);
     });
 
-    console.log('WebSocket server initialized');
+    logger.info('WebSocket server initialized');
   }
 
   /**
@@ -82,7 +83,7 @@ export class WebSocketService {
     const userId = socket.userId!;
     const email = socket.email;
 
-    console.log(`[WS] User connected: ${userId}`);
+    logger.info('WebSocket user connected', { userId, email });
 
     // Add to online users
     this.onlineUsers.set(userId, {
@@ -118,13 +119,13 @@ export class WebSocketService {
     // Join a room (e.g., group chat, post comments)
     socket.on('room:join', (roomId: string) => {
       socket.join(roomId);
-      console.log(`[WS] User ${userId} joined room: ${roomId}`);
+      logger.debug('WebSocket user joined room', { userId, roomId });
     });
 
     // Leave a room
     socket.on('room:leave', (roomId: string) => {
       socket.leave(roomId);
-      console.log(`[WS] User ${userId} left room: ${roomId}`);
+      logger.debug('WebSocket user left room', { userId, roomId });
     });
 
     // Mark notifications as read (real-time sync across devices)
@@ -160,7 +161,7 @@ export class WebSocketService {
   private handleDisconnect(socket: AuthenticatedSocket): void {
     const userId = socket.userId!;
 
-    console.log(`[WS] User disconnected: ${userId}`);
+    logger.info('WebSocket user disconnected', { userId });
 
     // Remove from online users
     this.onlineUsers.delete(userId);

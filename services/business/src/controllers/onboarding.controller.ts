@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import logger from '../lib/logger';
 import { onboardingService, OnboardingData } from '../services/onboarding.service';
 import prisma from '../lib/prisma';
 
@@ -38,7 +39,11 @@ export class OnboardingController {
         message: 'Restaurante configurado com sucesso!'
       });
     } catch (error: any) {
-      console.error('Error in onboarding setup:', error);
+      logger.error('Error in onboarding setup:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
 
       if (error.message === 'User already has a restaurant configured') {
         return res.status(400).json({
@@ -67,7 +72,11 @@ export class OnboardingController {
       res.setHeader('Content-Disposition', 'attachment; filename=template-menu-iamenu.xlsx');
       res.send(buffer);
     } catch (error: any) {
-      console.error('Error generating template:', error);
+      logger.error('Error generating template:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to generate template'
@@ -122,7 +131,11 @@ export class OnboardingController {
         }
       });
     } catch (error: any) {
-      console.error('Error getting onboarding status:', error);
+      logger.error('Error getting onboarding status:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.user?.userId
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to get status'

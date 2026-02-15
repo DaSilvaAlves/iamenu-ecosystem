@@ -27,6 +27,7 @@ import HubsRegionaisView from './views/HubsRegionaisView';
 import VisaoEcossistemaView from './views/VisaoEcossistemaView';
 import StaffAIView from './views/StaffAIView';
 import SupplierDetail from './views/SupplierDetail';
+import CopyStudioView from './views/CopyStudioView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
@@ -135,6 +136,7 @@ const App = () => {
                                         <Route path="/takeway" element={<TakewayLandingView />} />
                                         <Route path="/hubs" element={<HubsRegionaisView />} />
                                         <Route path="/lab" element={<ChatView />} />
+                                        <Route path="/copy-studio" element={<CopyStudioView />} />
                                     </Routes>
                                 </div>
                             </AnimatePresence>

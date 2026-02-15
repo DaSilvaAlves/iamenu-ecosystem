@@ -11,6 +11,7 @@ if (process.env.SENTRY_DSN) {
 }
 
 import app from './app';
+import logger from './lib/logger';
 
 const PORT = process.env.PORT || 3004;
 const API_BASE = process.env.API_BASE || '/api/v1/business';
@@ -20,14 +21,11 @@ const API_BASE = process.env.API_BASE || '/api/v1/business';
 // ===================================
 
 const server = app.listen(PORT, () => {
-  console.log(`
-╔══════════════════════════════════════════╗
-║   iaMenu Business Intelligence API       ║
-║   Environment: ${process.env.NODE_ENV || 'development'}                 ║
-║   Port: ${PORT}                             ║
-║   API Base: ${API_BASE}          ║
-╚══════════════════════════════════════════╝
-  `);
+  logger.info('Business Intelligence API started', {
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development',
+    apiBase: API_BASE,
+  });
 });
 
 // ===================================
@@ -36,15 +34,21 @@ const server = app.listen(PORT, () => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason: Error | any, promise: Promise<any>) => {
-  console.error('❌ Unhandled Rejection:', reason instanceof Error ? reason.message : reason);
-  if (reason instanceof Error) console.error(reason.stack);
+  const errorMessage = reason instanceof Error ? reason.message : String(reason);
+  const errorStack = reason instanceof Error ? reason.stack : undefined;
+  logger.error('Unhandled Rejection', {
+    error: errorMessage,
+    stack: errorStack,
+  });
   process.exit(1);
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error: Error) => {
-  console.error('❌ Uncaught Exception:', error.message);
-  console.error(error.stack);
+  logger.error('Uncaught Exception', {
+    error: error.message,
+    stack: error.stack,
+  });
   process.exit(1);
 });
 

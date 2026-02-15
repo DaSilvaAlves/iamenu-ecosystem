@@ -1,0 +1,241 @@
+# Frontend/UX Specification Template
+# Used by @ux-design-expert in Phase 3: Frontend & UX Audit
+# Auto-filled during brownfield-discovery workflow
+
+metadata:
+  title: "Frontend Architecture & UX Specification"
+  date: "${DATE}"
+  version: "1.0"
+  scope: "Complete frontend technical audit"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 1: FRONTEND TECHNOLOGY STACK
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+frontend_stack:
+  framework:
+    name: ${FRONTEND_FRAMEWORK}
+    version: "${FRONTEND_VERSION}"
+    language: ${FRONTEND_LANGUAGE}
+    typescript: ${HAS_TYPESCRIPT}
+
+  styling:
+    solution: ${STYLING_SOLUTION}
+    methodology: ${CSS_METHODOLOGY}
+    responsive_design: ${HAS_RESPONSIVE}
+    dark_mode: ${HAS_DARK_MODE}
+
+  state_management:
+    solution: ${STATE_MANAGEMENT}
+    complexity: ${STATE_COMPLEXITY}
+    performance: ${STATE_PERFORMANCE_LEVEL}
+
+  build_tools:
+    bundler: ${BUNDLER_NAME}
+    version: "${BUNDLER_VERSION}"
+    dev_server: ${DEV_SERVER}
+    hmr_enabled: ${HMR_STATUS}
+
+  testing:
+    unit_testing: ${UNIT_TEST_FRAMEWORK}
+    e2e_testing: ${E2E_TEST_FRAMEWORK}
+    coverage_target: "${COVERAGE_TARGET}%"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 2: COMPONENT ARCHITECTURE
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+component_architecture:
+  total_components: ${TOTAL_COMPONENTS}
+  reusable_components: ${REUSABLE_COMPONENTS}
+  component_organization:
+    structure: |
+      ${COMPONENT_FOLDER_STRUCTURE}
+
+    patterns:
+      - name: "${PATTERN_NAME_1}"
+        components: ${PATTERN_COUNT_1}
+        consistency: "${CONSISTENCY_LEVEL_1}"
+
+  design_system:
+    exists: ${HAS_DESIGN_SYSTEM}
+    completeness: "${DESIGN_SYSTEM_COMPLETENESS}%"
+    documentation: ${DESIGN_SYSTEM_DOCS}
+    storybook_enabled: ${HAS_STORYBOOK}
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 3: UX/USABILITY ASSESSMENT
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+ux_assessment:
+  accessibility:
+    wcag_compliance: ${WCAG_LEVEL}
+    keyboard_navigation: ${HAS_KEYBOARD_NAV}
+    screen_reader_support: ${HAS_SCREEN_READER}
+    color_contrast: ${HAS_COLOR_CONTRAST_CHECK}
+    semantic_html: ${HAS_SEMANTIC_HTML}
+
+  responsive_design:
+    mobile_optimized: ${IS_MOBILE_OPTIMIZED}
+    breakpoints_defined: ${HAS_BREAKPOINTS}
+    touch_friendly: ${IS_TOUCH_FRIENDLY}
+    viewport_configuration: ${VIEWPORT_CONFIG}
+
+  performance:
+    lighthouse_score: "${LIGHTHOUSE_SCORE}"
+    first_contentful_paint: "${FCP}ms"
+    largest_contentful_paint: "${LCP}ms"
+    cumulative_layout_shift: "${CLS}"
+
+  user_experience:
+    navigation_clarity: "${NAV_CLARITY_LEVEL}"
+    loading_states: "${LOADING_STATES_QUALITY}"
+    error_handling: "${ERROR_HANDLING_QUALITY}"
+    feedback_mechanisms: "${FEEDBACK_QUALITY}"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 4: CODE QUALITY & MAINTENANCE
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+code_quality:
+  linting:
+    configured: ${HAS_LINTING}
+    tool: ${LINTING_TOOL}
+    strictness: "${LINTING_LEVEL}"
+    passing: ${LINTING_PASSES}
+
+  type_checking:
+    enabled: ${HAS_TYPE_CHECKING}
+    coverage: "${TYPE_COVERAGE}%"
+    strict_mode: ${HAS_STRICT_MODE}
+
+  documentation:
+    component_docs: "${COMPONENT_DOCS_COVERAGE}%"
+    prop_documentation: ${HAS_PROP_DOCS}
+    usage_examples: ${HAS_USAGE_EXAMPLES}
+    storybook_stories: ${STORYBOOK_STORY_COUNT}
+
+  maintainability:
+    average_component_size: "${AVG_COMPONENT_SIZE}"
+    cyclomatic_complexity: "${CYCLOMATIC_COMPLEXITY}"
+    duplication_ratio: "${DUPLICATION_RATIO}%"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 5: CRITICAL FRONTEND TECHNICAL DEBT
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+frontend_debt:
+  critical:
+    - id: FE-001
+      category: ${DEBT_CATEGORY_1}
+      title: "${DEBT_TITLE_1}"
+      description: "${DEBT_DESC_1}"
+      impact_on_users: "${IMPACT_1}"
+      effort_to_fix: "${EFFORT_1}"
+      affects_accessibility: ${AFFECTS_A11Y_1}
+
+    - id: FE-002
+      category: ${DEBT_CATEGORY_2}
+      title: "${DEBT_TITLE_2}"
+      description: "${DEBT_DESC_2}"
+      impact_on_users: "${IMPACT_2}"
+      effort_to_fix: "${EFFORT_2}"
+      affects_accessibility: ${AFFECTS_A11Y_2}
+
+  high_priority:
+    - id: FE-003
+      category: ${DEBT_CATEGORY_3}
+      title: "${DEBT_TITLE_3}"
+      description: "${DEBT_DESC_3}"
+      impact_on_users: "${IMPACT_3}"
+      effort_to_fix: "${EFFORT_3}"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 6: PERFORMANCE OPTIMIZATION OPPORTUNITIES
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+performance_opportunities:
+  bundling:
+    current_bundle_size: "${BUNDLE_SIZE}kb"
+    opportunities:
+      - optimization: "${OPT_NAME_1}"
+        potential_savings: "${SAVINGS_1}kb"
+        effort: ${EFFORT_OPT_1}
+
+  rendering:
+    current_render_performance: "${RENDER_PERF}"
+    improvement_areas:
+      - area: "${AREA_1}"
+        issue: "${ISSUE_1}"
+        solution: "${SOLUTION_1}"
+
+  lazy_loading:
+    enabled: ${HAS_LAZY_LOADING}
+    routes_lazy_loaded: "${LAZY_LOAD_COUNT}"
+    opportunity: "${LAZY_LOAD_OPPORTUNITY}"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 7: DESIGN SYSTEM & CONSISTENCY
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+design_consistency:
+  color_palette:
+    consistency: "${COLOR_CONSISTENCY}%"
+    colors_defined: ${COLORS_DEFINED}
+    unused_colors: ${UNUSED_COLORS_COUNT}
+
+  typography:
+    font_stack: "${FONT_STACK}"
+    consistency: "${TYPOGRAPHY_CONSISTENCY}%"
+    hierarchy_issues: ${TYPOGRAPHY_ISSUES}
+
+  spacing_system:
+    defined: ${SPACING_DEFINED}
+    consistency: "${SPACING_CONSISTENCY}%"
+    standardization: "${SPACING_STANDARD}"
+
+  component_consistency:
+    pattern_adherence: "${PATTERN_ADHERENCE}%"
+    prop_naming_consistency: "${PROP_NAMING_CONSISTENCY}%"
+    slot_usage_consistency: "${SLOT_USAGE_CONSISTENCY}%"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# PART 8: RECOMMENDATIONS & IMPROVEMENT ROADMAP
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+recommendations:
+  immediate_fixes:
+    - priority: CRITICAL
+      item: "${FIX_1}"
+      rationale: "${RATIONALE_1}"
+      estimated_hours: ${HOURS_1}
+
+  design_system_improvements:
+    - priority: HIGH
+      initiative: "${INIT_1}"
+      scope: "${SCOPE_1}"
+      timeline: "${TIMELINE_1}"
+
+  performance_optimization:
+    - priority: MEDIUM
+      optimization: "${PERF_1}"
+      estimated_improvement: "${IMPROVEMENT_1}"
+      hours: ${HOURS_PERF_1}
+
+  long_term_refactoring:
+    - priority: LOW
+      refactor: "${REFACTOR_1}"
+      rationale: "${REFACTOR_RATIONALE_1}"
+      phase: "${PHASE_1}"
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# METADATA FOR WORKFLOW INTEGRATION
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+workflow_metadata:
+  phase: 3
+  agent: ux-design-expert
+  created_by: brownfield-discovery
+  status: complete
+  validation_checklist: component-quality-checklist.md
+  next_phase: initial-consolidation

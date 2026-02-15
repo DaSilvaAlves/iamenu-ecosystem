@@ -20,7 +20,7 @@
     "test:community": "npm run test --workspace=@iamenu/community-api",
     "test:marketplace": "npm run test --workspace=@iamenu/marketplace-api",
     "lint": "eslint \"services/**/src/**/*.ts\" --fix",
-    "lint:check": "eslint \"services/**/src/**/*.ts\"",
+    "lint:check": "eslint \"services/**/src/**/*.ts\" --max-warnings 500",
     "prisma:generate": "npm run prisma:generate --workspaces",
     "prisma:migrate": "npm run prisma:migrate --workspaces",
     "prisma:seed": "npm run prisma:seed --workspaces",
@@ -60,7 +60,10 @@
     "setup": "npm install && npm run prisma:generate",
     "postinstall": "npm run prisma:generate --workspaces --if-present",
     "pretest": "npm run prisma:generate --workspaces --if-present",
-    "aios": "node .aios-core/cli-runner.js"
+    "aios": "node .aios-core/cli-runner.js",
+    "sync:templates": "node .aios-core/development/scripts/sync-templates.js sync",
+    "sync:templates:watch": "node .aios-core/development/scripts/sync-templates.js watch",
+    "sync:templates:status": "node .aios-core/development/scripts/sync-templates.js status"
   },
   "keywords": [
     "iamenu",
@@ -95,6 +98,8 @@
   },
   "dependencies": {
     "ajv-formats": "^3.0.1",
-    "node-fetch": "^3.3.2"
+    "aws-sdk": "^2.1693.0",
+    "node-fetch": "^3.3.2",
+    "pg-boss": "^10.4.2"
   }
 }

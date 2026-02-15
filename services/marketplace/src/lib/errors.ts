@@ -4,6 +4,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import logger from './logger';
 
 // Custom error types
 export class ApiError extends Error {
@@ -59,8 +60,8 @@ export const errorHandler = (
   const message = err.message || 'An unexpected error occurred';
 
   // Log error
-  console.error({
-    timestamp: new Date().toISOString(),
+  const requestLogger = (req as any).logger || logger;
+  requestLogger.error('API error', {
     code,
     message,
     statusCode,
@@ -82,7 +83,9 @@ export const errorHandler = (
 };
 
 // Async wrapper to catch errors
-export const asyncHandler = (fn: Function) => (
+export const asyncHandler = (
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<void> | void
+) => (
   req: Request,
   res: Response,
   next: NextFunction

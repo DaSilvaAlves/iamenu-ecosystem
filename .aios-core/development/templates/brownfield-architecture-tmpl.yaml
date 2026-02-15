@@ -1,0 +1,300 @@
+# brownfield-architecture-tmpl.yaml
+# Template para análise arquitectural de projectos legados
+# Utilizado na Fase 4 (Consolidação Inicial) do workflow brownfield-discovery
+
+metadata:
+  version: "1.0.0"
+  created: "2026-02-11"
+  author: "@architect"
+  purpose: "Consolidate findings from brownfield discovery into actionable architecture assessment"
+  target_workflow: "brownfield-discovery"
+  phase: 4
+
+---
+
+# ARCHITECTURAL ASSESSMENT - BROWNFIELD CONSOLIDATION
+
+## Executive Summary
+
+**Project**: {project_name}
+**Current State**: Legacy/Brownfield
+**Tech Stack**: {tech_stack}
+**Team Size**: {team_size}
+**Codebse Age**: {codebase_age}
+
+---
+
+## 1. CURRENT ARCHITECTURE ANALYSIS
+
+### 1.1 System Overview
+```
+{system_overview_diagram}
+```
+
+### 1.2 Technology Stack
+
+| Layer | Current | Issues | Recommendation |
+|-------|---------|--------|-----------------|
+| **Frontend** | {frontend_tech} | {frontend_issues} | {frontend_rec} |
+| **Backend** | {backend_tech} | {backend_issues} | {backend_rec} |
+| **Database** | {db_tech} | {db_issues} | {db_rec} |
+| **Infrastructure** | {infra_tech} | {infra_issues} | {infra_rec} |
+| **DevOps/CI-CD** | {devops_tech} | {devops_issues} | {devops_rec} |
+
+### 1.3 Code Quality Assessment
+
+```yaml
+code_quality:
+  test_coverage: {coverage_percent}%
+  lint_issues: {lint_count}
+  type_coverage: {type_coverage_percent}%
+  technical_debt_ratio: {debt_ratio}
+  code_duplication: {duplication_percent}%
+  cyclomatic_complexity: {complexity_score}
+```
+
+---
+
+## 2. TECHNICAL DEBT INVENTORY
+
+### 2.1 Critical Issues (Must Fix - Blocking)
+- [ ] {critical_issue_1}
+- [ ] {critical_issue_2}
+- [ ] {critical_issue_3}
+
+**Impact**: High | **Effort**: {effort_estimate} | **Priority**: P0
+
+### 2.2 High Issues (Should Fix - Urgent)
+- [ ] {high_issue_1}
+- [ ] {high_issue_2}
+
+**Impact**: Medium-High | **Effort**: {effort_estimate} | **Priority**: P1
+
+### 2.3 Medium Issues (Could Fix - Planning)
+- [ ] {medium_issue_1}
+- [ ] {medium_issue_2}
+
+**Impact**: Medium | **Effort**: {effort_estimate} | **Priority**: P2
+
+### 2.4 Low Issues (Nice to Fix - Backlog)
+- [ ] {low_issue_1}
+
+**Impact**: Low | **Effort**: {effort_estimate} | **Priority**: P3
+
+---
+
+## 3. MODERNIZATION ROADMAP
+
+### Phase 1: Foundation (Weeks 1-4)
+**Goal**: Stabilize and document current state
+
+- [ ] Setup monitoring and observability
+- [ ] Establish CI/CD pipelines
+- [ ] Document existing API contracts
+- [ ] Add test coverage baseline
+
+**Deliverables**: Monitoring dashboard, CI/CD workflows, API documentation
+
+### Phase 2: Quick Wins (Weeks 5-8)
+**Goal**: Address critical issues and low-hanging fruit
+
+- [ ] Fix critical security vulnerabilities
+- [ ] Upgrade dependencies (non-breaking)
+- [ ] Add type safety (TypeScript/JSDoc)
+- [ ] Improve test coverage to 60%+
+
+**Deliverables**: Secure baseline, type-safe codebase, improved tests
+
+### Phase 3: Refactoring (Weeks 9-16)
+**Goal**: Reduce technical debt and improve maintainability
+
+- [ ] Modularize monolithic services
+- [ ] Extract reusable components
+- [ ] Standardize error handling
+- [ ] Implement consistent logging
+
+**Deliverables**: Modular architecture, shared utilities, observability
+
+### Phase 4: Migration (Weeks 17-24)
+**Goal**: Modernize stack or migrate to new platform
+
+- [ ] Evaluate migration path (in-place vs. parallel)
+- [ ] Build new components in target tech
+- [ ] Parallel run period (if applicable)
+- [ ] Cutover to new architecture
+
+**Deliverables**: Modernized codebase, zero-downtime migration
+
+---
+
+## 4. ARCHITECTURE RECOMMENDATIONS
+
+### 4.1 Short-term (0-3 months)
+```yaml
+priorities:
+  - establish_observability: "Implement comprehensive logging and monitoring"
+  - security_hardening: "Address critical vulnerabilities"
+  - dependency_updates: "Update non-breaking dependencies"
+  - test_baseline: "Establish test coverage baseline (40%+)"
+```
+
+### 4.2 Medium-term (3-6 months)
+```yaml
+priorities:
+  - code_modernization: "Add TypeScript, improve type safety"
+  - refactoring: "Reduce cyclomatic complexity, improve maintainability"
+  - documentation: "API docs, architecture decision records"
+  - performance: "Identify and optimize bottlenecks"
+```
+
+### 4.3 Long-term (6-12 months)
+```yaml
+priorities:
+  - architectural_migration: "Microservices, serverless, or other patterns"
+  - platform_upgrade: "Major version upgrades, framework changes"
+  - team_scaling: "Processes and tooling to support team growth"
+  - automation: "Deploy frequency, quality gates, self-healing"
+```
+
+---
+
+## 5. MIGRATION STRATEGY
+
+### 5.1 Assessment
+- **Current State**: Fully documented (see attached reports)
+- **Target State**: {target_architecture}
+- **Gap Analysis**: {gap_analysis}
+
+### 5.2 Migration Path
+
+```
+Current → Intermediate → Target
+
+Current: {current_state}
+   ↓ (Phase 1-2)
+Intermediate: {intermediate_state}
+   ↓ (Phase 3-4)
+Target: {target_state}
+```
+
+### 5.3 Risk Assessment
+
+| Risk | Probability | Impact | Mitigation |
+|------|-------------|--------|-----------|
+| {risk_1} | {prob} | {impact} | {mitigation} |
+| {risk_2} | {prob} | {impact} | {mitigation} |
+
+---
+
+## 6. RESOURCE REQUIREMENTS
+
+### Team Composition
+```yaml
+team:
+  architect: 1 (full-time, 12 weeks)
+  senior_dev: 2 (full-time)
+  junior_dev: 2 (full-time)
+  qa: 1 (full-time)
+  devops: 0.5 (part-time)
+  product: 0.5 (part-time)
+```
+
+### Budget Estimation
+- **Team cost**: ${team_cost}
+- **Tools/licenses**: ${tools_cost}
+- **Infrastructure**: ${infra_cost}
+- **Contingency (15%)**: ${contingency}
+- **Total**: ${total_cost}
+
+### Timeline
+- **Phase 1**: 4 weeks
+- **Phase 2**: 4 weeks
+- **Phase 3**: 8 weeks
+- **Phase 4**: 8 weeks
+- **Total**: 24 weeks (6 months)
+
+---
+
+## 7. SUCCESS METRICS
+
+### Code Quality Metrics
+- Test coverage: {target}% (from {current}%)
+- Type coverage: {target}% (from {current}%)
+- Lint issues: {target} (from {current})
+- Cyclomatic complexity: {target} (from {current})
+
+### Operational Metrics
+- Deployment frequency: {target} (from {current})
+- Mean time to recovery: {target} (from {current})
+- Incident rate: {target} (from {current})
+- System availability: {target}% (from {current}%)
+
+### Business Metrics
+- Time-to-market: {target} (from {current})
+- Development velocity: {target} (from {current})
+- Team satisfaction: {target}/10 (from {current}/10)
+- Customer satisfaction: {target}% (from {current}%)
+
+---
+
+## 8. DEPENDENCIES & BLOCKERS
+
+### External Dependencies
+- [ ] {dependency_1}
+- [ ] {dependency_2}
+
+### Identified Blockers
+- [ ] {blocker_1} → Mitigation: {mitigation}
+- [ ] {blocker_2} → Mitigation: {mitigation}
+
+### Assumptions
+- [ ] {assumption_1}
+- [ ] {assumption_2}
+
+---
+
+## 9. DECISION RECORDS
+
+### ADR-001: {Decision Title}
+**Status**: {Proposed|Accepted|Deprecated|Superseded}
+**Context**: {Context}
+**Decision**: {Decision}
+**Consequences**: {Positive/Negative consequences}
+
+---
+
+## 10. NEXT STEPS
+
+1. **Week 1**: Architecture review with team and stakeholders
+2. **Week 2**: Approval and resource allocation
+3. **Week 3**: Kick-off Phase 1 (Foundation)
+4. **Ongoing**: Weekly progress reviews, bi-weekly stakeholder updates
+
+---
+
+## Appendices
+
+### A. Current Architecture Diagrams
+```
+{C4 model diagrams, flow charts, deployment diagrams}
+```
+
+### B. Detailed Issue List
+[See: TECHNICAL-DEBT-REPORT.md]
+
+### C. Code Quality Reports
+[See: coverage reports, lint reports, performance profiles]
+
+### D. Interview Summaries
+[See: stakeholder interviews, team feedback]
+
+### E. Competitive Analysis
+[See: industry benchmarks, similar projects]
+
+---
+
+**Document**: brownfield-architecture-assessment.md
+**Generated by**: @architect
+**Date**: {date}
+**Status**: ✅ Ready for review
+**Next Review**: {date + 2 weeks}

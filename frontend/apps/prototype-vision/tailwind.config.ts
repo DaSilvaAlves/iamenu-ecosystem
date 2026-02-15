@@ -8,6 +8,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Existing colors (preserved)
         primary: "#ff4d00",
         "primary-hover": "#e64500",
         "bg-dark": "#0a0a0a",
@@ -15,13 +16,65 @@ export default {
         "bg-sidebar": "#0f0f0f",
         "background-light": "#1a1a1a",
         "surface-light": "#141414",
-        // Custom colors for Marketplace comparison tab (harmonized)
-        "brand-orange": "#F2542D", // Keep as unique for specific orange
+        "brand-orange": "#F2542D",
         "surface-dark": "#161616",
         "surface-card": "#1E1E1E",
-        "text-muted": "#a0a0a0", // Harmonized with index.css variable
+        "text-muted": "#a0a0a0",
         "sidebar-bg": "#0B0B0B",
-        "border": "#222222", // Harmonized with index.css variable
+        "border": "#222222",
+
+        // Design System Foundation Colors
+        "ds-primary": "#007AFF",
+        "ds-primary-light": "#5AC8FA",
+        "ds-secondary": "#5AC8FA",
+        "ds-error": "#FF3B30",
+        "ds-success": "#34C759",
+        "ds-warning": "#FF9500",
+        "ds-gray-50": "#F9F9F9",
+        "ds-gray-100": "#F3F3F3",
+        "ds-gray-200": "#E8E8E8",
+        "ds-gray-300": "#D8D8D8",
+        "ds-gray-400": "#A9A9A9",
+        "ds-gray-500": "#808080",
+        "ds-gray-600": "#555555",
+        "ds-gray-700": "#333333",
+        "ds-gray-800": "#1A1A1A",
+      },
+      spacing: {
+        'xs': '4px',
+        'sm': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '24px',
+        '2xl': '32px',
+      },
+      borderRadius: {
+        'none': '0',
+        'sm': '4px',
+        'md': '8px',
+        'lg': '12px',
+        'full': '9999px',
+      },
+      fontSize: {
+        'xs': ['12px', '16px'],
+        'sm': ['14px', '20px'],
+        'base': ['16px', '24px'],
+        'lg': ['18px', '28px'],
+        'xl': ['20px', '28px'],
+        '2xl': ['24px', '32px'],
+        'h6': ['14px', '20px'],
+        'h5': ['16px', '24px'],
+        'h4': ['18px', '28px'],
+        'h3': ['20px', '28px'],
+        'h2': ['24px', '32px'],
+        'h1': ['32px', '40px'],
+      },
+      boxShadow: {
+        'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        'md': '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+        'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.15)',
+        'elevation-1': '0 1px 3px 0 rgba(0, 0, 0, 0.12)',
+        'elevation-2': '0 3px 6px 0 rgba(0, 0, 0, 0.15)',
       },
     },
   },

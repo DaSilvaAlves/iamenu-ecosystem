@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import logger from '../lib/logger';
 import { followersService } from '../services/followers.service';
 
 /**
@@ -30,7 +31,11 @@ export class FollowersController {
         message: 'Successfully followed user',
       });
     } catch (error: any) {
-      console.error('Error following user:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error following user failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
 
       if (error.message === 'Cannot follow yourself' || error.message === 'Already following this user') {
         return res.status(400).json({
@@ -69,7 +74,11 @@ export class FollowersController {
         message: 'Successfully unfollowed user',
       });
     } catch (error: any) {
-      console.error('Error unfollowing user:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error unfollowing user failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
 
       if (error.message === 'Not following this user') {
         return res.status(400).json({
@@ -108,7 +117,11 @@ export class FollowersController {
         data: { isFollowing },
       });
     } catch (error) {
-      console.error('Error checking follow status:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error checking follow status failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to check follow status',
@@ -139,7 +152,11 @@ export class FollowersController {
         },
       });
     } catch (error) {
-      console.error('Error fetching followers:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching followers failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch followers',
@@ -170,7 +187,11 @@ export class FollowersController {
         },
       });
     } catch (error) {
-      console.error('Error fetching following:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching following failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch following',
@@ -193,7 +214,11 @@ export class FollowersController {
         data: counts,
       });
     } catch (error) {
-      console.error('Error fetching follow counts:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching follow counts failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch follow counts',

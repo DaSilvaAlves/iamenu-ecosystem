@@ -1,6 +1,7 @@
 import { randomBytes } from 'crypto';
 import jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma';
+import logger from '../lib/logger';
 
 // Token expiration times
 const ACCESS_TOKEN_EXPIRY = '15m';  // Short-lived access token
@@ -109,7 +110,9 @@ export class RefreshTokenService {
     if (storedToken.revoked) {
       // Security: Revoke all tokens for this user (potential compromise)
       await this.revokeAllUserTokens(storedToken.userId);
-      console.warn(`[SECURITY] Token reuse detected for user ${storedToken.userId}`);
+      logger.warn('Token reuse detected - possible security compromise', {
+        userId: storedToken.userId
+      });
       return null;
     }
 

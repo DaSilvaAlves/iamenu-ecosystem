@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import logger from '../lib/logger';
 import { moderationService } from '../services/moderation.service';
 
 export class ModerationController {
@@ -37,7 +38,11 @@ export class ModerationController {
         data: report
       });
     } catch (error: any) {
-      console.error('Error creating report:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error creating report failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(400).json({
         success: false,
         error: error.message || 'Failed to create report'
@@ -68,7 +73,11 @@ export class ModerationController {
         }
       });
     } catch (error: any) {
-      console.error('Error fetching reports:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching reports failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch reports'
@@ -91,7 +100,11 @@ export class ModerationController {
         data: report
       });
     } catch (error: any) {
-      console.error('Error fetching report:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching report failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(404).json({
         success: false,
         error: error.message || 'Report not found'
@@ -134,7 +147,11 @@ export class ModerationController {
         data: report
       });
     } catch (error: any) {
-      console.error('Error reviewing report:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error reviewing report failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(400).json({
         success: false,
         error: error.message || 'Failed to review report'
@@ -177,7 +194,11 @@ export class ModerationController {
         data: result
       });
     } catch (error: any) {
-      console.error('Error removing content:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error removing content failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(400).json({
         success: false,
         error: error.message || 'Failed to remove content'
@@ -218,7 +239,11 @@ export class ModerationController {
         data: result
       });
     } catch (error: any) {
-      console.error('Error restoring content:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error restoring content failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(400).json({
         success: false,
         error: error.message || 'Failed to restore content'
@@ -252,7 +277,11 @@ export class ModerationController {
         }
       });
     } catch (error: any) {
-      console.error('Error fetching queue:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching queue failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch moderation queue'
@@ -273,7 +302,11 @@ export class ModerationController {
         data: stats
       });
     } catch (error: any) {
-      console.error('Error fetching stats:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching stats failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch queue stats'
@@ -313,7 +346,11 @@ export class ModerationController {
         message: `${result.processed} report(s) approved and content removed`
       });
     } catch (error: any) {
-      console.error('Error bulk approving:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error bulk approving failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(400).json({
         success: false,
         error: error.message || 'Failed to bulk approve'
@@ -353,7 +390,11 @@ export class ModerationController {
         message: `${result.processed} report(s) rejected`
       });
     } catch (error: any) {
-      console.error('Error bulk rejecting:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error bulk rejecting failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(400).json({
         success: false,
         error: error.message || 'Failed to bulk reject'
@@ -396,7 +437,11 @@ export class ModerationController {
         message: 'Warning issued successfully'
       });
     } catch (error: any) {
-      console.error('Error warning user:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error warning user failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(400).json({
         success: false,
         error: error.message || 'Failed to warn user'
@@ -434,7 +479,11 @@ export class ModerationController {
         message: durationDays ? `User banned for ${durationDays} days` : 'User permanently banned'
       });
     } catch (error: any) {
-      console.error('Error banning user:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error banning user failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(400).json({
         success: false,
         error: error.message || 'Failed to ban user'
@@ -461,7 +510,11 @@ export class ModerationController {
         message: 'User unbanned successfully'
       });
     } catch (error: any) {
-      console.error('Error unbanning user:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error unbanning user failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(400).json({
         success: false,
         error: error.message || 'Failed to unban user'
@@ -484,7 +537,11 @@ export class ModerationController {
         data: history
       });
     } catch (error: any) {
-      console.error('Error fetching user history:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching user history failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(400).json({
         success: false,
         error: error.message || 'Failed to fetch user history'
@@ -527,7 +584,11 @@ export class ModerationController {
         }
       });
     } catch (error: any) {
-      console.error('Error fetching logs:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error fetching logs failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to fetch moderation logs'

@@ -14,31 +14,35 @@ if (process.env.SENTRY_DSN) {
 }
 
 import app from './app';
+import logger from './lib/logger';
 
 const PORT = process.env.PORT || 3002;
 
 // Start server
 const server = app.listen(PORT, () => {
-  console.log(`
-╔═══════════════════════════════════════════════════╗
-║   🏪 Marketplace API (iaMenu)                    ║
-║   Port: ${PORT}                                       ║
-║   Health: http://localhost:${PORT}/health            ║
-║   Status: ✅ Running                             ║
-╚═══════════════════════════════════════════════════╝
-  `);
+  logger.info('Marketplace API started', {
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development',
+    health: `http://localhost:${PORT}/health`,
+  });
 });
 
 // Error Handling
 process.on('unhandledRejection', (reason: Error | any, promise: Promise<any>) => {
-  console.error('❌ Unhandled Rejection:', reason instanceof Error ? reason.message : reason);
-  if (reason instanceof Error) console.error(reason.stack);
+  const errorMessage = reason instanceof Error ? reason.message : String(reason);
+  const errorStack = reason instanceof Error ? reason.stack : undefined;
+  logger.error('Unhandled Rejection', {
+    error: errorMessage,
+    stack: errorStack,
+  });
   process.exit(1);
 });
 
 process.on('uncaughtException', (error: Error) => {
-  console.error('❌ Uncaught Exception:', error.message);
-  console.error(error.stack);
+  logger.error('Uncaught Exception', {
+    error: error.message,
+    stack: error.stack,
+  });
   process.exit(1);
 });
 

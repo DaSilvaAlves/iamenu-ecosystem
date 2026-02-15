@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import logger from '../lib/logger';
 import { refreshTokenService } from '../services/refreshToken.service';
 
 /**
@@ -64,7 +65,11 @@ export class AuthController {
         }
       });
     } catch (error) {
-      console.error('Error generating test token:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error generating test token', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to generate test token'
@@ -113,7 +118,11 @@ export class AuthController {
         expiresIn: tokens.expiresIn
       });
     } catch (error) {
-      console.error('Error refreshing token:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error refreshing token', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to refresh token'
@@ -143,7 +152,11 @@ export class AuthController {
         message: 'Logged out successfully'
       });
     } catch (error) {
-      console.error('Error logging out:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error logging out', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to logout'
@@ -172,7 +185,11 @@ export class AuthController {
         message: `Logged out from ${count} device(s)`
       });
     } catch (error) {
-      console.error('Error logging out all:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error logging out all', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to logout from all devices'
@@ -207,7 +224,11 @@ export class AuthController {
         }))
       });
     } catch (error) {
-      console.error('Error getting sessions:', error);
+      const requestLogger = (req as any).logger || logger;
+      requestLogger.error('Error getting sessions', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({
         success: false,
         error: 'Failed to get sessions'

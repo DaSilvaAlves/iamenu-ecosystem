@@ -3,6 +3,7 @@
  * SECURITY: Uses parameterized queries to prevent SQL injection
  */
 import { Request, Response, NextFunction } from 'express';
+import logger from '../lib/logger';
 import * as jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma';
 
@@ -59,7 +60,7 @@ export const rlsMiddleware = async (
 
     next();
   } catch (error) {
-    console.error('RLS middleware error:', error);
+    logger.error('RLS middleware error', { error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined });
     return res.status(401).json({ error: 'Authentication failed' });
   }
 };

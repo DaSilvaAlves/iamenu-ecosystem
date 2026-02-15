@@ -1,4 +1,6 @@
 import prisma from '../lib/prisma';
+import logger from '../lib/logger';
+import { cache } from '../lib/cache';
 import { notificationsService } from './notifications.service';
 import { extractMentions, resolveMentions } from '../utils/mention.utils';
 
@@ -10,6 +12,13 @@ export interface CreatePostDto {
   category: string;
   tags?: string[];
   imageUrl?: string;
+}
+
+export interface GetAllPostsResult {
+  posts: any[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 /**
@@ -28,7 +37,17 @@ export class PostsService {
     category?: string,
     sortBy: 'recent' | 'popular' | 'commented' = 'recent',
     userGroupIds?: string[]
-  ) {
+  ): Promise<GetAllPostsResult> {
+    // Generate cache key
+    const cacheKey = `posts:list:${JSON.stringify({ limit, offset, groupId, search, category, sortBy, userGroupIds })}`;
+
+    // Check cache first (5 minute TTL for list views)
+    const cachedPosts = cache.get(cacheKey);
+    if (cachedPosts) {
+      logger.debug('Cache hit for posts list', { cacheKey });
+      return cachedPosts;
+    }
+
     // Build where clause
     const where: any = {
       status: 'active'
@@ -65,6 +84,14 @@ export class PostsService {
       skip: offset,
       orderBy,
       include: {
+        author: {
+          select: {
+            userId: true,
+            username: true,
+            restaurantName: true,
+            profilePhoto: true,
+          },
+        },
         group: {
           select: {
             id: true,
@@ -79,24 +106,8 @@ export class PostsService {
       },
     });
 
-    // Get unique author IDs
-    const authorIds = [...new Set(posts.map(p => p.authorId))];
-
-    // Fetch all author profiles in one query
-    const authors = await prisma.profile.findMany({
-      where: {
-        userId: { in: authorIds }
-      },
-      select: {
-        userId: true,
-        username: true,
-        restaurantName: true,
-        profilePhoto: true,
-      }
-    });
-
-    // Create a map for quick lookup
-    const authorMap = new Map(authors.map(a => [a.userId, a]));
+    // Create a map for quick lookup (author is now included in posts)
+    const authorMap = new Map(posts.map(p => [p.authorId, p.author]));
 
     // OPTIMIZATION: Batch-load all reactions at once instead of N separate queries
     const postIds = posts.map(p => p.id);
@@ -143,12 +154,17 @@ export class PostsService {
 
     const total = await prisma.post.count({ where });
 
-    return {
+    const result = {
       posts: postsWithReactions,
       total,
       limit,
       offset,
     };
+
+    // Cache the result (5 minute TTL)
+    cache.set(cacheKey, result, 300);
+
+    return result;
   }
 
   /**
@@ -158,6 +174,14 @@ export class PostsService {
     const post = await prisma.post.findUnique({
       where: { id },
       include: {
+        author: {
+          select: {
+            userId: true,
+            username: true,
+            restaurantName: true,
+            profilePhoto: true,
+          },
+        },
         group: {
           select: {
             id: true,
@@ -167,15 +191,12 @@ export class PostsService {
         comments: {
           take: 5,
           orderBy: { createdAt: 'desc' },
-          include: {
-            author: {
-              select: {
-                userId: true,
-                username: true,
-                restaurantName: true,
-                profilePhoto: true,
-              },
-            },
+          select: {
+            id: true,
+            body: true,
+            authorId: true,
+            createdAt: true,
+            likes: true,
           },
         },
       },
@@ -185,23 +206,12 @@ export class PostsService {
       return null;
     }
 
-    // Fetch author profile
-    const author = await prisma.profile.findUnique({
-      where: { userId: post.authorId },
-      select: {
-        userId: true,
-        username: true,
-        restaurantName: true,
-        profilePhoto: true,
-      }
-    });
-
     return {
       ...post,
-      author: author ? {
-        userId: author.userId,
-        displayName: author.restaurantName || author.username || 'Utilizador',
-        profilePhoto: author.profilePhoto,
+      author: post.author ? {
+        userId: post.author.userId,
+        displayName: post.author.restaurantName || post.author.username || 'Utilizador',
+        profilePhoto: post.author.profilePhoto,
       } : null,
     };
   }
@@ -249,9 +259,15 @@ export class PostsService {
         }
       }
     } catch (mentionError) {
-      console.error('Failed to process mentions:', mentionError);
+      logger.warn('Failed to process mentions', {
+        error: mentionError instanceof Error ? mentionError.message : String(mentionError),
+        postId: post.id
+      });
       // Don't fail post creation if mention processing fails
     }
+
+    // Invalidate cache for posts list (new post added)
+    cache.invalidatePattern('posts:list:.*');
 
     return post;
   }
@@ -280,6 +296,10 @@ export class PostsService {
       },
     });
 
+    // Invalidate cache (post updated)
+    cache.invalidatePattern('posts:list:.*');
+    cache.invalidate(`posts:detail:${id}`);
+
     return updated;
   }
 
@@ -299,6 +319,10 @@ export class PostsService {
     await prisma.post.delete({
       where: { id },
     });
+
+    // Invalidate cache (post deleted)
+    cache.invalidatePattern('posts:list:.*');
+    cache.invalidate(`posts:detail:${id}`);
 
     return true;
   }

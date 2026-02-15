@@ -6,6 +6,7 @@ import compression from 'compression';
 import morgan from 'morgan';
 import path from 'path';
 import { errorHandler } from './middleware/errorHandler';
+import requestIdMiddleware from './middleware/requestId';
 
 // Import routes
 import suppliersRouter from './routes/suppliers';
@@ -17,7 +18,11 @@ const app: Application = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(requestIdMiddleware);
+app.use(cors({
+  origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173', 'http://localhost:5174'],
+  credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(compression());

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import logger from '../lib/logger';
 
 // Extend Express Request type para incluir user
 declare global {
@@ -55,7 +56,7 @@ export const authenticateJWT = (
     const JWT_SECRET = process.env.JWT_SECRET;
 
     if (!JWT_SECRET) {
-      console.error('JWT_SECRET not configured');
+      logger.error('JWT_SECRET not configured');
       throw new Error('JWT_SECRET not configured in environment variables');
     }
 
@@ -97,7 +98,10 @@ export const authenticateJWT = (
     }
 
     // Other errors
-    console.error('Auth middleware error:', error);
+    logger.error('Auth middleware error', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
     res.status(500).json({
       error: 'Internal Server Error',
       message: 'Authentication failed'

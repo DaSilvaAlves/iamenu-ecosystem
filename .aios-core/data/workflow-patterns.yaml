@@ -660,3 +660,4 @@ workflows:
 # - Agent sequences match actual workflow patterns from recent stories
 # - Threshold of 2 ensures workflow detection is accurate but not overly sensitive
 # - All 10 workflows now have transition definitions (Story WIS-2)
+# Pattern test
