@@ -63,21 +63,24 @@ jobs:
 
       # TD-002 FIX: Generate Prisma clients before tests
       - name: Generate Prisma Clients
-        run: npm run prisma:generate --workspaces --if-present
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/iamenu_test
+        run: |
+          for service in community marketplace academy business; do
+            if [ -d "services/$service/prisma" ]; then
+              cd services/$service
+              DATABASE_URL="postgresql://postgres:postgres@localhost:5432/iamenu_test?schema=$service" npx prisma generate
+              cd ../..
+            fi
+          done
 
       - name: Run database migrations
         run: |
           for service in community marketplace academy business; do
             if [ -d "services/$service/prisma" ]; then
               cd services/$service
-              npx prisma migrate deploy --skip-seed || true
+              DATABASE_URL="postgresql://postgres:postgres@localhost:5432/iamenu_test?schema=$service" npx prisma migrate deploy --skip-seed || true
               cd ../..
             fi
           done
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/iamenu_test
 
       - name: Run tests
         run: npm test -- --forceExit --testTimeout=60000
