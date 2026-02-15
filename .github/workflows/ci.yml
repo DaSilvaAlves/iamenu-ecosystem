@@ -89,7 +89,7 @@ jobs:
           for service in community marketplace academy business; do
             if [ -d "services/$service/prisma" ]; then
               cd services/$service
-              DATABASE_URL="postgresql://postgres:postgres@localhost:5432/iamenu_test?schema=$service" npx prisma migrate deploy --skip-seed || true
+              DATABASE_URL="postgresql://postgres:postgres@localhost:5432/iamenu_test?schema=$service" npx prisma db push --skip-generate
               cd ../..
             fi
           done
