@@ -3,8 +3,8 @@
  * Validates that RLS policies prevent data leakage
  */
 
-import prisma from '../lib/prisma';
-import { setRLSContext, clearRLSContext } from '../middleware/rls';
+import prisma from '../../src/lib/prisma';
+import { setRLSContext, clearRLSContext } from '../../src/middleware/rls';
 
 describe('RLS: Community Service Security Tests', () => {
   const user1 = 'user-1';

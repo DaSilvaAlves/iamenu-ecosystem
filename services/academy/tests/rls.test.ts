@@ -2,8 +2,8 @@
  * RLS Security Tests - Academy Service
  */
 
-import prisma from '../lib/prisma';
-import { setRLSContext, clearRLSContext } from '../middleware/rls';
+import prisma from '../../src/lib/prisma';
+import { setRLSContext, clearRLSContext } from '../../src/middleware/rls';
 
 describe('RLS: Academy Service - Student Privacy', () => {
   const student1 = 'student-1';

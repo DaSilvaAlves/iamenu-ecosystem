@@ -3,8 +3,8 @@
  * Validates supplier/buyer data isolation
  */
 
-import prisma from '../lib/prisma';
-import { setRLSContext, clearRLSContext } from '../middleware/rls';
+import prisma from '../../src/lib/prisma';
+import { setRLSContext, clearRLSContext } from '../../src/middleware/rls';
 
 describe('RLS: Marketplace Service - Data Isolation', () => {
   const supplier1 = 'supplier-1';

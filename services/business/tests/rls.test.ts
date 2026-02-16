@@ -3,8 +3,8 @@
  * Validates restaurant data isolation for financial data
  */
 
-import prisma from '../lib/prisma';
-import { setRLSContext, clearRLSContext } from '../middleware/rls';
+import prisma from '../../src/lib/prisma';
+import { setRLSContext, clearRLSContext } from '../../src/middleware/rls';
 
 describe('RLS: Business Service - CRITICAL Restaurant Isolation', () => {
   const owner1 = 'owner-1';
