@@ -45,7 +45,7 @@ export class PostsService {
     const cachedPosts = cache.get(cacheKey);
     if (cachedPosts) {
       logger.debug('Cache hit for posts list', { cacheKey });
-      return cachedPosts;
+      return cachedPosts as GetAllPostsResult;
     }
 
     // Build where clause
