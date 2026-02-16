@@ -100,8 +100,7 @@ jobs:
       # - TypeScript Decimal type issues in services
       # - Missing test fixture files
       # Will be re-enabled after test refactoring
-      - name: Run tests (DISABLED - needs refactoring)
-        if: false
+      - name: Run tests
         run: npm test -- --forceExit --testTimeout=60000
         timeout-minutes: 20
         env:
@@ -119,11 +118,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    # TODO: Fix Decimal type issues in dashboard.service.ts
-    # Currently disabled due to: https://github.com/DaSilvaAlves/iamenu-ecosystem/issues/XXX
-    # Operator '+=' cannot be applied to types 'number' and 'Decimal'
-    # Will be re-enabled after type casting fixes
-    if: false
+    needs: test
 
     steps:
       - uses: actions/checkout@v4

@@ -352,7 +352,7 @@ export class DashboardService {
         trends[key] = { revenue: 0, orders: 0 };
       }
 
-      trends[key].revenue += order.total;
+      trends[key].revenue += toNum(order.total);
       trends[key].orders += 1;
     });
 
@@ -409,14 +409,14 @@ export class DashboardService {
     }
 
     // Calcular métricas
-    const totalRevenue = products.reduce((sum, p) => sum + p.totalRevenue, 0);
+    const totalRevenue = products.reduce((sum, p) => sum + toNum(p.totalRevenue), 0);
     const avgSales = products.reduce((sum, p) => sum + p.sales, 0) / products.length;
-    const margins = products.map(p => ((p.price - p.cost) / p.price) * 100);
+    const margins = products.map(p => ((toNum(p.price) - toNum(p.cost)) / toNum(p.price)) * 100);
     const avgMargin = margins.reduce((sum, m) => sum + m, 0) / margins.length;
 
     // Classificar produtos
     const classified = products.map(p => {
-      const margin = ((p.price - p.cost) / p.price) * 100;
+      const margin = ((toNum(p.price) - toNum(p.cost)) / toNum(p.price)) * 100;
       const isHighMargin = margin > avgMargin;
       const isHighVolume = p.sales > avgSales;
 
@@ -449,20 +449,20 @@ export class DashboardService {
     const dogs = classified.filter(p => p.classification === 'dog');
 
     // Calcular potencial de revenue por categoria
-    const gemsPotential = gems.reduce((sum, p) => sum + (p.price * 50), 0); // Se venderem 50 unidades
+    const gemsPotential = gems.reduce((sum, p) => sum + (toNum(p.price) * 50), 0); // Se venderem 50 unidades
     const popularsPotential = populars.reduce((sum, p) => {
       // Se aumentarem margem em 5%
-      const currentProfit = (p.price - p.cost) * p.sales;
-      const newPrice = p.price * 1.05;
-      const newProfit = (newPrice - p.cost) * p.sales;
+      const currentProfit = (toNum(p.price) - toNum(p.cost)) * p.sales;
+      const newPrice = toNum(p.price) * 1.05;
+      const newProfit = (newPrice - toNum(p.cost)) * p.sales;
       return sum + (newProfit - currentProfit);
     }, 0);
 
     return {
-      stars: stars.sort((a, b) => b.revenue - a.revenue),
+      stars: stars.sort((a, b) => toNum(b.revenue) - toNum(a.revenue)),
       gems: gems.sort((a, b) => b.margin - a.margin),
       populars: populars.sort((a, b) => b.sales - a.sales),
-      dogs: dogs.sort((a, b) => a.revenue - b.revenue),
+      dogs: dogs.sort((a, b) => toNum(a.revenue) - toNum(b.revenue)),
       summary: {
         totalProducts: products.length,
         totalRevenue,
@@ -526,7 +526,7 @@ export class DashboardService {
 
     orders.forEach(order => {
       const dayOfWeek = new Date(order.orderDate).getDay();
-      salesByDayOfWeek[dayOfWeek].push(order.total);
+      salesByDayOfWeek[dayOfWeek].push(toNum(order.total));
     });
 
     // Próximo dia da semana
@@ -557,7 +557,7 @@ export class DashboardService {
     });
 
     const topProduct = products[0];
-    const estimatedCovers = Math.round(avgTomorrowRevenue / (restaurant.averageTicket || 25));
+    const estimatedCovers = Math.round(avgTomorrowRevenue / toNum(restaurant.averageTicket || 25));
 
     // Gerar sugestão
     const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -631,7 +631,7 @@ export class DashboardService {
 
     orders.forEach(order => {
       const dayOfWeek = new Date(order.orderDate).getDay();
-      salesByDayOfWeek[dayOfWeek].revenue.push(order.total);
+      salesByDayOfWeek[dayOfWeek].revenue.push(toNum(order.total));
       salesByDayOfWeek[dayOfWeek].orders.push(1);
     });
 
@@ -741,7 +741,7 @@ export class DashboardService {
       const hour = date.getHours();
 
       heatmapData[dayOfWeek][hour].count += 1;
-      heatmapData[dayOfWeek][hour].revenue += order.total;
+      heatmapData[dayOfWeek][hour].revenue += toNum(order.total);
     });
 
     // Encontrar intensidade máxima (para normalização)
@@ -838,12 +838,12 @@ export class DashboardService {
     });
 
     // Calcular métricas do restaurante
-    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+    const totalRevenue = orders.reduce((sum, o) => sum + toNum(o.total), 0);
     const totalOrders = orders.length;
     const avgTicket = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
     // Food Cost médio
-    const foodCosts = products.map(p => (p.cost / p.price) * 100);
+    const foodCosts = products.map(p => (toNum(p.cost) / toNum(p.price)) * 100);
     const avgFoodCost = foodCosts.length > 0
       ? foodCosts.reduce((sum, fc) => sum + fc, 0) / foodCosts.length
       : 0;
