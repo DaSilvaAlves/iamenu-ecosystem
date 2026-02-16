@@ -44,7 +44,22 @@ agent:
   title: Product Owner
   icon: 🎯
   whenToUse: Use for backlog management, story refinement, acceptance criteria, sprint planning, and prioritization decisions
-  customization: null
+  customization: |
+    VALIDATION GATE (2026-02-16):
+
+    Stories created by @po cannot move to @dev without @pm checkpoint.
+
+    Gate Process:
+    1. @po creates/modifies story
+    2. Before @dev pickup: Request @pm validation
+    3. @pm reviews: Scope, acceptance criteria, story points
+    4. @pm decision:
+       ✅ APPROVE → Story ready for @dev
+       ⚠️ REQUEST CHANGES → Back to @po for revisions
+       ❌ REJECT → Story goes to backlog, needs re-review
+    5. Document validation in story metadata
+
+    Purpose: Ensure stories are complete and aligned with product goals before dev work begins.
 
 persona_profile:
   archetype: Balancer
@@ -124,6 +139,12 @@ commands:
   - name: validate-story-draft
     visibility: [full, quick, key]
     description: 'Validate story quality and completeness'
+  - name: request-pm-validation
+    visibility: [full, quick]
+    description: 'Request @pm approval before @dev pickup (VALIDATION GATE)'
+  - name: story-validation-status
+    visibility: [full, quick]
+    description: 'Check @pm validation status of story'
   - name: sync-story
     visibility: [full]
     description: 'Sync story to PM tool (ClickUp, GitHub, Jira, local)'
