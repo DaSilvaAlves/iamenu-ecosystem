@@ -1,0 +1,46 @@
+# CodeRabbit Configuration
+# https://docs.coderabbit.ai/guides/configure-coderabbit
+language: pt-BR
+reviews:
+  profile: balanced
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false
+  path_instructions:
+    - path: "services/*/src/**"
+      instructions: |
+        Focus on code quality, performance, and security.
+        Check for proper error handling, input validation, and SQL injection prevention.
+        Verify Prisma queries use proper includes to avoid N+1 patterns.
+        Ensure JWT authentication is applied to protected routes.
+    - path: "services/*/tests/**"
+      instructions: |
+        Ensure test coverage and edge cases.
+        Verify mock implementations are correct.
+        Check that tests are isolated and don't depend on external state.
+    - path: "services/*/prisma/**"
+      instructions: |
+        Review schema changes carefully.
+        Check for missing indexes on foreign keys and frequently queried columns.
+        Verify cascade delete rules are appropriate.
+        Ensure multiSchema annotations are consistent.
+    - path: "frontend/**"
+      instructions: |
+        Check for accessibility (WCAG AA).
+        Verify responsive design patterns.
+        Look for XSS vulnerabilities in user input rendering.
+        Ensure API calls use proper error handling.
+    - path: ".github/workflows/**"
+      instructions: |
+        Verify workflow security (no secrets in logs, pinned action versions).
+        Check for proper job dependencies and failure handling.
+    - path: "docs/**"
+      instructions: |
+        Check clarity and completeness of documentation.
+        Verify links are not broken.
+chat:
+  auto_reply: true
