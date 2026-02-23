@@ -94,12 +94,6 @@ jobs:
             fi
           done
 
-      # TODO: Fix test issues - https://github.com/DaSilvaAlves/iamenu-ecosystem/issues/XXX
-      # Tests disabled temporarily due to:
-      # - Cannot find module errors (prisma imports)
-      # - TypeScript Decimal type issues in services
-      # - Missing test fixture files
-      # Will be re-enabled after test refactoring
       - name: Run tests
         run: npm test -- --forceExit --testTimeout=60000
         timeout-minutes: 20
@@ -135,7 +129,7 @@ jobs:
       - name: Generate Prisma Clients
         run: npm run prisma:generate --workspaces --if-present
 
-      - name: Build all services (DISABLED - needs Decimal type fixes)
+      - name: Build all services
         run: npm run build --workspaces --if-present
 
   security:

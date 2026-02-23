@@ -75,34 +75,31 @@ export const getSupplierById = async (supplierId: string) => {
 
 export const updateSupplier = async (supplierId: string, data: any) => {
   try {
-    // Parse JSON strings from FormData (categories and certifications come as JSON strings)
-    // Handle empty strings to avoid JSON.parse errors
+    // Parse JSON strings from FormData (categories, certifications, deliveryZones come as JSON strings)
     let parsedCategories: string[] = [];
     let parsedCertifications: string[] = [];
+    let parsedDeliveryZones: string[] = [];
 
-    try {
-      parsedCategories = typeof data.categories === 'string' && data.categories !== ''
-        ? JSON.parse(data.categories)
-        : (Array.isArray(data.categories) ? data.categories : []);
-    } catch (e) {
-      logger.warn('Error parsing categories', {
-        error: e instanceof Error ? e.message : String(e),
-        input: data.categories
-      });
-      parsedCategories = [];
-    }
+    const parseJsonArray = (input: any, fieldName: string): string[] => {
+      if (Array.isArray(input)) return input;
+      if (typeof input === 'string' && input.trim() !== '') {
+        try {
+          const parsed = JSON.parse(input);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+          logger.warn(`Error parsing ${fieldName}`, {
+            error: e instanceof Error ? e.message : String(e),
+            input
+          });
+          return [];
+        }
+      }
+      return [];
+    };
 
-    try {
-      parsedCertifications = typeof data.certifications === 'string' && data.certifications !== ''
-        ? JSON.parse(data.certifications)
-        : (Array.isArray(data.certifications) ? data.certifications : []);
-    } catch (e) {
-      logger.warn('Error parsing certifications', {
-        error: e instanceof Error ? e.message : String(e),
-        input: data.certifications
-      });
-      parsedCertifications = [];
-    }
+    parsedCategories = parseJsonArray(data.categories, 'categories');
+    parsedCertifications = parseJsonArray(data.certifications, 'certifications');
+    parsedDeliveryZones = parseJsonArray(data.deliveryZones, 'deliveryZones');
 
     // Sanitize data: convert empty strings to null for optional fields
     const sanitizedData: any = {
@@ -110,24 +107,28 @@ export const updateSupplier = async (supplierId: string, data: any) => {
     };
 
     // Only update fields that are provided and not empty
-    if (data.companyName && data.companyName !== '') {
-      sanitizedData.companyName = data.companyName;
+    if (data.companyName !== undefined) {
+      sanitizedData.companyName = data.companyName || '';
     }
 
     if (data.description !== undefined) {
       sanitizedData.description = data.description || null;
     }
 
-    if (parsedCategories.length > 0) {
+    if (data.productsDescription !== undefined) {
+      sanitizedData.productsDescription = data.productsDescription || null;
+    }
+
+    if (data.categories !== undefined) {
       sanitizedData.categories = parsedCategories;
     }
 
-    if (data.locationCity && data.locationCity !== '') {
-      sanitizedData.locationCity = data.locationCity;
+    if (data.locationCity !== undefined) {
+      sanitizedData.locationCity = data.locationCity || null;
     }
 
-    if (data.locationRegion && data.locationRegion !== '') {
-      sanitizedData.locationRegion = data.locationRegion;
+    if (data.locationRegion !== undefined) {
+      sanitizedData.locationRegion = data.locationRegion || null;
     }
 
     // Handle boolean - check if it was explicitly set
@@ -135,57 +136,69 @@ export const updateSupplier = async (supplierId: string, data: any) => {
       sanitizedData.nationalDelivery = data.nationalDelivery === 'true' || data.nationalDelivery === true;
     }
 
+    if (data.priceListPublic !== undefined) {
+      sanitizedData.priceListPublic = data.priceListPublic === 'true' || data.priceListPublic === true;
+    }
+
     // Handle logo and header images
-    if (data.logoUrl && data.logoUrl !== '') {
-      sanitizedData.logoUrl = data.logoUrl;
+    if (data.logoUrl !== undefined) {
+      sanitizedData.logoUrl = data.logoUrl || null;
     }
 
-    if (data.headerImageUrl && data.headerImageUrl !== '') {
-      sanitizedData.headerImageUrl = data.headerImageUrl;
+    if (data.headerImageUrl !== undefined) {
+      sanitizedData.headerImageUrl = data.headerImageUrl || null;
     }
 
-    // Handle certifications (only update if provided)
+    if (data.catalogPdfUrl !== undefined) {
+      sanitizedData.catalogPdfUrl = data.catalogPdfUrl || null;
+    }
+
+    // Handle certifications
     if (data.certifications !== undefined) {
       sanitizedData.certifications = parsedCertifications;
     }
 
+    // Handle delivery zones
+    if (data.deliveryZones !== undefined) {
+      sanitizedData.deliveryZones = parsedDeliveryZones;
+    }
+
     // Handle optional string fields
     if (data.contactPhone !== undefined) {
-      sanitizedData.contactPhone = data.contactPhone && data.contactPhone !== '' ? data.contactPhone : null;
+      sanitizedData.contactPhone = data.contactPhone || null;
     }
 
     if (data.contactEmail !== undefined) {
-      sanitizedData.contactEmail = data.contactEmail && data.contactEmail !== '' ? data.contactEmail : null;
+      sanitizedData.contactEmail = data.contactEmail || null;
     }
 
     if (data.contactWebsite !== undefined) {
-      sanitizedData.contactWebsite = data.contactWebsite && data.contactWebsite !== '' ? data.contactWebsite : null;
+      sanitizedData.contactWebsite = data.contactWebsite || null;
     }
 
     if (data.deliveryCost !== undefined) {
-      sanitizedData.deliveryCost = data.deliveryCost && data.deliveryCost !== '' ? data.deliveryCost : null;
+      sanitizedData.deliveryCost = data.deliveryCost || null;
     }
 
     if (data.deliveryFrequency !== undefined) {
-      sanitizedData.deliveryFrequency = data.deliveryFrequency && data.deliveryFrequency !== '' ? data.deliveryFrequency : null;
+      sanitizedData.deliveryFrequency = data.deliveryFrequency || null;
     }
 
     // Handle minOrder - must be a valid number or null
     if (data.minOrder !== undefined) {
-      if (data.minOrder && data.minOrder !== '') {
+      if (data.minOrder !== null && data.minOrder !== '') {
         const parsedMinOrder = parseFloat(data.minOrder);
-        // Only set if it's a valid number (not NaN)
-        sanitizedData.minOrder = !isNaN(parsedMinOrder) ? parsedMinOrder.toString() : null;
+        sanitizedData.minOrder = !isNaN(parsedMinOrder) ? parsedMinOrder : null;
       } else {
         sanitizedData.minOrder = null;
       }
     }
 
     if (data.paymentTerms !== undefined) {
-      sanitizedData.paymentTerms = data.paymentTerms && data.paymentTerms !== '' ? data.paymentTerms : null;
+      sanitizedData.paymentTerms = data.paymentTerms || null;
     }
 
-    logger.debug('Updating supplier with data', { sanitizedData });
+    logger.debug('Updating supplier with data', { supplierId, sanitizedData });
 
     // Update supplier in database
     const updatedSupplier = await prisma.supplier.update({
@@ -207,7 +220,8 @@ export const updateSupplier = async (supplierId: string, data: any) => {
     logger.error('Error updating supplier', {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
-      supplierId
+      supplierId,
+      inputData: data
     });
     throw error;
   }

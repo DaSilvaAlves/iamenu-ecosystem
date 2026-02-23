@@ -51,43 +51,28 @@ export const createSupplier = asyncHandler(async (req: Request, res: Response) =
     return;
   }
 
-  // Parse arrays if they come as JSON strings (from FormData)
-  let categories: string[] = [];
-  let certifications: string[] = [];
-  let deliveryZones: string[] = [];
-
-  try {
-    categories = typeof data.categories === 'string' ? JSON.parse(data.categories) : (data.categories || []);
-  } catch { categories = []; }
-
-  try {
-    certifications = typeof data.certifications === 'string' ? JSON.parse(data.certifications) : (data.certifications || []);
-  } catch { certifications = []; }
-
-  try {
-    deliveryZones = typeof data.deliveryZones === 'string' ? JSON.parse(data.deliveryZones) : (data.deliveryZones || []);
-  } catch { deliveryZones = []; }
+  // The service now handles parsing of JSON strings for arrays and conversion of minOrder,
+  // but for createSupplier we'll pass the parsed values to maintain the existing interface
+  const parseJsonArray = (input: any): string[] => {
+    if (Array.isArray(input)) return input;
+    if (typeof input === 'string' && input.trim() !== '') {
+      try {
+        const parsed = JSON.parse(input);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch { return []; }
+    }
+    return [];
+  };
 
   const supplierData = {
-    userId: data.userId,
-    companyName: data.companyName,
-    description: data.description,
-    categories,
-    locationCity: data.locationCity,
-    locationRegion: data.locationRegion,
-    nationalDelivery: data.nationalDelivery === 'true' || data.nationalDelivery === true,
-    contactPhone: data.contactPhone,
-    contactEmail: data.contactEmail,
-    contactWebsite: data.contactWebsite,
+    ...data,
+    categories: parseJsonArray(data.categories),
+    certifications: parseJsonArray(data.certifications),
+    deliveryZones: parseJsonArray(data.deliveryZones),
     logoUrl,
     headerImageUrl,
-    productsDescription: data.productsDescription,
-    certifications,
-    deliveryZones,
-    deliveryCost: data.deliveryCost,
-    deliveryFrequency: data.deliveryFrequency,
+    nationalDelivery: data.nationalDelivery === 'true' || data.nationalDelivery === true,
     minOrder: data.minOrder ? parseFloat(data.minOrder) : undefined,
-    paymentTerms: data.paymentTerms,
   };
 
   const supplier = await supplierService.createSupplier(supplierData);
@@ -110,6 +95,7 @@ export const updateSupplier = asyncHandler(async (req: Request, res: Response) =
     ...(headerImageUrl && { headerImageUrl })
   };
 
+  // Pass everything to the service, which now handles sanitization and parsing robustly
   const updatedSupplier = await supplierService.updateSupplier(id, updateData);
 
   if (!updatedSupplier) {

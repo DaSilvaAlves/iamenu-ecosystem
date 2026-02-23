@@ -18,7 +18,7 @@ echo.
 :: Marketplace: 3005
 :: Business:    3002
 :: Academy:     3003
-:: PostgreSQL:  5432 (Docker)
+:: PostgreSQL:  5433 (Docker)
 :: ===================================================================
 
 set PROJECT_ROOT=C:\Users\XPS\Documents\iamenu-ecosystem
@@ -55,7 +55,7 @@ if %ERRORLEVEL% NEQ 0 (
         -e POSTGRES_USER=postgres ^
         -e POSTGRES_PASSWORD=postgres ^
         -e POSTGRES_DB=iamenu ^
-        -p 5432:5432 ^
+        -p 5433:5432 ^
         -v iamenu-postgres-data:/var/lib/postgresql/data ^
         postgres:15
 ) else (
@@ -74,7 +74,7 @@ if %ERRORLEVEL% NEQ 0 (
 :: Aguardar PostgreSQL ficar pronto
 echo      Aguardando PostgreSQL ficar pronto...
 timeout /t 3 /nobreak >nul
-echo      ✅ PostgreSQL iniciado (porta 5432)
+echo      ✅ PostgreSQL iniciado (porta 5433)
 
 :: ===================================================================
 :: PASSO 3: Iniciar Backend Services

@@ -89,6 +89,16 @@ app.use(`${API_BASE}/dashboard`, dashboardRouter);
 // Error Handling
 // ===================================
 
+// 404 handler
+app.use((req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    error: 'Route not found',
+    path: req.path
+  });
+});
+
+// Error handler (must be after 404 handler)
 app.use((err: Error, req: Request, res: Response, next: any) => {
   logger.error('Unhandled application error', {
     error: err instanceof Error ? err.message : String(err),
@@ -97,15 +107,6 @@ app.use((err: Error, req: Request, res: Response, next: any) => {
   res.status(500).json({
     success: false,
     error: err.message || 'Internal Server Error'
-  });
-});
-
-// 404 handler
-app.use((req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    error: 'Route not found',
-    path: req.path
   });
 });
 

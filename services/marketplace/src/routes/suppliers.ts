@@ -13,7 +13,7 @@ router.get('/', supplierController.getAllSuppliers); // List all suppliers
 router.use('/:supplierId/reviews', reviewsRouter);
 
 // Routes that require authentication
-router.post('/', authenticateJWT, supplierController.createSupplier); // Create a new supplier
+router.post('/', authenticateJWT, upload.fields([{ name: 'logoFile', maxCount: 1 }, { name: 'headerFile', maxCount: 1 }]), supplierController.createSupplier); // Create a new supplier
 router.get('/:id', supplierController.getSupplierById); // Get supplier by ID (can be public, but could also be protected for specific details)
 router.patch('/:id', authenticateJWT, upload.fields([{ name: 'logoFile', maxCount: 1 }, { name: 'headerFile', maxCount: 1 }]), supplierController.updateSupplier); // Update a supplier
 router.delete('/:id', authenticateJWT, supplierController.deleteSupplier); // Delete a supplier
