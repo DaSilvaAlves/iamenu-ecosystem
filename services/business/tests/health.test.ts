@@ -47,8 +47,9 @@ describe('404 Handler', () => {
       .get('/unknown-route-that-does-not-exist')
       .expect(404);
 
-    expect(response.body.success).toBe(false);
-    expect(response.body.error).toBe('Route not found');
+    expect(response.body.status).toBe(404);
+    expect(response.body.error).toBe('NOT_FOUND');
+    expect(response.body.message).toBe('Route not found');
   });
 
   it('should return 404 for unknown API routes', async () => {
@@ -56,8 +57,9 @@ describe('404 Handler', () => {
       .get('/api/v1/business/unknown')
       .expect(404);
 
-    expect(response.body.success).toBe(false);
-    expect(response.body.error).toBe('Route not found');
+    expect(response.body.status).toBe(404);
+    expect(response.body.error).toBe('NOT_FOUND');
+    expect(response.body.message).toBe('Route not found');
   });
 });
 

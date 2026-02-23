@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import logger from './lib/logger';
 import requestIdMiddleware from './middleware/requestId';
+import { errorHandler } from './middleware/errorHandler';
 
 // Load environment variables
 dotenv.config();
@@ -96,22 +97,15 @@ app.use(`${API_BASE}/dashboard`, dashboardRouter);
 // 404 handler
 app.use((req: Request, res: Response) => {
   res.status(404).json({
-    success: false,
-    error: 'Route not found',
-    path: req.path
+    status: 404,
+    error: 'NOT_FOUND',
+    message: 'Route not found',
+    path: req.path,
+    timestamp: new Date().toISOString()
   });
 });
 
-// Error handler (must be after 404 handler)
-app.use((err: Error, req: Request, res: Response, next: any) => {
-  logger.error('Unhandled application error', {
-    error: err instanceof Error ? err.message : String(err),
-    stack: err instanceof Error ? err.stack : undefined
-  });
-  res.status(500).json({
-    success: false,
-    error: err.message || 'Internal Server Error'
-  });
-});
+// Global error handler
+app.use(errorHandler);
 
 export default app;

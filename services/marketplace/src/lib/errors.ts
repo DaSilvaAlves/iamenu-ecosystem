@@ -1,12 +1,15 @@
 /**
- * Unified Error Handler Middleware
- * Applied to all services: Community, Marketplace, Academy, Business
+ * Unified Error Classes and Handler
+ * Standard error handling for all iaMenu services
  */
 
 import { Request, Response, NextFunction } from 'express';
 import logger from './logger';
 
-// Custom error types
+// ===================================
+// Error Classes
+// ===================================
+
 export class ApiError extends Error {
   constructor(
     public code: string,
@@ -48,7 +51,16 @@ export class ConflictError extends ApiError {
   }
 }
 
-// Error handler middleware
+export class RateLimitError extends ApiError {
+  constructor(message: string = 'Too many requests') {
+    super('RATE_LIMITED', message, 429);
+  }
+}
+
+// ===================================
+// Error Handler Middleware
+// ===================================
+
 export const errorHandler = (
   err: any,
   req: Request,
@@ -58,37 +70,39 @@ export const errorHandler = (
   const statusCode = err.statusCode || 500;
   const code = err.code || 'INTERNAL_SERVER_ERROR';
   const message = err.message || 'An unexpected error occurred';
+  const requestId = (req as any).requestId || (req as any).id;
 
-  // Log error
+  // Log error with correlation ID
   const requestLogger = (req as any).logger || logger;
   requestLogger.error('API error', {
     code,
     message,
     statusCode,
+    requestId,
     path: req.path,
     method: req.method,
-    userId: (req as any).userId,
-    stack: err.stack
+    userId: (req as any).userId || (req as any).user?.userId,
+    stack: err instanceof Error ? err.stack : undefined
   });
 
-  // Send response
+  // Send standardized response
   res.status(statusCode).json({
+    status: statusCode,
     error: code,
     message,
-    statusCode,
+    ...(requestId && { requestId }),
     timestamp: new Date().toISOString(),
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-    ...(err.details && { details: err.details })
+    ...(err.details && { details: err.details }),
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
 };
 
-// Async wrapper to catch errors
+// ===================================
+// Async Handler Wrapper
+// ===================================
+
 export const asyncHandler = (
-  fn: (req: Request, res: Response, next: NextFunction) => Promise<void> | void
-) => (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<any>
+) => (req: Request, res: Response, next: NextFunction) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
