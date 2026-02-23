@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import path from 'path';
 import logger from './lib/logger';
+import requestIdMiddleware from './middleware/requestId';
 
 // Load environment variables
 dotenv.config();
@@ -24,6 +25,9 @@ const app: Application = express();
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
+
+// Request ID for distributed tracing
+app.use(requestIdMiddleware);
 
 // CORS
 app.use(cors({
