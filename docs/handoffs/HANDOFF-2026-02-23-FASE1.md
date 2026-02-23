@@ -1,113 +1,378 @@
-# HANDOFF - Sessão 2026-02-23 - Cenário C: Produto Pronto
+# HANDOFF COMPLETO - Sessão 2026-02-23
 
-**Data:** 2026-02-23
-**Contexto:** Plano de 5 fases para terminar o iaMenu Ecosystem (Cenário C ~184h)
-**Estado:** Fase 1 em curso, activar @dev imediatamente
+## INSTRUÇÕES PARA A NOVA SESSÃO
 
----
+**Cola este documento inteiro como primeira mensagem na nova janela do Claude Code.**
 
-## ACÇÃO IMEDIATA NA NOVA SESSÃO
+Depois escreve exactamente:
 
 ```
-1. Cola este handoff inteiro como primeira mensagem
-2. Activa @dev: /AIOS:agents:dev
-3. Diz: "Continua a Fase 1 - Task 12: Migrar 61 ficheiros .jsx para .tsx"
+Lê o handoff acima. Activa /AIOS:agents:dev e continua a Fase 1, tarefa actual:
+Migrar os 61 ficheiros .jsx restantes para .tsx no frontend (TECH-DEBT-002.1).
+Depois da migração TS, continua com as restantes tarefas da Fase 1 e Fases 2-4 do Cenário C.
 ```
 
 ---
 
-## ESTADO ACTUAL DO PROJECTO
+## 1. O QUE É ESTE PROJECTO
 
-### Fase 0: COMPLETA ✅
-Commits pushed para origin/main:
-- `9f4f631` fix: stabilize project (CI build, error handling, suppliers refactor, Railway configs)
-- `9dc21be` chore: configure GitHub DevOps infrastructure (repo público, branch protection, CodeRabbit)
-- `9cae3df` fix: add prisma migrate deploy to academy Railway build
-- `44de272` fix: add requestId middleware to business, body-parser limits to academy
-- `5122e55` feat: standardize error handling across all 4 services [Story 2.4]
+**iaMenu Ecosystem** — Plataforma para restaurantes portugueses com 4 serviços backend (Node.js/Express/Prisma/PostgreSQL) + 1 frontend (React 18 + Vite).
 
-### Fase 1: EM CURSO 🟡
+| Serviço | Port Local | Produção Railway |
+|---------|-----------|-----------------|
+| Community | 3001 | iamenucommunity-api-production.up.railway.app ✅ |
+| Marketplace | 3002 | iamenumarketplace-api-production.up.railway.app ✅ |
+| Academy | 3003 | iamenuacademy-api-production.up.railway.app ❌ 502 |
+| Business | 3004 | iamenubusiness-api-production.up.railway.app ❌ 502 |
+| Frontend | 5173 | prototype-vision.vercel.app ✅ |
 
-| # | Tarefa | Estado | Agente |
-|---|--------|--------|--------|
-| 1.8 | requestIdMiddleware no Business | ✅ DONE | @dev |
-| 1.9 | body-parser limits no Academy | ✅ DONE | @dev |
-| 1.3 | Error Handling standardization (4 serviços) | ✅ DONE | @dev |
-| 1.1 | **TS Migration - Migrar 61 .jsx → .tsx** | 🟡 **NEXT** | @dev |
-| 1.7 | Marketplace multiSchema fix | ⬜ PENDING | @dev |
-| 1.4 | Test Coverage expansion 85% | ⬜ PENDING | @dev |
-| 1.5 | INF-004: Sentry monitoring | ⬜ PENDING (user sem conta) | @devops |
-| 1.6 | INF-006: Health Dashboard | 🟡 Academy/Business 502 | @devops |
-
-### TAREFA ACTUAL → Migrar 61 .jsx para .tsx
-
-**Story:** TECH-DEBT-002.1 (docs/stories/story-TECH-DEBT-002.1.md)
-**O que já foi feito:** Tasks 2.1.1-2.1.5 completas (setup TS, 30 ficheiros .tsx criados, utilities migradas, config migrada, validação OK)
-**O que falta:** 61 ficheiros .jsx no frontend/apps/prototype-vision/src/ precisam ser convertidos para .tsx
-
-**Ficheiros .jsx a migrar (61 total):**
-- `App.jsx`, `main.jsx` (root)
-- `components/` (13 ficheiros): BenchmarkChart, DemandForecastChart, ErrorBoundary, MentionInput, MenuEngineeringMatrix, NotificationBadge, NotificationsPanel, PeakHoursHeatmap, SalesTrendChart, Sidebar, TextRenderer, TopBar
-- `views/` (42 ficheiros): Academy, AlertsView, ChatView, CommunityView, ComparisonTab, CopyStudioView, DashboardBI, FoodCostView, GastroLens, GroupDetailView, GroupsView, HubsRegionaisView, IncomingRfqTab, MarketingPlanner, Marketplace, OnboardingView, OrdersView, PaymentsAutomationView, ProductsView, ProfilesTab, ProfileView, ResponsesTab, RfqRequestsTab, RfqTab, SearchView, StaffAIView, SupplierDetail, TakewayLandingView, TokenLogin, TourRapidoView, UpgradePROView, VisaoEcossistemaView
-- `views/hubs-regionais/` (4): CreatePostModal, HubFeed, HubFeedback, HubResources
-- `views/reputacao-online/` (5): AlertSettings, Dashboard, Inbox, ReviewCard, ReviewDetail
-- `views/staff-ai/` (5): StaffAnnouncements, StaffDashboard, StaffOnboarding, StaffSchedule, StaffTeam
-
-**Abordagem recomendada:**
-1. Renomear todos os .jsx → .tsx em batch (git mv)
-2. Correr tsc --noEmit para ver erros
-3. Corrigir erros de tipo por directório (components/ primeiro, depois views/)
-4. Validar build no final
+**Repo:** github.com/DaSilvaAlves/iamenu-ecosystem (público, branch protection activa em main)
 
 ---
 
-## PLANO COMPLETO (Cenário C - 5 Fases)
+## 2. PLANO GLOBAL: CENÁRIO C — PRODUTO PRONTO (~184h, 3-4 semanas)
 
-### Fase 0: Estabilização ✅ DONE (6h)
+Plano de 5 fases para terminar o projecto. Aprovado pelo user na sessão de hoje.
+
+### Fase 0: Estabilização ✅ COMPLETA
+- CI build re-enabled, error handler order corrigido, suppliers refactored
+- Repo tornado público, branch protection (Lint/Test/Build), CodeRabbit config
+- Railway configs actualizados, requestId middleware, body-parser limits
+
 ### Fase 1: Completar Tech Debt 🟡 EM CURSO (~38h)
+- **Concluído:** Error handling standardizado (4 serviços), requestId no business, body-parser no academy
+- **EM CURSO:** Migração TypeScript frontend (61 .jsx → .tsx) ← RETOMAR AQUI
+- **Pendente:** Marketplace multiSchema fix (3h), Test Coverage 85% (12h)
+
 ### Fase 2: Infraestrutura de Suporte (~34h)
-- 3.8 Logging estruturado, 3.1 Redis Caching, 3.2 Query Optimization, 3.3 Rate Limiting, 3.9 Monitoring
+- Story 3.8: Logging estruturado Winston JSON (8h)
+- Story 3.1: Redis Caching layer (8h)
+- Story 3.2: Database Query Optimization + indexes (6h)
+- Story 3.3: API Rate Limiting com tiers (5h)
+- Story 3.9: Monitoring e alertas Grafana (7h)
+
 ### Fase 3: Features Core (~46h)
-- 3.4 Notifications, 3.5 Search, 3.6 Payments (Stripe), 3.7 Analytics
+- Story 3.4: Real-time Notifications via Socket.io + BullMQ (10h)
+- Story 3.5: PostgreSQL Full-Text Search com GIN indexes (12h)
+- Story 3.6: Stripe Payment Integration (14h) — CRITICAL PATH revenue
+- Story 3.7: Analytics e Reporting DAU/MAU/revenue (10h)
+
 ### Fase 4: Admin + Quality (~60h)
-- 3.10 Admin Dashboard, Soft Deletes, Audit Logging, Storybook, WCAG, E2E Tests
+- Story 3.10: Admin Dashboard com RBAC (12h)
+- Soft Deletes em posts/comments/orders (12-15h)
+- Audit Logging system (15h)
+- Storybook deploy (3h)
+- WCAG AA audit + fixes (10h)
+- E2E tests Playwright (8h)
 
 ---
 
-## CONFIGURAÇÕES JÁ FEITAS
+## 3. O QUE FOI FEITO NESTA SESSÃO (6 commits)
 
-| Item | Estado |
-|------|--------|
-| Repo público | ✅ github.com/DaSilvaAlves/iamenu-ecosystem |
-| Branch protection (main) | ✅ Lint, Test, Build required |
-| CodeRabbit (.coderabbit.yaml) | ✅ Criado (instalar GitHub App pendente) |
-| RAILWAY_TOKEN | ✅ Configurado |
-| CI build re-enabled | ✅ |
-| Error handling standardizado | ✅ 4 serviços com ApiError + requestId |
-| SENTRY_DSN | ⬜ User sem conta Sentry |
-| CODECOV_TOKEN | ⬜ User sem conta Codecov |
+```
+00877a5 docs: create handoff for session continuation - Fase 1 TS migration
+5122e55 feat: standardize error handling across all 4 services [Story 2.4]
+44de272 fix: add requestId middleware to business, body-parser limits to academy
+9cae3df fix: add prisma migrate deploy to academy Railway build
+9dc21be chore: configure GitHub DevOps infrastructure [Story 5.10]
+9f4f631 fix: stabilize project - CI build, error handling, suppliers refactor, Railway configs
+```
 
-## PRODUÇÃO
+**Tudo pushed para origin/main. Working tree LIMPA. Nada pendente.**
 
-| Serviço | URL | Status |
-|---------|-----|--------|
-| Community | iamenucommunity-api-production.up.railway.app | ✅ 200 |
-| Marketplace | iamenumarketplace-api-production.up.railway.app | ✅ 200 |
-| Academy | iamenuacademy-api-production.up.railway.app | ❌ 502 (investigar) |
-| Business | iamenubusiness-api-production.up.railway.app | ❌ 502 (investigar) |
-| Frontend | prototype-vision.vercel.app | ✅ 200 |
+### Detalhe das alterações:
 
-## BUGS CONHECIDOS
+**Commit 9f4f631 — Estabilização:**
+- `.github/workflows/ci.yml` — Re-enabled build job, removidos TODOs obsoletos
+- `docker-compose.yml` — PostgreSQL port 5432→5433 (evitar conflito local)
+- `services/business/src/app.ts` — Corrigida ordem 404/errorHandler (404 era unreachable)
+- `services/marketplace/src/` — Suppliers refactor com parseJsonArray(), deliveryZones, file upload
+- `services/*/package.json` — Split prisma:migrate em migrate:deploy + migrate:dev
+- `services/*/railway.json` — Adicionado prisma migrate deploy ao buildCommand
+- `start-dev.bat` — PostgreSQL port actualizado
 
-1. **Frontend tests falham** - `@testing-library/dom` não instalado (pré-existente)
-2. **Business RLS test** falha - precisa DB com RLS policies (pré-existente)
-3. **Academy/Business 502** em produção - user a investigar Railway dashboard
-4. **61 .jsx ficheiros** no frontend - migração TS incompleta (a resolver AGORA)
+**Commit 9dc21be — DevOps Infrastructure:**
+- `.coderabbit.yaml` — CodeRabbit config (balanced, pt-BR, path instructions)
+- `.aios/devops-setup-report.yaml` — Setup report completo
+- Repo tornado público via `gh repo edit --visibility public`
+- Branch protection via GitHub API (required: Lint, Test, Build)
 
-## COMMITS NÃO PUSHED (se houver)
+**Commit 9cae3df — Academy Railway fix:**
+- `services/academy/railway.json` — Adicionado prisma migrate deploy
 
-Nenhum — tudo foi pushed para origin/main.
+**Commit 44de272 — Quick fixes:**
+- `services/business/src/app.ts` — Import + uso de requestIdMiddleware
+- `services/academy/src/app.ts` — express.json({ limit: '10mb' })
+
+**Commit 5122e55 — Error Handling Standardization:**
+- `services/*/src/lib/errors.ts` — Ficheiro IDÊNTICO nos 4 serviços com:
+  - ApiError (base), ValidationError, AuthenticationError, ForbiddenError, NotFoundError, ConflictError, RateLimitError
+  - errorHandler middleware com requestId correlation
+  - asyncHandler wrapper
+  - Response format: `{status, error, message, requestId, timestamp, details}`
+- `services/*/src/middleware/errorHandler.ts` — Re-exports de lib/errors.ts (backward compat, AppError alias)
+- `services/business/src/middleware/errorHandler.ts` — CRIADO (não existia)
+- `services/business/tests/health.test.ts` — Actualizado para novo formato 404
 
 ---
 
-**Criado por:** Dex (@dev) + Gage (@devops) — Sessão 2026-02-23
+## 4. TAREFA ACTUAL: MIGRAR 61 .JSX → .TSX
+
+**Story:** docs/stories/story-TECH-DEBT-002.1.md
+**Task:** 2.1.2 (expansão) + 2.1.6 (finalização)
+
+### O que já está migrado (.tsx — 30 ficheiros):
+```
+components/Button/    Button.tsx, Button.test.tsx, Button.stories.tsx
+components/Card/      Card.tsx, Card.test.tsx, Card.stories.tsx
+components/chat/      ChatWindow.tsx, ConversationList.tsx
+components/Checkbox/  Checkbox.tsx, Checkbox.test.tsx, Checkbox.stories.tsx
+components/Input/     Input.tsx, Input.test.tsx, Input.stories.tsx
+components/Select/    Select.tsx, Select.test.tsx, Select.stories.tsx
+components/ui/        Badge.tsx, Button.tsx, Card.tsx, Input.tsx, Loading.tsx, Modal.tsx
+                      + test files + stories
+```
+
+### O que já está migrado (.ts — 18 ficheiros):
+```
+components/*/types.ts   (Button, Card, Checkbox, Input, Select + common.ts, index.ts)
+components/tokens/      index.ts
+config/                 api.ts
+utils/                  DataManager.ts, GeminiService.ts, imageUtils.ts, devToken.ts, chatConstants.ts
+```
+
+### FICHEIROS .JSX A MIGRAR (61 total, ordenados por tamanho):
+
+**TOP 10 maiores (prioridade — mais complexos):**
+```
+1825 linhas  views/DashboardBI.jsx          — Dashboard BI com charts Chart.js
+1433 linhas  views/GroupDetailView.jsx       — Detalhe de grupo community
+1062 linhas  views/CommunityView.jsx         — Feed principal community
+1024 linhas  views/ProfilesTab.jsx           — Tab de perfis
+1015 linhas  views/FoodCostView.jsx          — Calculadora food cost
+ 716 linhas  views/GroupsView.jsx            — Lista de grupos
+ 700 linhas  views/ProfileView.jsx           — Perfil individual
+ 625 linhas  views/OnboardingView.jsx        — Onboarding wizard
+ 601 linhas  views/SupplierDetail.jsx        — Detalhe supplier
+ 574 linhas  views/GastroLens.jsx            — AI gastro lens
+```
+
+**Root (2 ficheiros):**
+```
+ 151 linhas  App.jsx                         — Root component com React Router
+  37 linhas  main.jsx                        — Entry point
+```
+
+**Components (13 ficheiros):**
+```
+ 413 linhas  components/Sidebar.jsx
+ 256 linhas  components/NotificationsPanel.jsx
+ 239 linhas  components/MentionInput.jsx
+ 208 linhas  components/MenuEngineeringMatrix.jsx
+ 175 linhas  components/PeakHoursHeatmap.jsx
+ 163 linhas  components/TopBar.jsx
+ 161 linhas  components/SalesTrendChart.jsx
+ 140 linhas  components/BenchmarkChart.jsx
+ 108 linhas  components/DemandForecastChart.jsx
+  76 linhas  components/ErrorBoundary.jsx
+  53 linhas  components/NotificationBadge.jsx
+  42 linhas  components/TextRenderer.jsx
+```
+
+**Views (42 ficheiros):**
+```
+views/Academy.jsx, AlertsView.jsx, ChatView.jsx, CommunityView.jsx,
+ComparisonTab.jsx, CopyStudioView.jsx, DashboardBI.jsx, FoodCostView.jsx,
+GastroLens.jsx, GroupDetailView.jsx, GroupsView.jsx, HubsRegionaisView.jsx,
+IncomingRfqTab.jsx, MarketingPlanner.jsx, Marketplace.jsx, OnboardingView.jsx,
+OrdersView.jsx, PaymentsAutomationView.jsx, ProductsView.jsx, ProfilesTab.jsx,
+ProfileView.jsx, ResponsesTab.jsx, RfqRequestsTab.jsx, RfqTab.jsx,
+SearchView.jsx, StaffAIView.jsx, SupplierDetail.jsx, TakewayLandingView.jsx,
+TokenLogin.jsx, TourRapidoView.jsx, UpgradePROView.jsx, VisaoEcossistemaView.jsx
+
+views/hubs-regionais/ (4): CreatePostModal, HubFeed, HubFeedback, HubResources
+views/reputacao-online/ (5): AlertSettings, Dashboard, Inbox, ReviewCard, ReviewDetail
+views/staff-ai/ (5): StaffAnnouncements, StaffDashboard, StaffOnboarding, StaffSchedule, StaffTeam
+```
+
+### Abordagem recomendada para a migração:
+
+```
+PASSO 1: Renomear todos os .jsx → .tsx em batch (git mv)
+PASSO 2: Correr build (npx tsc --noEmit ou npm run build) — vai dar MUITOS erros
+PASSO 3: Corrigir erros por directório:
+  a) main.tsx + App.tsx (root, poucos erros)
+  b) components/*.tsx (13 ficheiros, médio)
+  c) views/*.tsx (42 ficheiros, bulk do trabalho)
+PASSO 4: Para cada ficheiro:
+  - Adicionar tipos aos props (interface XxxProps { ... })
+  - Tipar event handlers (React.ChangeEvent, React.MouseEvent, etc.)
+  - Tipar useState<T>, useRef<T>
+  - Usar 'as any' APENAS como último recurso temporário
+PASSO 5: Validar: tsc --noEmit zero errors + npm run build SUCCESS
+PASSO 6: Commit
+```
+
+### Configuração TypeScript (já configurada):
+- `tsconfig.json` com strict: true, noImplicitAny: true
+- Vite já suporta .tsx
+- `allowJs` NÃO está no tsconfig (apenas "include": ["src"])
+- Framework: React 18.2.0, TypeScript 5.9.3, Vite 5.2.0
+
+### Dependências que os .jsx usam (para saber os tipos necessários):
+- `react-router-dom` v7 (useNavigate, useParams, useSearchParams, Link)
+- `framer-motion` v11 (motion.div, AnimatePresence)
+- `chart.js` + `react-chartjs-2` (Line, Bar, Doughnut, Radar)
+- `axios` (API calls)
+- `react-hot-toast` (toast notifications)
+- `lucide-react` (icons)
+- `date-fns` (date formatting)
+- `jspdf` + `jspdf-autotable` (PDF generation)
+- `zustand` v5 (state stores)
+- Custom hooks em `src/lib/stores/` e `src/services/`
+
+---
+
+## 5. TAREFAS RESTANTES APÓS A MIGRAÇÃO TS
+
+### Fase 1 restante (após TS migration):
+
+**1.7 — Marketplace multiSchema fix (3h):**
+- `services/marketplace/prisma/schema.prisma` não tem `previewFeatures = ["multiSchema"]` nem `@@schema("marketplace")`
+- Tabelas vão para schema `public` em vez de `marketplace`
+- Precisa: adicionar multiSchema, anotar todos os 10 modelos, criar migration
+
+**1.4 — Test Coverage expansion para 85% (12h):**
+- Backend actual: ~40% cobertura estimada
+- Frontend: testes existem para design system components mas `@testing-library/dom` NÃO está instalado
+- Fix frontend: `npm install --save-dev @testing-library/dom` no workspace do frontend
+- Adicionar testes para: controllers, services, middleware de cada serviço
+
+### Depois da Fase 1 → Fases 2, 3, 4 (ver secção 2 acima)
+
+---
+
+## 6. BUGS E PROBLEMAS CONHECIDOS
+
+| # | Bug | Severidade | Serviço | Nota |
+|---|-----|-----------|---------|------|
+| 1 | Academy 502 em produção | HIGH | academy | User a investigar Railway dashboard |
+| 2 | Business 502 em produção | HIGH | business | User a investigar Railway dashboard |
+| 3 | Frontend tests falham (`@testing-library/dom` missing) | MEDIUM | frontend | Pré-existente, fix: `npm install -D @testing-library/dom` |
+| 4 | Business RLS test falha | LOW | business | Precisa DB com RLS policies, pré-existente |
+| 5 | 497 ESLint warnings | LOW | all | Maioria `@typescript-eslint/no-explicit-any` |
+| 6 | Marketplace sem multiSchema | MEDIUM | marketplace | Tabelas no schema `public` em vez de `marketplace` |
+| 7 | CodeRabbit GitHub App não instalado | LOW | infra | User precisa instalar: github.com/apps/coderabbitai |
+| 8 | SENTRY_DSN não configurado | LOW | all | User sem conta Sentry.io |
+| 9 | CODECOV_TOKEN não configurado | LOW | CI | User sem conta Codecov.io |
+
+---
+
+## 7. ESTRUTURA DO PROJECTO (referência rápida)
+
+```
+iamenu-ecosystem/
+├── services/
+│   ├── community/     (port 3001) — Posts, Groups, Followers, Gamification, Socket.io
+│   ├── marketplace/   (port 3002) — Suppliers, Reviews, RFQ, Products
+│   ├── academy/       (port 3003) — Courses, Modules, Lessons, Certificates
+│   ├── business/      (port 3004) — Dashboard BI, Onboarding, Analytics
+│   └── takeway-proxy/ — External proxy
+├── frontend/apps/prototype-vision/  (port 5173) — React 18 + Vite + Tailwind
+├── .github/workflows/ — ci.yml, cd.yml, sync-aios-templates.yml
+├── .coderabbit.yaml — CodeRabbit config
+├── docker-compose.yml — PostgreSQL (port 5433)
+└── docs/stories/ — 37 story files
+```
+
+### Padrão de cada serviço backend:
+```
+services/{name}/
+├── src/
+│   ├── controllers/  — Request handling
+│   ├── services/     — Business logic
+│   ├── routes/       — Express routes
+│   ├── middleware/    — auth.ts, errorHandler.ts, requestId.ts, rls.ts
+│   ├── lib/          — prisma.ts, logger.ts, errors.ts, cache.ts
+│   └── index.ts      — Entry point (Sentry, server start)
+├── prisma/schema.prisma
+├── tests/
+├── package.json
+└── railway.json
+```
+
+### Padrão de error handling (STANDARD — mesmo nos 4 serviços):
+```typescript
+// lib/errors.ts — Classes
+ApiError (base), ValidationError (400), AuthenticationError (401),
+ForbiddenError (403), NotFoundError (404), ConflictError (409), RateLimitError (429)
+
+// Response format
+{ status: number, error: string, message: string, requestId?: string, timestamp: string, details?: object }
+
+// middleware/errorHandler.ts — Re-exports de lib/errors.ts
+export { ApiError, ApiError as AppError, ValidationError, ..., errorHandler, asyncHandler } from '../lib/errors';
+```
+
+---
+
+## 8. COMANDOS ÚTEIS
+
+```bash
+# Desenvolvimento
+npm run dev                    # Start all services + frontend
+npm run dev:community          # Single service
+
+# Database
+docker compose up postgres -d  # PostgreSQL (port 5433)
+cd services/<service> && npx dotenv -e ../../.env npx prisma studio
+
+# Testing
+npm test                       # All services
+npm run test:community         # Single service
+cd services/<service> && npx tsc --noEmit  # Typecheck
+
+# Frontend
+cd frontend/apps/prototype-vision && npm run build  # Build
+cd frontend/apps/prototype-vision && npm run dev     # Dev server
+
+# Lint
+npm run lint:check             # Check only (no fix)
+npm run lint                   # Auto-fix
+
+# Git (via @devops APENAS para push)
+git status && git diff --stat  # Check state
+```
+
+---
+
+## 9. AGENTES AIOS — QUEM FAZ O QUÊ
+
+| Agente | Skill | Responsabilidade | Quando usar |
+|--------|-------|-----------------|-------------|
+| **@dev (Dex)** | `/AIOS:agents:dev` | Implementação de código, refactoring, testes | Migração TS, features, bug fixes |
+| **@devops (Gage)** | `/AIOS:agents:devops` | Git push, PRs, CI/CD, Railway, GitHub config | Push, deploy, release, secrets |
+| **@qa (Quinn)** | `/AIOS:agents:qa` | Code review, test validation | Review antes de merge |
+| **@architect (Aria)** | `/AIOS:agents:architect` | Design decisions, ADRs | Decisões arquiteturais |
+
+**REGRA:** @dev NÃO pode fazer git push. Apenas @devops pode.
+
+---
+
+## 10. SECRETS E ACESSOS
+
+| Secret | Onde | Estado |
+|--------|------|--------|
+| RAILWAY_TOKEN | GitHub Secrets | ✅ Configurado |
+| GitHub CLI | Local (keyring) | ✅ DaSilvaAlves autenticado |
+| Railway CLI | Local | ✅ euricojsalves@gmail.com |
+| SENTRY_DSN | Não configurado | ⬜ User sem conta |
+| CODECOV_TOKEN | Não configurado | ⬜ User sem conta |
+
+---
+
+**FIM DO HANDOFF — Sessão 2026-02-23**
+**Criado por:** Dex (@dev) + Gage (@devops)
+**Working tree:** LIMPA (tudo commitado e pushed)
+**Branch:** main
+**Último commit:** 00877a5
