@@ -1,11 +1,14 @@
 /**
  * RLS Security Tests - Academy Service
+ * SKIPPED IN CI: Requires RLS PostgreSQL configuration
  */
 
-import prisma from '../../src/lib/prisma';
-import { setRLSContext, clearRLSContext } from '../../src/middleware/rls';
+// Skip this test in CI environments - it requires special PostgreSQL setup
+if (!process.env.CI) {
+  const prisma = require('../../src/lib/prisma').default;
+  const { setRLSContext, clearRLSContext } = require('../../src/middleware/rls');
 
-(process.env.CI ? describe.skip : describe)('RLS: Academy Service - Student Privacy', () => {
+describe('RLS: Academy Service - Student Privacy', () => {
   const student1 = 'student-1';
   const student2 = 'student-2';
 
@@ -59,3 +62,4 @@ import { setRLSContext, clearRLSContext } from '../../src/middleware/rls';
     await clearRLSContext();
   });
 });
+} // End of CI skip block
